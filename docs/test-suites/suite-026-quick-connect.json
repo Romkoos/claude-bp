@@ -1,0 +1,156 @@
+{
+  "id": "SUITE-026",
+  "name": "Quick-Connect Menu (Edge Drop)",
+  "tests": [
+    {
+      "id": "TC-250",
+      "name": "Dragging edge from output port and dropping on empty canvas shows quick-connect menu",
+      "priority": "critical",
+      "phase": 3,
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "dragAndDrop", "source": "[data-testid='palette-node-rules']", "target": ".react-flow__pane", "offsetX": 300, "offsetY": 300 },
+        { "action": "wait_for_timeout", "timeout": 300 },
+        {
+          "action": "dragFromHandle",
+          "sourceNode": "rules",
+          "sourceHandle": "out_context",
+          "dropOffsetX": 250,
+          "dropOffsetY": 0
+        }
+      ],
+      "assertions": [
+        { "type": "visible", "target": "[data-testid='quick-connect-menu']", "description": "Quick-connect menu appears" },
+        { "type": "visible", "target": "[data-testid='qc-add-skill']", "description": "Skill option visible (has context input)" },
+        { "type": "visible", "target": "[data-testid='qc-add-subagent']", "description": "Subagent option visible (has context input)" },
+        { "type": "notVisible", "target": "[data-testid='qc-add-hook']", "description": "Hook NOT shown (has context output, not input)" }
+      ]
+    },
+    {
+      "id": "TC-251",
+      "name": "Selecting node from quick-connect menu creates node and edge",
+      "priority": "critical",
+      "phase": 3,
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "dragAndDrop", "source": "[data-testid='palette-node-rules']", "target": ".react-flow__pane", "offsetX": 300, "offsetY": 300 },
+        { "action": "wait_for_timeout", "timeout": 300 },
+        {
+          "action": "dragFromHandle",
+          "sourceNode": "rules",
+          "sourceHandle": "out_context",
+          "dropOffsetX": 250,
+          "dropOffsetY": 0
+        },
+        { "action": "click", "target": "[data-testid='qc-add-skill']" }
+      ],
+      "assertions": [
+        { "type": "count", "target": ".react-flow__node", "expected": 2, "description": "Two nodes exist (rules + new skill)" },
+        { "type": "count", "target": ".react-flow__edge", "expected": 1, "description": "Edge created between them" },
+        { "type": "notVisible", "target": "[data-testid='quick-connect-menu']", "description": "Menu closed after selection" }
+      ]
+    },
+    {
+      "id": "TC-252",
+      "name": "Quick-connect menu closes on Escape",
+      "priority": "high",
+      "phase": 3,
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "dragAndDrop", "source": "[data-testid='palette-node-rules']", "target": ".react-flow__pane", "offsetX": 300, "offsetY": 300 },
+        { "action": "wait_for_timeout", "timeout": 300 },
+        {
+          "action": "dragFromHandle",
+          "sourceNode": "rules",
+          "sourceHandle": "out_context",
+          "dropOffsetX": 250,
+          "dropOffsetY": 0
+        },
+        { "action": "wait_for_timeout", "timeout": 200 },
+        { "action": "keyboard", "keys": "Escape" }
+      ],
+      "assertions": [
+        { "type": "notVisible", "target": "[data-testid='quick-connect-menu']", "description": "Menu closed on Escape" },
+        { "type": "count", "target": ".react-flow__node", "expected": 1, "description": "No new node created" }
+      ]
+    },
+    {
+      "id": "TC-253",
+      "name": "Quick-connect menu only shows compatible node types (ToolAccess output)",
+      "priority": "high",
+      "phase": 3,
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "dragAndDrop", "source": "[data-testid='palette-node-skill']", "target": ".react-flow__pane", "offsetX": 300, "offsetY": 300 },
+        { "action": "wait_for_timeout", "timeout": 300 },
+        {
+          "action": "dragFromHandle",
+          "sourceNode": "skill",
+          "sourceHandle": "out_tools",
+          "dropOffsetX": 250,
+          "dropOffsetY": 0
+        }
+      ],
+      "assertions": [
+        { "type": "visible", "target": "[data-testid='quick-connect-menu']", "description": "Quick-connect menu appears" },
+        { "type": "visible", "target": "[data-testid='qc-add-tool']", "description": "Tool option visible (has ToolAccess input)" },
+        { "type": "notVisible", "target": "[data-testid='qc-add-rules']", "description": "Rules NOT shown (no ToolAccess input)" },
+        { "type": "notVisible", "target": "[data-testid='qc-add-hook']", "description": "Hook NOT shown (no ToolAccess input)" },
+        { "type": "notVisible", "target": "[data-testid='qc-add-comment']", "description": "Comment NOT shown (no pins at all)" }
+      ]
+    },
+    {
+      "id": "TC-254",
+      "name": "Quick-connect works in reverse direction (dragging from input port)",
+      "priority": "critical",
+      "phase": 3,
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "dragAndDrop", "source": "[data-testid='palette-node-tool']", "target": ".react-flow__pane", "offsetX": 500, "offsetY": 300 },
+        { "action": "wait_for_timeout", "timeout": 300 },
+        {
+          "action": "dragFromHandle",
+          "sourceNode": "tool",
+          "sourceHandle": "in_used_by",
+          "dropOffsetX": -250,
+          "dropOffsetY": 0
+        }
+      ],
+      "assertions": [
+        { "type": "visible", "target": "[data-testid='quick-connect-menu']", "description": "Quick-connect menu appears for input drag" },
+        { "type": "visible", "target": "[data-testid='qc-add-skill']", "description": "Skill shown (has ToolAccess output)" },
+        { "type": "visible", "target": "[data-testid='qc-add-subagent']", "description": "Subagent shown (has ToolAccess output)" },
+        { "type": "visible", "target": "[data-testid='qc-add-mcp']", "description": "MCP shown (has ToolAccess output)" }
+      ]
+    },
+    {
+      "id": "TC-255",
+      "name": "Reverse quick-connect creates correct edge direction",
+      "priority": "critical",
+      "phase": 3,
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "dragAndDrop", "source": "[data-testid='palette-node-tool']", "target": ".react-flow__pane", "offsetX": 500, "offsetY": 300 },
+        { "action": "wait_for_timeout", "timeout": 300 },
+        {
+          "action": "dragFromHandle",
+          "sourceNode": "tool",
+          "sourceHandle": "in_used_by",
+          "dropOffsetX": -250,
+          "dropOffsetY": 0
+        },
+        { "action": "click", "target": "[data-testid='qc-add-skill']" }
+      ],
+      "assertions": [
+        { "type": "count", "target": ".react-flow__node", "expected": 2, "description": "Two nodes (tool + new skill)" },
+        { "type": "count", "target": ".react-flow__edge", "expected": 1, "description": "Edge created between them" }
+      ]
+    }
+  ]
+}

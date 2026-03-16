@@ -72,6 +72,10 @@ export function BlueprintCanvas() {
     handleType: 'source' | 'target';
   } | null>(null);
 
+  // Timestamp when quick-connect menu was opened; used to suppress the
+  // click event that fires immediately after mouseup on the canvas.
+  const quickConnectOpenedAt = useRef<number>(0);
+
   const { screenToFlowPosition, fitView, setCenter, getZoom } = useReactFlow();
 
   const nodes = useGraphStore((s) => s.nodes);
@@ -101,7 +105,14 @@ export function BlueprintCanvas() {
 
   // Close context menu + keyboard shortcuts
   useEffect(() => {
-    const handleClick = () => { setContextMenu(null); setCanvasMenu(null); setQuickConnectMenu(null); };
+    const handleClick = () => {
+      setContextMenu(null);
+      setCanvasMenu(null);
+      // Don't close quick-connect menu if it was just opened (mouseup → click race)
+      if (Date.now() - quickConnectOpenedAt.current > 200) {
+        setQuickConnectMenu(null);
+      }
+    };
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         setContextMenu(null);
@@ -271,6 +282,7 @@ export function BlueprintCanvas() {
       const clientX = 'changedTouches' in event ? event.changedTouches[0].clientX : event.clientX;
       const clientY = 'changedTouches' in event ? event.changedTouches[0].clientY : event.clientY;
 
+      quickConnectOpenedAt.current = Date.now();
       setQuickConnectMenu({
         x: clientX,
         y: clientY,

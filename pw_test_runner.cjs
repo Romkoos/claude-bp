@@ -223,6 +223,28 @@ async function runStep(page, step, baseUrl) {
       await page.waitForTimeout(200);
       break;
     }
+    case "dragFromHandle": {
+      // Drag from a handle and drop on empty canvas (for quick-connect menu testing)
+      const dfhType = step.sourceNode.split(":")[0];
+      const dfhIdx = parseInt(step.sourceNode.split(":")[1] || "0");
+      const dfhNodes = await page.$$(`.react-flow__node-${dfhType}`);
+      if (!dfhNodes[dfhIdx]) throw new Error(`Node not found: ${step.sourceNode}`);
+      const dfhHandle = await dfhNodes[dfhIdx].$(`[data-handleid='${step.sourceHandle}']`);
+      if (!dfhHandle) throw new Error(`Handle not found: ${step.sourceHandle}`);
+      const dfhBox = await dfhHandle.boundingBox();
+      if (!dfhBox) throw new Error("Handle has no bounding box");
+      const dfhStartX = dfhBox.x + dfhBox.width / 2;
+      const dfhStartY = dfhBox.y + dfhBox.height / 2;
+      const dfhEndX = dfhStartX + (step.dropOffsetX || 200);
+      const dfhEndY = dfhStartY + (step.dropOffsetY || 0);
+      await page.mouse.move(dfhStartX, dfhStartY);
+      await page.mouse.down();
+      await page.mouse.move(dfhEndX, dfhEndY, { steps: 5 });
+      await page.waitForTimeout(50);
+      await page.mouse.up();
+      await page.waitForTimeout(300);
+      break;
+    }
     case "loadTemplate": {
       const sel = step.target || `[data-testid='${step.templateId}']`;
       await page.click(sel, { timeout });
