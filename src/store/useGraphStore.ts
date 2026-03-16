@@ -11,10 +11,11 @@ import {
 } from '@xyflow/react';
 import type { BlueprintNodeType } from '../types/nodes';
 import type { GraphSchema } from '../types/graph';
-import { NODE_PIN_DEFINITIONS, createRulesData, createSkillData, createSubagentData, createHookData } from '../constants/nodeDefaults';
+import { NODE_PIN_DEFINITIONS, createRulesData, createSkillData, createSubagentData, createHookData, createToolData, createMcpData, createPluginData } from '../constants/nodeDefaults';
 import { generateId } from '../utils/idGenerator';
 import { validateGraph, type ValidationResult } from '../validation/validate';
 import { exportGraph, importGraph } from '../serialization/jsonExporter';
+import { applyDagreLayout } from '../utils/layout';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const DATA_FACTORIES: Record<BlueprintNodeType, () => any> = {
@@ -22,6 +23,9 @@ const DATA_FACTORIES: Record<BlueprintNodeType, () => any> = {
   skill: createSkillData,
   subagent: createSubagentData,
   hook: createHookData,
+  tool: createToolData,
+  mcp: createMcpData,
+  plugin: createPluginData,
 };
 
 interface GraphStore {
@@ -40,6 +44,10 @@ interface GraphStore {
   deleteNode: (nodeId: string) => void;
   duplicateNode: (nodeId: string) => void;
   disconnectNode: (nodeId: string) => void;
+  groupIntoPlugin: (nodeIds: string[]) => void;
+  removeFromPlugin: (nodeId: string) => void;
+  layouting: boolean;
+  autoLayout: (direction?: 'TB' | 'LR' | 'BT' | 'RL') => void;
   onConnect: (connection: Connection) => void;
   selectNode: (nodeId: string | null) => void;
   runValidation: () => void;
@@ -56,6 +64,7 @@ export const useGraphStore = create<GraphStore>()(
       selectedNodeId: null,
       configName: 'Untitled Blueprint',
       validationResults: [],
+      layouting: false,
 
       setNodes: (nodes) => set({ nodes }),
       setEdges: (edges) => set({ edges }),
@@ -119,6 +128,91 @@ export const useGraphStore = create<GraphStore>()(
         set({
           edges: get().edges.filter((e) => e.source !== nodeId && e.target !== nodeId),
         });
+      },
+
+      groupIntoPlugin: (nodeIds) => {
+        const { nodes } = get();
+        const selectedNodes = nodes.filter((n) => nodeIds.includes(n.id) && !n.parentId);
+        if (selectedNodes.length === 0) return;
+
+        const padding = 60;
+        const headerHeight = 50;
+        let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+        for (const n of selectedNodes) {
+          const w = (n.measured?.width ?? n.width ?? 300) as number;
+          const h = (n.measured?.height ?? n.height ?? 200) as number;
+          minX = Math.min(minX, n.position.x);
+          minY = Math.min(minY, n.position.y);
+          maxX = Math.max(maxX, n.position.x + w);
+          maxY = Math.max(maxY, n.position.y + h);
+        }
+
+        const pluginId = generateId();
+        const pluginX = minX - padding;
+        const pluginY = minY - padding - headerHeight;
+
+        const pluginNode: Node = {
+          id: pluginId,
+          type: 'plugin',
+          position: { x: pluginX, y: pluginY },
+          data: createPluginData() as unknown as Record<string, unknown>,
+          style: {
+            width: maxX - minX + padding * 2,
+            height: maxY - minY + padding * 2 + headerHeight,
+          },
+        };
+
+        const updatedNodes = nodes.map((n) => {
+          if (nodeIds.includes(n.id) && !n.parentId) {
+            return {
+              ...n,
+              parentId: pluginId,
+              position: {
+                x: n.position.x - pluginX,
+                y: n.position.y - pluginY,
+              },
+            };
+          }
+          return n;
+        });
+
+        set({ nodes: [pluginNode, ...updatedNodes] });
+      },
+
+      removeFromPlugin: (nodeId) => {
+        const { nodes } = get();
+        const node = nodes.find((n) => n.id === nodeId);
+        if (!node || !node.parentId) return;
+
+        const parentNode = nodes.find((n) => n.id === node.parentId);
+        if (!parentNode) return;
+
+        set({
+          nodes: nodes.map((n) =>
+            n.id === nodeId
+              ? {
+                  ...n,
+                  parentId: undefined,
+                  position: {
+                    x: n.position.x + parentNode.position.x,
+                    y: n.position.y + parentNode.position.y,
+                  },
+                }
+              : n
+          ),
+        });
+      },
+
+      autoLayout: (direction = 'LR') => {
+        const { nodes, edges } = get();
+        if (nodes.length === 0) return;
+        const layoutedNodes = applyDagreLayout(nodes, edges, {
+          direction,
+          nodeSpacing: 80,
+          rankSpacing: 200,
+        });
+        set({ nodes: layoutedNodes, layouting: true });
+        setTimeout(() => set({ layouting: false }), 350);
       },
 
       onConnect: (connection) => {
@@ -213,6 +307,8 @@ export const useGraphStore = create<GraphStore>()(
         edges: state.edges,
       }),
       limit: 50,
+      equality: (pastState, currentState) =>
+        JSON.stringify(pastState) === JSON.stringify(currentState),
     }
   )
 );

@@ -18,9 +18,11 @@ interface BaseNodeProps {
   icon: LucideIcon;
   children?: ReactNode;
   selected?: boolean;
+  minWidth?: number;
+  dashed?: boolean;
 }
 
-function BaseNodeInner({ id, nodeType, data, pins, icon: Icon, children, selected }: BaseNodeProps) {
+function BaseNodeInner({ id, nodeType, data, pins, icon: Icon, children, selected, minWidth = 280, dashed = false }: BaseNodeProps) {
   const updateNodeData = useGraphStore((s) => s.updateNodeData);
   const colors = NODE_COLORS[nodeType];
   const inputPins = pins.filter((p) => p.direction === PinDirection.In);
@@ -33,9 +35,9 @@ function BaseNodeInner({ id, nodeType, data, pins, icon: Icon, children, selecte
       className="blueprint-node rounded-lg overflow-hidden"
       style={{
         background: 'var(--node-bg)',
-        border: `1px solid ${selected ? colors.header : 'var(--node-border)'}`,
+        border: `1px ${dashed ? 'dashed' : 'solid'} ${selected ? colors.header : 'var(--node-border)'}`,
         boxShadow: selected ? `0 0 20px ${colors.glow}` : undefined,
-        minWidth: 280,
+        minWidth,
         maxWidth: 400,
       }}
     >

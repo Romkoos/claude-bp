@@ -1,4 +1,4 @@
-import { FileText, Zap, Bot, Webhook, Trash2, type LucideIcon } from 'lucide-react';
+import { FileText, Zap, Bot, Webhook, Wrench, Plug, Package, Trash2, type LucideIcon } from 'lucide-react';
 import type { BlueprintNodeType } from '../../types/nodes';
 import { NODE_COLORS } from '../../constants/theme';
 import { useGraphStore } from '../../store/useGraphStore';
@@ -6,12 +6,18 @@ import { RulesEditor } from './RulesEditor';
 import { SkillEditor } from './SkillEditor';
 import { SubagentEditor } from './SubagentEditor';
 import { HookEditor } from './HookEditor';
+import { ToolEditor } from './ToolEditor';
+import { McpEditor } from './McpEditor';
+import { PluginEditor } from './PluginEditor';
 
 const NODE_ICONS: Record<BlueprintNodeType, LucideIcon> = {
   rules: FileText,
   skill: Zap,
   subagent: Bot,
   hook: Webhook,
+  tool: Wrench,
+  mcp: Plug,
+  plugin: Package,
 };
 
 const NODE_TYPE_LABELS: Record<BlueprintNodeType, string> = {
@@ -19,6 +25,9 @@ const NODE_TYPE_LABELS: Record<BlueprintNodeType, string> = {
   skill: 'Skill',
   subagent: 'Subagent',
   hook: 'Hook',
+  tool: 'Tool',
+  mcp: 'MCP Server',
+  plugin: 'Plugin',
 };
 
 export function PropertiesPanel() {
@@ -72,6 +81,9 @@ export function PropertiesPanel() {
         {nodeType === 'skill' && <SkillEditor nodeId={node.id} data={data} />}
         {nodeType === 'subagent' && <SubagentEditor nodeId={node.id} data={data} />}
         {nodeType === 'hook' && <HookEditor nodeId={node.id} data={data} />}
+        {nodeType === 'tool' && <ToolEditor nodeId={node.id} data={data} />}
+        {nodeType === 'mcp' && <McpEditor nodeId={node.id} data={data} />}
+        {nodeType === 'plugin' && <PluginEditor nodeId={node.id} data={data} />}
       </div>
 
       {/* Delete button */}

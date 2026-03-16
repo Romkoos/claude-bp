@@ -1,5 +1,5 @@
 import { PinType, PinDirection, type PinDefinition } from '../types/pins';
-import type { BlueprintNodeType, RulesNodeData, SkillNodeData, SubagentNodeData, HookNodeData } from '../types/nodes';
+import type { BlueprintNodeType, RulesNodeData, SkillNodeData, SubagentNodeData, HookNodeData, ToolNodeData, McpNodeData, PluginNodeData } from '../types/nodes';
 
 export const NODE_PIN_DEFINITIONS: Record<BlueprintNodeType, PinDefinition[]> = {
   rules: [
@@ -27,6 +27,17 @@ export const NODE_PIN_DEFINITIONS: Record<BlueprintNodeType, PinDefinition[]> = 
     { id: 'in_trigger',    type: PinType.Trigger,    direction: PinDirection.In,  label: 'listens to' },
     { id: 'out_decision',  type: PinType.Decision,   direction: PinDirection.Out, label: 'blocks/allows' },
     { id: 'out_context',   type: PinType.Context,    direction: PinDirection.Out, label: 'injects context' },
+  ],
+  tool: [
+    { id: 'in_used_by',     type: PinType.ToolAccess, direction: PinDirection.In, label: 'used by' },
+    { id: 'in_provided_by', type: PinType.ToolAccess, direction: PinDirection.In, label: 'provided by' },
+  ],
+  mcp: [
+    { id: 'out_tools',   type: PinType.ToolAccess, direction: PinDirection.Out, label: 'provides tools' },
+    { id: 'out_context',  type: PinType.Context,   direction: PinDirection.Out, label: 'provides context' },
+  ],
+  plugin: [
+    { id: 'out_bundle', type: PinType.Bundle, direction: PinDirection.Out, label: 'exports' },
   ],
 };
 
@@ -93,5 +104,46 @@ export function createHookData(): HookNodeData {
     decision: { type: 'none', reason: '', modifyInput: false },
     injectSystemMessage: '',
     continueAfter: true,
+  };
+}
+
+export function createToolData(): ToolNodeData {
+  return {
+    label: 'New Tool',
+    collapsed: false,
+    validation: { errors: [], warnings: [] },
+    toolName: 'Bash',
+    pattern: '',
+    builtin: true,
+    description: '',
+  };
+}
+
+export function createMcpData(): McpNodeData {
+  return {
+    label: 'New MCP Server',
+    collapsed: false,
+    validation: { errors: [], warnings: [] },
+    serverName: '',
+    connection: {
+      type: 'url',
+      url: '',
+      command: '',
+      args: [],
+    },
+    env: {},
+    providedTools: [],
+  };
+}
+
+export function createPluginData(): PluginNodeData {
+  return {
+    label: 'New Plugin',
+    collapsed: false,
+    validation: { errors: [], warnings: [] },
+    pluginName: '',
+    version: '1.0.0',
+    description: '',
+    installScript: '',
   };
 }

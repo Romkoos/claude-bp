@@ -1,6 +1,9 @@
-import { FileText, Zap, Bot, Webhook, type LucideIcon } from 'lucide-react';
+import { FileText, Zap, Bot, Webhook, Wrench, Plug, Package, type LucideIcon } from 'lucide-react';
+import { useReactFlow } from '@xyflow/react';
 import type { BlueprintNodeType } from '../../types/nodes';
 import { NODE_COLORS } from '../../constants/theme';
+import { TEMPLATES } from '../../constants/templates';
+import { useGraphStore } from '../../store/useGraphStore';
 
 interface PaletteItem {
   type: BlueprintNodeType;
@@ -14,12 +17,35 @@ const PALETTE_ITEMS: PaletteItem[] = [
   { type: 'skill', label: 'Skill', description: 'On-demand skill with instructions', icon: Zap },
   { type: 'subagent', label: 'Subagent', description: 'Isolated worker with system prompt', icon: Bot },
   { type: 'hook', label: 'Hook', description: 'Lifecycle event interceptor', icon: Webhook },
+  { type: 'tool', label: 'Tool', description: 'Atomic tool unit (Read, Write, Bash, etc.)', icon: Wrench },
+  { type: 'mcp', label: 'MCP Server', description: 'External service via MCP protocol', icon: Plug },
+  { type: 'plugin', label: 'Plugin', description: 'Bundle container for skills, agents, hooks', icon: Package },
 ];
 
 export function NodePalette() {
+  const importJSON = useGraphStore((s) => s.importJSON);
+  const { fitView } = useReactFlow();
+
   const onDragStart = (event: React.DragEvent, nodeType: BlueprintNodeType) => {
     event.dataTransfer.setData('application/blueprint-node', nodeType);
     event.dataTransfer.effectAllowed = 'move';
+  };
+
+  const loadTemplate = (template: typeof TEMPLATES[0]) => {
+    if (!window.confirm(`Load "${template.name}"? This will replace the current graph.`)) return;
+    importJSON({
+      version: '1.0.0',
+      metadata: {
+        name: template.name,
+        description: template.description,
+        created: new Date().toISOString(),
+        modified: new Date().toISOString(),
+      },
+      nodes: template.graph.nodes,
+      edges: template.graph.edges,
+      viewport: { x: 0, y: 0, zoom: 1 },
+    });
+    setTimeout(() => fitView({ padding: 0.2 }), 100);
   };
 
   return (
@@ -74,15 +100,33 @@ export function NodePalette() {
         >
           Templates
         </h3>
-        <div
-          className="text-[11px] p-3 rounded-lg text-center"
-          style={{
-            color: 'var(--text-muted)',
-            background: '#0d111730',
-            border: '1px dashed var(--node-border)',
-          }}
-        >
-          Coming in Phase 2
+        <div className="space-y-2">
+          {TEMPLATES.map((template) => (
+            <button
+              key={template.id}
+              onClick={() => loadTemplate(template)}
+              className="w-full text-left rounded-lg transition-all hover:scale-[1.02] cursor-pointer"
+              style={{
+                background: 'var(--node-bg)',
+                border: '1px solid var(--node-border)',
+                padding: 0,
+              }}
+            >
+              <div className="p-2.5 flex items-start gap-2.5">
+                <span className="text-base flex-shrink-0" style={{ marginTop: 1 }}>
+                  {template.icon}
+                </span>
+                <div className="min-w-0">
+                  <div className="text-xs font-medium" style={{ color: 'var(--text-primary)' }}>
+                    {template.name}
+                  </div>
+                  <div className="text-[10px] mt-0.5" style={{ color: 'var(--text-muted)' }}>
+                    {template.description}
+                  </div>
+                </div>
+              </div>
+            </button>
+          ))}
         </div>
       </div>
     </div>

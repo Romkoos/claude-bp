@@ -19,6 +19,9 @@ import { RulesNode } from '../Nodes/RulesNode';
 import { SkillNode } from '../Nodes/SkillNode';
 import { SubagentNode } from '../Nodes/SubagentNode';
 import { HookNode } from '../Nodes/HookNode';
+import { ToolNode } from '../Nodes/ToolNode';
+import { McpNode } from '../Nodes/McpNode';
+import { PluginNode } from '../Nodes/PluginNode';
 import { TypedEdge } from '../Edges/TypedEdge';
 
 // MUST be defined outside component to prevent infinite re-renders
@@ -27,6 +30,9 @@ const nodeTypes: NodeTypes = {
   skill: SkillNode,
   subagent: SubagentNode,
   hook: HookNode,
+  tool: ToolNode,
+  mcp: McpNode,
+  plugin: PluginNode,
 };
 
 const edgeTypes: EdgeTypes = {
@@ -46,7 +52,8 @@ interface ContextMenuState {
 export function BlueprintCanvas() {
   const reactFlowRef = useRef<HTMLDivElement>(null);
   const [contextMenu, setContextMenu] = useState<ContextMenuState | null>(null);
-  const { screenToFlowPosition } = useReactFlow();
+  const [canvasMenu, setCanvasMenu] = useState<{ x: number; y: number } | null>(null);
+  const { screenToFlowPosition, fitView } = useReactFlow();
 
   const nodes = useGraphStore((s) => s.nodes);
   const edges = useGraphStore((s) => s.edges);
@@ -58,12 +65,26 @@ export function BlueprintCanvas() {
   const deleteNode = useGraphStore((s) => s.deleteNode);
   const duplicateNode = useGraphStore((s) => s.duplicateNode);
   const disconnectNode = useGraphStore((s) => s.disconnectNode);
+  const groupIntoPlugin = useGraphStore((s) => s.groupIntoPlugin);
+  const removeFromPlugin = useGraphStore((s) => s.removeFromPlugin);
+  const autoLayout = useGraphStore((s) => s.autoLayout);
+  const layouting = useGraphStore((s) => s.layouting);
+
+  const contextMenuNode = contextMenu ? nodes.find((n) => n.id === contextMenu.nodeId) : null;
+
+  // Fit view after auto-layout animation
+  useEffect(() => {
+    if (layouting) {
+      const timer = setTimeout(() => fitView({ padding: 0.2 }), 350);
+      return () => clearTimeout(timer);
+    }
+  }, [layouting, fitView]);
 
   // Close context menu + undo/redo keyboard shortcuts
   useEffect(() => {
-    const handleClick = () => setContextMenu(null);
+    const handleClick = () => { setContextMenu(null); setCanvasMenu(null); };
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setContextMenu(null);
+      if (e.key === 'Escape') { setContextMenu(null); setCanvasMenu(null); }
 
       // Undo/Redo: skip if user is typing in an input/textarea
       const tag = (e.target as HTMLElement)?.tagName;
@@ -150,13 +171,18 @@ export function BlueprintCanvas() {
     []
   );
 
+  const onPaneContextMenu = useCallback((event: MouseEvent | React.MouseEvent) => {
+    event.preventDefault();
+    setCanvasMenu({ x: event.clientX, y: event.clientY });
+  }, []);
+
   const minimapNodeColor = (node: { type?: string }) => {
     const colors = NODE_COLORS[node.type as BlueprintNodeType];
     return colors?.header || '#2d333b';
   };
 
   return (
-    <div ref={reactFlowRef} className="flex-1 relative">
+    <div ref={reactFlowRef} className={`flex-1 relative${layouting ? ' layouting' : ''}`}>
       <ReactFlow
         nodes={nodes}
         edges={edges}
@@ -172,6 +198,7 @@ export function BlueprintCanvas() {
         onNodeClick={onNodeClick}
         onPaneClick={onPaneClick}
         onNodeContextMenu={onNodeContextMenu}
+        onPaneContextMenu={onPaneContextMenu}
         colorMode="dark"
         snapToGrid
         snapGrid={[20, 20]}
@@ -207,11 +234,63 @@ export function BlueprintCanvas() {
           >
             Disconnect all
           </div>
+          <div style={{ height: 1, background: 'var(--node-border)', margin: '4px 0' }} />
+          {!contextMenuNode?.parentId && (
+            <div
+              className="context-menu-item"
+              onClick={() => {
+                const selectedIds = nodes.filter((n) => n.selected).map((n) => n.id);
+                const idsToGroup = selectedIds.length > 1 ? selectedIds : [contextMenu.nodeId];
+                groupIntoPlugin(idsToGroup);
+                setContextMenu(null);
+              }}
+            >
+              Group into Plugin
+            </div>
+          )}
+          {contextMenuNode?.parentId && (
+            <div
+              className="context-menu-item"
+              onClick={() => { removeFromPlugin(contextMenu.nodeId); setContextMenu(null); }}
+            >
+              Remove from Plugin
+            </div>
+          )}
           <div
             className="context-menu-item danger"
             onClick={() => { deleteNode(contextMenu.nodeId); setContextMenu(null); }}
           >
             Delete
+          </div>
+        </div>
+      )}
+
+      {/* Canvas Context Menu */}
+      {canvasMenu && (
+        <div
+          className="context-menu"
+          style={{ left: canvasMenu.x, top: canvasMenu.y }}
+          onClick={(e) => e.stopPropagation()}
+        >
+          {(['rules', 'skill', 'subagent', 'hook', 'tool', 'mcp', 'plugin'] as BlueprintNodeType[]).map((type) => (
+            <div
+              key={type}
+              className="context-menu-item"
+              onClick={() => {
+                const position = screenToFlowPosition({ x: canvasMenu.x, y: canvasMenu.y });
+                addNode(type, position);
+                setCanvasMenu(null);
+              }}
+            >
+              Add {type === 'mcp' ? 'MCP Server' : type.charAt(0).toUpperCase() + type.slice(1)}
+            </div>
+          ))}
+          <div style={{ height: 1, background: 'var(--node-border)', margin: '4px 0' }} />
+          <div
+            className="context-menu-item"
+            onClick={() => { autoLayout('LR'); setCanvasMenu(null); }}
+          >
+            Auto-layout
           </div>
         </div>
       )}

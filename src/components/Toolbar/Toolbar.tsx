@@ -1,6 +1,7 @@
 import { useRef } from 'react';
-import { ShieldCheck, LayoutGrid, Save, Upload, Trash2 } from 'lucide-react';
+import { ShieldCheck, LayoutGrid, Save, Upload, Trash2, Undo2, Redo2 } from 'lucide-react';
 import { useReactFlow } from '@xyflow/react';
+import { useStore } from 'zustand';
 import { useGraphStore } from '../../store/useGraphStore';
 import { downloadJSON } from '../../serialization/jsonExporter';
 import type { GraphSchema } from '../../types/graph';
@@ -14,6 +15,12 @@ export function Toolbar() {
   const importJSON = useGraphStore((s) => s.importJSON);
   const clearGraph = useGraphStore((s) => s.clearGraph);
   const runValidation = useGraphStore((s) => s.runValidation);
+  const autoLayout = useGraphStore((s) => s.autoLayout);
+
+  const canUndo = useStore(useGraphStore.temporal, (s) => s.pastStates.length > 0);
+  const canRedo = useStore(useGraphStore.temporal, (s) => s.futureStates.length > 0);
+  const undo = useStore(useGraphStore.temporal, (s) => s.undo);
+  const redo = useStore(useGraphStore.temporal, (s) => s.redo);
 
   const handleSave = () => {
     const graph = exportJSON(getViewport());
@@ -72,8 +79,11 @@ export function Toolbar() {
 
       {/* Right: Actions */}
       <div className="flex items-center gap-1">
+        <ToolbarButton icon={Undo2} label="Undo" onClick={undo} disabled={!canUndo} />
+        <ToolbarButton icon={Redo2} label="Redo" onClick={redo} disabled={!canRedo} />
+        <div className="w-px h-5 mx-1" style={{ background: 'var(--node-border)' }} />
         <ToolbarButton icon={ShieldCheck} label="Validate" onClick={runValidation} />
-        <ToolbarButton icon={LayoutGrid} label="Auto-layout" onClick={() => {}} />
+        <ToolbarButton icon={LayoutGrid} label="Auto-layout" onClick={() => autoLayout('LR')} />
         <ToolbarButton icon={Save} label="Save" onClick={handleSave} />
         <ToolbarButton icon={Upload} label="Load" onClick={() => fileInputRef.current?.click()} />
         <ToolbarButton icon={Trash2} label="Clear" onClick={handleClear} danger />
@@ -95,19 +105,27 @@ function ToolbarButton({
   label,
   onClick,
   danger,
+  disabled,
 }: {
   icon: React.ComponentType<{ size?: number }>;
   label: string;
   onClick: () => void;
   danger?: boolean;
+  disabled?: boolean;
 }) {
   return (
     <button
       onClick={onClick}
       title={label}
+      disabled={disabled}
       className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs transition-colors"
-      style={{ color: danger ? '#ef4444' : 'var(--text-secondary)' }}
+      style={{
+        color: danger ? '#ef4444' : 'var(--text-secondary)',
+        opacity: disabled ? 0.3 : 1,
+        cursor: disabled ? 'not-allowed' : 'pointer',
+      }}
       onMouseEnter={(e) => {
+        if (disabled) return;
         (e.currentTarget as HTMLElement).style.background = 'var(--node-border)';
         if (!danger) (e.currentTarget as HTMLElement).style.color = 'var(--text-primary)';
       }}
