@@ -9,11 +9,13 @@ import {
   type IsValidConnection,
   type NodeTypes,
   type EdgeTypes,
+  type OnConnectStart,
+  type Connection,
 } from '@xyflow/react';
 import type { BlueprintNodeType } from '../../types/nodes';
 import { NODE_PIN_DEFINITIONS } from '../../constants/nodeDefaults';
 import { NODE_COLORS } from '../../constants/theme';
-import { canConnect } from '../../utils/pinCompatibility';
+import { canConnect, getCompatibleNodeTypes } from '../../utils/pinCompatibility';
 import { useGraphStore } from '../../store/useGraphStore';
 import { RulesNode } from '../Nodes/RulesNode';
 import { SkillNode } from '../Nodes/SkillNode';
@@ -55,6 +57,21 @@ export function BlueprintCanvas() {
   const reactFlowRef = useRef<HTMLDivElement>(null);
   const [contextMenu, setContextMenu] = useState<ContextMenuState | null>(null);
   const [canvasMenu, setCanvasMenu] = useState<{ x: number; y: number } | null>(null);
+  const [quickConnectMenu, setQuickConnectMenu] = useState<{
+    x: number;
+    y: number;
+    sourceNodeId: string;
+    sourceHandleId: string;
+    items: { nodeType: BlueprintNodeType; pinId: string }[];
+    draggedFromSource: boolean;
+  } | null>(null);
+
+  const connectStartRef = useRef<{
+    nodeId: string;
+    handleId: string;
+    handleType: 'source' | 'target';
+  } | null>(null);
+
   const { screenToFlowPosition, fitView, setCenter, getZoom } = useReactFlow();
 
   const nodes = useGraphStore((s) => s.nodes);
@@ -84,11 +101,12 @@ export function BlueprintCanvas() {
 
   // Close context menu + keyboard shortcuts
   useEffect(() => {
-    const handleClick = () => { setContextMenu(null); setCanvasMenu(null); };
+    const handleClick = () => { setContextMenu(null); setCanvasMenu(null); setQuickConnectMenu(null); };
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         setContextMenu(null);
         setCanvasMenu(null);
+        setQuickConnectMenu(null);
         selectNode(null);
         useGraphStore.getState().setSearchOpen(false);
         useGraphStore.getState().setExportPreviewOpen(false);
@@ -215,6 +233,94 @@ export function BlueprintCanvas() {
     setCanvasMenu({ x: event.clientX, y: event.clientY });
   }, []);
 
+  const onConnectStartHandler: OnConnectStart = useCallback((_event, params) => {
+    connectStartRef.current = {
+      nodeId: params.nodeId ?? '',
+      handleId: params.handleId ?? '',
+      handleType: params.handleType ?? 'source',
+    };
+  }, []);
+
+  const onConnectEndHandler = useCallback(
+    (event: MouseEvent | TouchEvent) => {
+      const startInfo = connectStartRef.current;
+      connectStartRef.current = null;
+      if (!startInfo) return;
+
+      // If dropped on a handle or node, the connection succeeded — do nothing
+      const target = event.target as HTMLElement;
+      if (target.closest('.react-flow__handle') || target.closest('.react-flow__node')) {
+        return;
+      }
+
+      // Find the dragged pin definition
+      const sourceNode = nodes.find((n) => n.id === startInfo.nodeId);
+      if (!sourceNode) return;
+
+      const pins = NODE_PIN_DEFINITIONS[sourceNode.type as BlueprintNodeType];
+      if (!pins) return;
+
+      const draggedPin = pins.find((p) => p.id === startInfo.handleId);
+      if (!draggedPin) return;
+
+      // Get compatible node types
+      const items = getCompatibleNodeTypes(draggedPin.type, draggedPin.direction);
+      if (items.length === 0) return;
+
+      // Get mouse/touch position
+      const clientX = 'changedTouches' in event ? event.changedTouches[0].clientX : event.clientX;
+      const clientY = 'changedTouches' in event ? event.changedTouches[0].clientY : event.clientY;
+
+      setQuickConnectMenu({
+        x: clientX,
+        y: clientY,
+        sourceNodeId: startInfo.nodeId,
+        sourceHandleId: startInfo.handleId,
+        items,
+        draggedFromSource: startInfo.handleType === 'source',
+      });
+    },
+    [nodes]
+  );
+
+  const onQuickConnectSelect = useCallback(
+    (nodeType: BlueprintNodeType, pinId: string) => {
+      if (!quickConnectMenu) return;
+
+      const position = screenToFlowPosition({
+        x: quickConnectMenu.x,
+        y: quickConnectMenu.y,
+      });
+
+      addNode(nodeType, position);
+
+      const newNodes = useGraphStore.getState().nodes;
+      const newNode = newNodes[newNodes.length - 1];
+      if (!newNode) { setQuickConnectMenu(null); return; }
+
+      let connection: Connection;
+      if (quickConnectMenu.draggedFromSource) {
+        connection = {
+          source: quickConnectMenu.sourceNodeId,
+          sourceHandle: quickConnectMenu.sourceHandleId,
+          target: newNode.id,
+          targetHandle: pinId,
+        };
+      } else {
+        connection = {
+          source: newNode.id,
+          sourceHandle: pinId,
+          target: quickConnectMenu.sourceNodeId,
+          targetHandle: quickConnectMenu.sourceHandleId,
+        };
+      }
+
+      onConnectHandler(connection);
+      setQuickConnectMenu(null);
+    },
+    [quickConnectMenu, screenToFlowPosition, addNode, onConnectHandler]
+  );
+
   const minimapNodeColor = (node: { type?: string }) => {
     const colors = NODE_COLORS[node.type as BlueprintNodeType];
     return colors?.header || '#2d333b';
@@ -228,6 +334,8 @@ export function BlueprintCanvas() {
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
         onConnect={onConnectHandler}
+        onConnectStart={onConnectStartHandler}
+        onConnectEnd={onConnectEndHandler}
         nodeTypes={nodeTypes}
         edgeTypes={edgeTypes}
         defaultEdgeOptions={defaultEdgeOptions}
@@ -349,6 +457,37 @@ export function BlueprintCanvas() {
           >
             Auto-layout
           </div>
+        </div>
+      )}
+
+      {/* Quick-Connect Menu */}
+      {quickConnectMenu && (
+        <div
+          data-testid="quick-connect-menu"
+          className="context-menu"
+          style={{ left: quickConnectMenu.x, top: quickConnectMenu.y }}
+          onClick={(e) => e.stopPropagation()}
+        >
+          {quickConnectMenu.items.map(({ nodeType, pinId }) => (
+            <div
+              key={`${nodeType}-${pinId}`}
+              data-testid={`qc-add-${nodeType}`}
+              className="context-menu-item"
+              onClick={() => onQuickConnectSelect(nodeType, pinId)}
+            >
+              <span
+                style={{
+                  display: 'inline-block',
+                  width: 8,
+                  height: 8,
+                  borderRadius: '50%',
+                  backgroundColor: NODE_COLORS[nodeType]?.header,
+                  marginRight: 8,
+                }}
+              />
+              {nodeType === 'mcp' ? 'MCP Server' : nodeType.charAt(0).toUpperCase() + nodeType.slice(1)}
+            </div>
+          ))}
         </div>
       )}
     </div>
