@@ -1,0 +1,125 @@
+{
+  "id": "SUITE-015",
+  "name": "Export — File System (.claude/ ZIP)",
+  "tests": [
+    {
+      "id": "TC-140",
+      "name": "Export button opens Export Preview modal",
+      "priority": "critical",
+      "phase": 3,
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "click", "target": "[data-testid='template-starter']" },
+        { "action": "click", "target": "[data-testid='confirm-load-template']" },
+        { "action": "click", "target": "[data-testid='toolbar-export']" }
+      ],
+      "assertions": [
+        { "type": "visible", "target": "[data-testid='export-preview-modal']", "description": "Export preview modal opens" },
+        { "type": "visible", "target": "[data-testid='export-file-tree']", "description": "File tree visible" },
+        { "type": "visible", "target": "[data-testid='export-download-zip']", "description": "Download ZIP button visible" }
+      ]
+    },
+    {
+      "id": "TC-141",
+      "name": "Export file tree contains CLAUDE.md for Rules node",
+      "priority": "critical",
+      "phase": 3,
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "click", "target": "[data-testid='template-starter']" },
+        { "action": "click", "target": "[data-testid='confirm-load-template']" },
+        { "action": "click", "target": "[data-testid='toolbar-export']" }
+      ],
+      "assertions": [
+        { "type": "textContains", "target": "[data-testid='export-file-tree']", "expected": "CLAUDE.md", "description": "CLAUDE.md file in tree" }
+      ]
+    },
+    {
+      "id": "TC-142",
+      "name": "Export file tree contains SKILL.md for Skill nodes",
+      "priority": "critical",
+      "phase": 3,
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "click", "target": "[data-testid='template-starter']" },
+        { "action": "click", "target": "[data-testid='confirm-load-template']" },
+        { "action": "click", "target": "[data-testid='toolbar-export']" }
+      ],
+      "assertions": [
+        { "type": "textContains", "target": "[data-testid='export-file-tree']", "expected": "SKILL.md", "description": "SKILL.md file in tree" },
+        { "type": "textContains", "target": "[data-testid='export-file-tree']", "expected": "skills", "description": ".claude/skills/ directory in tree" }
+      ]
+    },
+    {
+      "id": "TC-143",
+      "name": "Clicking file in tree shows content preview",
+      "priority": "high",
+      "phase": 3,
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "dragAndDrop", "source": "[data-testid='palette-node-rules']", "target": ".react-flow__pane", "offsetX": 400, "offsetY": 300 },
+        { "action": "click", "target": "[data-testid='toolbar-export']" },
+        { "action": "wait_for_timeout", "timeout": 500 }
+      ],
+      "assertions": [
+        { "type": "visible", "target": "[data-testid='export-content-preview']", "description": "Content preview panel visible" }
+      ]
+    },
+    {
+      "id": "TC-144",
+      "name": "Export preview shows generated file content",
+      "priority": "high",
+      "phase": 3,
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "dragAndDrop", "source": "[data-testid='palette-node-skill']", "target": ".react-flow__pane", "offsetX": 400, "offsetY": 300 },
+        { "action": "click", "target": "[data-testid='toolbar-export']" },
+        { "action": "wait_for_timeout", "timeout": 500 }
+      ],
+      "assertions": [
+        { "type": "visible", "target": "[data-testid='export-preview-modal']", "description": "Export modal visible" },
+        { "type": "visible", "target": "[data-testid='export-file-tree']", "description": "File tree visible" }
+      ]
+    },
+    {
+      "id": "TC-145",
+      "name": "Export with PR Review template generates agents/*.md and settings.json",
+      "priority": "high",
+      "phase": 3,
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "click", "target": "[data-testid='template-pr-review']" },
+        { "action": "click", "target": "[data-testid='confirm-load-template']" },
+        { "action": "click", "target": "[data-testid='toolbar-export']" }
+      ],
+      "assertions": [
+        { "type": "textContains", "target": "[data-testid='export-file-tree']", "expected": "agents", "description": ".claude/agents/ directory present" },
+        { "type": "textContains", "target": "[data-testid='export-file-tree']", "expected": "settings.json", "description": "settings.json present (for hooks)" }
+      ]
+    },
+    {
+      "id": "TC-146",
+      "name": "Download ZIP button triggers file download",
+      "priority": "critical",
+      "phase": 3,
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "click", "target": "[data-testid='template-starter']" },
+        { "action": "click", "target": "[data-testid='confirm-load-template']" },
+        { "action": "click", "target": "[data-testid='toolbar-export']" },
+        { "action": "interceptDownload", "filename": "*.zip" },
+        { "action": "click", "target": "[data-testid='export-download-zip']" }
+      ],
+      "assertions": [
+        { "type": "downloadTriggered", "filenamePattern": ".claude-config.zip", "description": "ZIP file download triggered" }
+      ]
+    }
+  ]
+}

@@ -35,14 +35,14 @@ export function McpEditor({ nodeId, data }: Props) {
   };
 
   return (
-    <div className="space-y-1">
+    <div className="space-y-1" data-testid="mcp-editor">
       <CollapsibleSection title="Server Configuration">
         <div className="space-y-2">
-          <div>
+          <div data-testid="field-mcp-server-name">
             <label className="text-[10px] uppercase tracking-wider mb-1 block" style={{ color: 'var(--text-muted)' }}>Server Name</label>
             <input value={d.serverName} onChange={(e) => updateNodeData(nodeId, { serverName: e.target.value })} placeholder="my-mcp-server" className="bp-input text-xs" />
           </div>
-          <div>
+          <div data-testid="field-mcp-connection-type">
             <label className="text-[10px] uppercase tracking-wider mb-1 block" style={{ color: 'var(--text-muted)' }}>Connection Type</label>
             <select value={d.connection.type} onChange={(e) => updateConnection({ type: e.target.value as McpNodeData['connection']['type'] })} className="bp-select text-xs">
               <option value="url">URL</option>
@@ -57,11 +57,11 @@ export function McpEditor({ nodeId, data }: Props) {
           )}
           {d.connection.type === 'stdio' && (
             <>
-              <div>
+              <div data-testid="field-mcp-command">
                 <label className="text-[10px] uppercase tracking-wider mb-1 block" style={{ color: 'var(--text-muted)' }}>Command</label>
                 <input value={d.connection.command} onChange={(e) => updateConnection({ command: e.target.value })} placeholder="npx -y @modelcontextprotocol/server" className="bp-input text-xs font-mono" />
               </div>
-              <div>
+              <div data-testid="field-mcp-args">
                 <label className="text-[10px] uppercase tracking-wider mb-1 block" style={{ color: 'var(--text-muted)' }}>Args (comma-separated)</label>
                 <input
                   value={d.connection.args.join(', ')}

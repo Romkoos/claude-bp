@@ -1,0 +1,146 @@
+{
+  "id": "SUITE-006",
+  "name": "Node Selection & Properties Panel",
+  "tests": [
+    {
+      "id": "TC-050",
+      "name": "Clicking a Skill node opens Properties Panel with Skill editor",
+      "priority": "critical",
+      "phase": 1,
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "dragAndDrop", "source": "[data-testid='palette-node-skill']", "target": ".react-flow__pane", "offsetX": 400, "offsetY": 300 },
+        { "action": "click", "target": ".react-flow__node[data-type='skill']" }
+      ],
+      "assertions": [
+        { "type": "visible", "target": "[data-testid='properties-panel']", "description": "Properties panel appears" },
+        { "type": "visible", "target": "[data-testid='skill-editor']", "description": "Skill-specific editor rendered" },
+        { "type": "visible", "target": "[data-testid='field-skill-name']", "description": "Skill name field visible" },
+        { "type": "visible", "target": "[data-testid='field-skill-description']", "description": "Skill description field visible" },
+        { "type": "visible", "target": "[data-testid='field-skill-context']", "description": "Skill context dropdown visible" },
+        { "type": "visible", "target": "[data-testid='field-skill-allowed-tools']", "description": "Allowed tools multi-select visible" }
+      ]
+    },
+    {
+      "id": "TC-051",
+      "name": "Clicking a Subagent node opens Subagent editor",
+      "priority": "critical",
+      "phase": 1,
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "dragAndDrop", "source": "[data-testid='palette-node-subagent']", "target": ".react-flow__pane", "offsetX": 400, "offsetY": 300 },
+        { "action": "click", "target": ".react-flow__node[data-type='subagent']" }
+      ],
+      "assertions": [
+        { "type": "visible", "target": "[data-testid='subagent-editor']", "description": "Subagent editor rendered" },
+        { "type": "visible", "target": "[data-testid='field-subagent-system-prompt']", "description": "System prompt field visible" },
+        { "type": "visible", "target": "[data-testid='field-subagent-agent-type']", "description": "Agent type dropdown visible" }
+      ]
+    },
+    {
+      "id": "TC-052",
+      "name": "Clicking a Hook node opens Hook editor",
+      "priority": "critical",
+      "phase": 1,
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "dragAndDrop", "source": "[data-testid='palette-node-hook']", "target": ".react-flow__pane", "offsetX": 400, "offsetY": 300 },
+        { "action": "click", "target": ".react-flow__node[data-type='hook']" }
+      ],
+      "assertions": [
+        { "type": "visible", "target": "[data-testid='hook-editor']", "description": "Hook editor rendered" },
+        { "type": "visible", "target": "[data-testid='field-hook-event']", "description": "Event dropdown visible" },
+        { "type": "visible", "target": "[data-testid='field-hook-matcher']", "description": "Matcher field visible" },
+        { "type": "visible", "target": "[data-testid='field-hook-command']", "description": "Command field visible" },
+        { "type": "visible", "target": "[data-testid='field-hook-decision']", "description": "Decision type dropdown visible" }
+      ]
+    },
+    {
+      "id": "TC-053",
+      "name": "Clicking a Rules node opens Rules editor",
+      "priority": "critical",
+      "phase": 1,
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "dragAndDrop", "source": "[data-testid='palette-node-rules']", "target": ".react-flow__pane", "offsetX": 400, "offsetY": 300 },
+        { "action": "click", "target": ".react-flow__node[data-type='rules']" }
+      ],
+      "assertions": [
+        { "type": "visible", "target": "[data-testid='rules-editor']", "description": "Rules editor rendered" },
+        { "type": "visible", "target": "[data-testid='field-rules-scope']", "description": "Scope field visible" },
+        { "type": "visible", "target": "[data-testid='field-rules-content']", "description": "Content editor visible" }
+      ]
+    },
+    {
+      "id": "TC-054",
+      "name": "Clicking Tool node opens Tool editor",
+      "priority": "high",
+      "phase": 2,
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "dragAndDrop", "source": "[data-testid='palette-node-tool']", "target": ".react-flow__pane", "offsetX": 400, "offsetY": 300 },
+        { "action": "click", "target": ".react-flow__node[data-type='tool']" }
+      ],
+      "assertions": [
+        { "type": "visible", "target": "[data-testid='tool-editor']", "description": "Tool editor rendered" },
+        { "type": "visible", "target": "[data-testid='field-tool-name']", "description": "Tool name field visible" },
+        { "type": "visible", "target": "[data-testid='field-tool-pattern']", "description": "Pattern field visible" },
+        { "type": "visible", "target": "[data-testid='field-tool-builtin']", "description": "Built-in toggle visible" }
+      ]
+    },
+    {
+      "id": "TC-055",
+      "name": "Clicking MCP node opens MCP editor",
+      "priority": "high",
+      "phase": 2,
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "dragAndDrop", "source": "[data-testid='palette-node-mcp']", "target": ".react-flow__pane", "offsetX": 400, "offsetY": 300 },
+        { "action": "click", "target": ".react-flow__node[data-type='mcp']" }
+      ],
+      "assertions": [
+        { "type": "visible", "target": "[data-testid='mcp-editor']", "description": "MCP editor rendered" },
+        { "type": "visible", "target": "[data-testid='field-mcp-server-name']", "description": "Server name field visible" },
+        { "type": "visible", "target": "[data-testid='field-mcp-connection-type']", "description": "Connection type dropdown visible" }
+      ]
+    },
+    {
+      "id": "TC-056",
+      "name": "Clicking canvas (pane) closes Properties Panel",
+      "priority": "high",
+      "phase": 1,
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "dragAndDrop", "source": "[data-testid='palette-node-skill']", "target": ".react-flow__pane", "offsetX": 400, "offsetY": 300 },
+        { "action": "click", "target": ".react-flow__node[data-type='skill']" },
+        { "action": "click", "target": ".react-flow__pane", "offsetX": 100, "offsetY": 100 }
+      ],
+      "assertions": [
+        { "type": "notVisible", "target": "[data-testid='properties-panel']", "description": "Properties panel hidden after clicking canvas" }
+      ]
+    },
+    {
+      "id": "TC-057",
+      "name": "Properties Panel collapsible sections work",
+      "priority": "medium",
+      "phase": 1,
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "dragAndDrop", "source": "[data-testid='palette-node-skill']", "target": ".react-flow__pane", "offsetX": 400, "offsetY": 300 },
+        { "action": "click", "target": ".react-flow__node[data-type='skill']" },
+        { "action": "click", "target": "[data-testid='collapsible-section-frontmatter'] [data-testid='section-toggle']" }
+      ],
+      "assertions": [
+        { "type": "notVisible", "target": "[data-testid='collapsible-section-frontmatter'] [data-testid='section-content']", "description": "Section content hidden after collapse" }
+      ]
+    }
+  ]
+}

@@ -214,3 +214,22 @@ body {
   font-weight: 500;
   line-height: 1.4;
 }
+
+/* === Simulation animations === */
+@keyframes sim-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 var(--glow-color); }
+  50% { box-shadow: 0 0 20px 8px var(--glow-color); }
+}
+.simulation-active {
+  animation: sim-pulse 0.5s ease-in-out 2;
+}
+
+@keyframes traveling-dot {
+  from { stroke-dashoffset: 100; }
+  to { stroke-dashoffset: 0; }
+}
+.simulation-edge path {
+  stroke-width: 4 !important;
+  stroke-dasharray: 4 96 !important;
+  animation: traveling-dot 0.4s linear !important;
+}

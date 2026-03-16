@@ -1,0 +1,82 @@
+{
+  "id": "SUITE-024",
+  "name": "Edge Cases & Error Handling",
+  "tests": [
+    {
+      "id": "TC-231",
+      "name": "Deleting a node removes its connected edges",
+      "priority": "critical",
+      "phase": 1,
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "dragAndDrop", "source": "[data-testid='palette-node-rules']", "target": ".react-flow__pane", "offsetX": 200, "offsetY": 300 },
+        { "action": "dragAndDrop", "source": "[data-testid='palette-node-skill']", "target": ".react-flow__pane", "offsetX": 600, "offsetY": 300 },
+        { "action": "dragBetweenHandles", "sourceNode": "rules", "sourceHandle": "out_context", "targetNode": "skill", "targetHandle": "in_context" },
+        { "action": "wait_for_timeout", "timeout": 300 },
+        { "action": "rightClick", "target": ".react-flow__node[data-type='skill']" },
+        { "action": "click", "target": "[data-testid='ctx-delete-node']" },
+        { "action": "wait_for_timeout", "timeout": 500 }
+      ],
+      "assertions": [
+        { "type": "count", "target": ".react-flow__edge", "expected": 0, "description": "Edges removed when node deleted" },
+        { "type": "count", "target": ".react-flow__node", "expected": 1, "description": "Only rules node remains" }
+      ]
+    },
+    {
+      "id": "TC-232",
+      "name": "Clear button removes all nodes",
+      "priority": "high",
+      "phase": 1,
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "click", "target": "[data-testid='template-starter']" },
+        { "action": "wait_for_timeout", "timeout": 500 },
+        { "action": "click", "target": "[data-testid='toolbar-clear']" },
+        { "action": "wait_for_timeout", "timeout": 300 }
+      ],
+      "assertions": [
+        { "type": "count", "target": ".react-flow__node", "expected": 0, "description": "All nodes cleared" },
+        { "type": "textContains", "target": "[data-testid='status-bar']", "expected": "Nodes: 0", "description": "Status shows 0 nodes" }
+      ]
+    },
+    {
+      "id": "TC-233",
+      "name": "No console errors during normal operation",
+      "priority": "critical",
+      "phase": 1,
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "interceptConsoleErrors" },
+        { "action": "dragAndDrop", "source": "[data-testid='palette-node-skill']", "target": ".react-flow__pane", "offsetX": 400, "offsetY": 300 },
+        { "action": "click", "target": ".react-flow__node[data-type='skill']" },
+        { "action": "click", "target": ".react-flow__pane", "offsetX": 50, "offsetY": 50 },
+        { "action": "click", "target": "[data-testid='toolbar-validate']" }
+      ],
+      "assertions": [
+        { "type": "noConsoleErrors", "description": "No console errors during typical workflow" }
+      ]
+    },
+    {
+      "id": "TC-234",
+      "name": "Rapid node creation does not cause infinite re-renders",
+      "priority": "high",
+      "phase": 1,
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "dragAndDrop", "source": "[data-testid='palette-node-skill']", "target": ".react-flow__pane", "offsetX": 200, "offsetY": 200 },
+        { "action": "dragAndDrop", "source": "[data-testid='palette-node-skill']", "target": ".react-flow__pane", "offsetX": 200, "offsetY": 350 },
+        { "action": "dragAndDrop", "source": "[data-testid='palette-node-skill']", "target": ".react-flow__pane", "offsetX": 200, "offsetY": 500 },
+        { "action": "dragAndDrop", "source": "[data-testid='palette-node-skill']", "target": ".react-flow__pane", "offsetX": 500, "offsetY": 200 },
+        { "action": "dragAndDrop", "source": "[data-testid='palette-node-skill']", "target": ".react-flow__pane", "offsetX": 500, "offsetY": 350 }
+      ],
+      "assertions": [
+        { "type": "count", "target": ".react-flow__node", "expected": 5, "description": "5 nodes created" },
+        { "type": "noConsoleErrors", "description": "No infinite re-render errors" }
+      ]
+    }
+  ]
+}

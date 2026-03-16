@@ -1,5 +1,5 @@
 import { PinType, PinDirection, type PinDefinition } from '../types/pins';
-import type { BlueprintNodeType, RulesNodeData, SkillNodeData, SubagentNodeData, HookNodeData, ToolNodeData, McpNodeData, PluginNodeData } from '../types/nodes';
+import type { BlueprintNodeType, RulesNodeData, SkillNodeData, SubagentNodeData, HookNodeData, ToolNodeData, McpNodeData, PluginNodeData, CommentNodeData } from '../types/nodes';
 
 export const NODE_PIN_DEFINITIONS: Record<BlueprintNodeType, PinDefinition[]> = {
   rules: [
@@ -39,6 +39,7 @@ export const NODE_PIN_DEFINITIONS: Record<BlueprintNodeType, PinDefinition[]> = 
   plugin: [
     { id: 'out_bundle', type: PinType.Bundle, direction: PinDirection.Out, label: 'exports' },
   ],
+  comment: [],
 };
 
 export function createRulesData(): RulesNodeData {
@@ -133,6 +134,18 @@ export function createMcpData(): McpNodeData {
     },
     env: {},
     providedTools: [],
+  };
+}
+
+export function createCommentData(): CommentNodeData {
+  return {
+    label: '',
+    collapsed: false,
+    validation: { errors: [], warnings: [] },
+    content: '',
+    color: 'yellow',
+    width: 200,
+    height: 120,
   };
 }
 

@@ -1,0 +1,70 @@
+{
+  "id": "SUITE-017",
+  "name": "Code Editor Component",
+  "tests": [
+    {
+      "id": "TC-160",
+      "name": "Code editor renders with line numbers for system prompt",
+      "priority": "high",
+      "phase": 3,
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "dragAndDrop", "source": "[data-testid='palette-node-subagent']", "target": ".react-flow__pane", "offsetX": 400, "offsetY": 300 },
+        { "action": "click", "target": ".react-flow__node[data-type='subagent']" }
+      ],
+      "assertions": [
+        { "type": "visible", "target": "[data-testid='code-editor']", "description": "Code editor rendered for system prompt" },
+        { "type": "visible", "target": "[data-testid='code-editor-line-numbers']", "description": "Line numbers gutter visible" }
+      ]
+    },
+    {
+      "id": "TC-161",
+      "name": "Tab key inserts spaces instead of changing focus",
+      "priority": "medium",
+      "phase": 3,
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "dragAndDrop", "source": "[data-testid='palette-node-subagent']", "target": ".react-flow__pane", "offsetX": 400, "offsetY": 300 },
+        { "action": "click", "target": ".react-flow__node[data-type='subagent']" },
+        { "action": "click", "target": "[data-testid='code-editor'] textarea" },
+        { "action": "type", "target": "[data-testid='code-editor'] textarea", "value": "line1" },
+        { "action": "keyboard", "keys": "Tab" }
+      ],
+      "assertions": [
+        { "type": "focused", "target": "[data-testid='code-editor'] textarea", "description": "Textarea still focused after Tab" }
+      ]
+    },
+    {
+      "id": "TC-162",
+      "name": "Code editor used for Skill instructions",
+      "priority": "medium",
+      "phase": 3,
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "dragAndDrop", "source": "[data-testid='palette-node-skill']", "target": ".react-flow__pane", "offsetX": 400, "offsetY": 300 },
+        { "action": "click", "target": ".react-flow__node[data-type='skill']" }
+      ],
+      "assertions": [
+        { "type": "visible", "target": "[data-testid='field-skill-instructions'] [data-testid='code-editor']", "description": "Code editor for skill instructions" }
+      ]
+    },
+    {
+      "id": "TC-163",
+      "name": "Hook editor shows command field",
+      "priority": "medium",
+      "phase": 3,
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "dragAndDrop", "source": "[data-testid='palette-node-hook']", "target": ".react-flow__pane", "offsetX": 400, "offsetY": 300 },
+        { "action": "click", "target": ".react-flow__node[data-type='hook']" }
+      ],
+      "assertions": [
+        { "type": "visible", "target": "[data-testid='field-hook-command']", "description": "Hook command field visible" }
+      ]
+    }
+  ]
+}

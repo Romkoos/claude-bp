@@ -1,0 +1,118 @@
+{
+  "id": "SUITE-019",
+  "name": "Keyboard Shortcuts",
+  "tests": [
+    {
+      "id": "TC-180",
+      "name": "Ctrl+S triggers save",
+      "priority": "high",
+      "phase": 3,
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "dragAndDrop", "source": "[data-testid='palette-node-skill']", "target": ".react-flow__pane", "offsetX": 400, "offsetY": 300 },
+        { "action": "interceptDownload", "filename": "*.blueprint.json" },
+        { "action": "keyboard", "keys": "Control+s" }
+      ],
+      "assertions": [
+        { "type": "downloadTriggered", "filenamePattern": ".blueprint.json", "description": "Save triggered via Ctrl+S" }
+      ]
+    },
+    {
+      "id": "TC-181",
+      "name": "Delete key removes selected node",
+      "priority": "high",
+      "phase": 1,
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "dragAndDrop", "source": "[data-testid='palette-node-skill']", "target": ".react-flow__pane", "offsetX": 400, "offsetY": 300 },
+        { "action": "click", "target": ".react-flow__node[data-type='skill']" },
+        { "action": "keyboard", "keys": "Delete" }
+      ],
+      "assertions": [
+        { "type": "count", "target": ".react-flow__node", "expected": 0, "description": "Node deleted with Delete key" }
+      ]
+    },
+    {
+      "id": "TC-182",
+      "name": "F key triggers fit view",
+      "priority": "medium",
+      "phase": 3,
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "click", "target": "[data-testid='template-pr-review']" },
+        { "action": "click", "target": "[data-testid='confirm-load-template']" },
+        { "action": "keyboard", "keys": "f" }
+      ],
+      "assertions": [
+        { "type": "noError", "description": "Fit view executes without error" }
+      ]
+    },
+    {
+      "id": "TC-183",
+      "name": "? key opens shortcuts overlay",
+      "priority": "medium",
+      "phase": 3,
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "keyboard", "keys": "?" }
+      ],
+      "assertions": [
+        { "type": "visible", "target": "[data-testid='shortcuts-overlay']", "description": "Shortcuts overlay opens" }
+      ]
+    },
+    {
+      "id": "TC-184",
+      "name": "Shortcuts suppressed when input is focused",
+      "priority": "high",
+      "phase": 3,
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "dragAndDrop", "source": "[data-testid='palette-node-skill']", "target": ".react-flow__pane", "offsetX": 400, "offsetY": 300 },
+        { "action": "click", "target": ".react-flow__node[data-type='skill']" },
+        { "action": "click", "target": "[data-testid='field-skill-name'] input" },
+        { "action": "keyboard", "keys": "f" }
+      ],
+      "assertions": [
+        { "type": "focused", "target": "[data-testid='field-skill-name'] input", "description": "Input still focused — 'f' typed as text, not interpreted as shortcut" }
+      ]
+    },
+    {
+      "id": "TC-185",
+      "name": "Ctrl+A selects all nodes",
+      "priority": "medium",
+      "phase": 3,
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "click", "target": "[data-testid='template-starter']" },
+        { "action": "click", "target": "[data-testid='confirm-load-template']" },
+        { "action": "keyboard", "keys": "Control+a" }
+      ],
+      "assertions": [
+        { "type": "count", "target": ".react-flow__node.selected", "expected": 2, "description": "All nodes selected" }
+      ]
+    },
+    {
+      "id": "TC-186",
+      "name": "Escape deselects all",
+      "priority": "medium",
+      "phase": 3,
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "dragAndDrop", "source": "[data-testid='palette-node-skill']", "target": ".react-flow__pane", "offsetX": 400, "offsetY": 300 },
+        { "action": "click", "target": ".react-flow__node[data-type='skill']" },
+        { "action": "keyboard", "keys": "Escape" }
+      ],
+      "assertions": [
+        { "type": "count", "target": ".react-flow__node.selected", "expected": 0, "description": "No nodes selected after Escape" },
+        { "type": "notVisible", "target": "[data-testid='properties-panel']", "description": "Properties panel closed" }
+      ]
+    }
+  ]
+}

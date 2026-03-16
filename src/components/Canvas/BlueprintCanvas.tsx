@@ -22,6 +22,7 @@ import { HookNode } from '../Nodes/HookNode';
 import { ToolNode } from '../Nodes/ToolNode';
 import { McpNode } from '../Nodes/McpNode';
 import { PluginNode } from '../Nodes/PluginNode';
+import { CommentNode } from '../Nodes/CommentNode';
 import { TypedEdge } from '../Edges/TypedEdge';
 
 // MUST be defined outside component to prevent infinite re-renders
@@ -33,6 +34,7 @@ const nodeTypes: NodeTypes = {
   tool: ToolNode,
   mcp: McpNode,
   plugin: PluginNode,
+  comment: CommentNode,
 };
 
 const edgeTypes: EdgeTypes = {
@@ -53,7 +55,7 @@ export function BlueprintCanvas() {
   const reactFlowRef = useRef<HTMLDivElement>(null);
   const [contextMenu, setContextMenu] = useState<ContextMenuState | null>(null);
   const [canvasMenu, setCanvasMenu] = useState<{ x: number; y: number } | null>(null);
-  const { screenToFlowPosition, fitView } = useReactFlow();
+  const { screenToFlowPosition, fitView, setCenter, getZoom } = useReactFlow();
 
   const nodes = useGraphStore((s) => s.nodes);
   const edges = useGraphStore((s) => s.edges);
@@ -80,24 +82,61 @@ export function BlueprintCanvas() {
     }
   }, [layouting, fitView]);
 
-  // Close context menu + undo/redo keyboard shortcuts
+  // Close context menu + keyboard shortcuts
   useEffect(() => {
     const handleClick = () => { setContextMenu(null); setCanvasMenu(null); };
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') { setContextMenu(null); setCanvasMenu(null); }
+      if (e.key === 'Escape') {
+        setContextMenu(null);
+        setCanvasMenu(null);
+        selectNode(null);
+        useGraphStore.getState().setSearchOpen(false);
+        useGraphStore.getState().setExportPreviewOpen(false);
+        useGraphStore.getState().setShortcutsOpen(false);
+      }
 
-      // Undo/Redo: skip if user is typing in an input/textarea
-      const tag = (e.target as HTMLElement)?.tagName;
-      if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
+      const tag = (document.activeElement?.tagName ?? '').toLowerCase();
+      if (['input', 'textarea', 'select'].includes(tag)) {
+        return;
+      }
 
-      if ((e.ctrlKey || e.metaKey) && e.key === 'z' && !e.shiftKey) {
+      const meta = e.ctrlKey || e.metaKey;
+      const key = e.key.toLowerCase();
+      const shift = e.shiftKey;
+
+      // Undo / Redo
+      if (meta && key === 'z' && !shift) {
         e.preventDefault();
         useGraphStore.temporal.getState().undo();
       }
-      if ((e.ctrlKey || e.metaKey) && (e.key === 'y' || (e.key === 'z' && e.shiftKey))) {
+      if (meta && (key === 'y' || (key === 'z' && shift))) {
         e.preventDefault();
         useGraphStore.temporal.getState().redo();
       }
+
+      // Search
+      if (meta && key === 'k') { e.preventDefault(); useGraphStore.getState().setSearchOpen(true); }
+      // Export preview
+      if (meta && key === 'e') { e.preventDefault(); useGraphStore.getState().setExportPreviewOpen(true); }
+      // Duplicate selected
+      if (meta && key === 'd') {
+        e.preventDefault();
+        const sel = useGraphStore.getState().selectedNodeId;
+        if (sel) useGraphStore.getState().duplicateNode(sel);
+      }
+      // Select all nodes
+      if (meta && key === 'a') {
+        e.preventDefault();
+        const st = useGraphStore.getState();
+        const allSelected = st.nodes.map((n) => ({ ...n, selected: true }));
+        useGraphStore.setState({ nodes: allSelected });
+      }
+      // Fit view
+      if (key === 'f' && !meta) { e.preventDefault(); fitView({ padding: 0.2 }); }
+      // Shortcuts overlay
+      if (key === '?' || (shift && key === '/')) { useGraphStore.getState().setShortcutsOpen(true); }
+      // Search via /
+      if (key === '/' && !shift && !meta) { e.preventDefault(); useGraphStore.getState().setSearchOpen(true); }
     };
     document.addEventListener('click', handleClick);
     document.addEventListener('keydown', handleKeyDown);
@@ -105,7 +144,7 @@ export function BlueprintCanvas() {
       document.removeEventListener('click', handleClick);
       document.removeEventListener('keydown', handleKeyDown);
     };
-  }, []);
+  }, [fitView, selectNode]);
 
   const onDragOver = useCallback((event: React.DragEvent) => {
     event.preventDefault();
@@ -182,7 +221,7 @@ export function BlueprintCanvas() {
   };
 
   return (
-    <div ref={reactFlowRef} className={`flex-1 relative${layouting ? ' layouting' : ''}`}>
+    <div ref={reactFlowRef} data-testid="blueprint-canvas" className={`flex-1 relative${layouting ? ' layouting' : ''}`}>
       <ReactFlow
         nodes={nodes}
         edges={edges}
@@ -211,6 +250,15 @@ export function BlueprintCanvas() {
           nodeColor={minimapNodeColor}
           style={{ background: '#161b22', border: '1px solid #2d333b', borderRadius: 8 }}
           maskColor="#0d111780"
+          onNodeClick={(_event, node) => {
+            const n = nodes.find((nd) => nd.id === node.id);
+            if (n) {
+              const x = n.position.x + (n.measured?.width ?? 300) / 2;
+              const y = n.position.y + (n.measured?.height ?? 200) / 2;
+              setCenter(x, y, { zoom: getZoom(), duration: 300 });
+              selectNode(n.id);
+            }
+          }}
         />
         <Controls />
       </ReactFlow>
@@ -218,17 +266,20 @@ export function BlueprintCanvas() {
       {/* Context Menu */}
       {contextMenu && (
         <div
+          data-testid="context-menu"
           className="context-menu"
           style={{ left: contextMenu.x, top: contextMenu.y }}
           onClick={(e) => e.stopPropagation()}
         >
           <div
+            data-testid="ctx-duplicate-node"
             className="context-menu-item"
             onClick={() => { duplicateNode(contextMenu.nodeId); setContextMenu(null); }}
           >
             Duplicate
           </div>
           <div
+            data-testid="ctx-disconnect-all"
             className="context-menu-item"
             onClick={() => { disconnectNode(contextMenu.nodeId); setContextMenu(null); }}
           >
@@ -237,6 +288,7 @@ export function BlueprintCanvas() {
           <div style={{ height: 1, background: 'var(--node-border)', margin: '4px 0' }} />
           {!contextMenuNode?.parentId && (
             <div
+              data-testid="ctx-group-into-plugin"
               className="context-menu-item"
               onClick={() => {
                 const selectedIds = nodes.filter((n) => n.selected).map((n) => n.id);
@@ -250,6 +302,7 @@ export function BlueprintCanvas() {
           )}
           {contextMenuNode?.parentId && (
             <div
+              data-testid="ctx-remove-from-plugin"
               className="context-menu-item"
               onClick={() => { removeFromPlugin(contextMenu.nodeId); setContextMenu(null); }}
             >
@@ -257,6 +310,7 @@ export function BlueprintCanvas() {
             </div>
           )}
           <div
+            data-testid="ctx-delete-node"
             className="context-menu-item danger"
             onClick={() => { deleteNode(contextMenu.nodeId); setContextMenu(null); }}
           >
@@ -268,13 +322,15 @@ export function BlueprintCanvas() {
       {/* Canvas Context Menu */}
       {canvasMenu && (
         <div
+          data-testid="context-menu"
           className="context-menu"
           style={{ left: canvasMenu.x, top: canvasMenu.y }}
           onClick={(e) => e.stopPropagation()}
         >
-          {(['rules', 'skill', 'subagent', 'hook', 'tool', 'mcp', 'plugin'] as BlueprintNodeType[]).map((type) => (
+          {(['rules', 'skill', 'subagent', 'hook', 'tool', 'mcp', 'plugin', 'comment'] as BlueprintNodeType[]).map((type) => (
             <div
               key={type}
+              data-testid={`ctx-add-${type}`}
               className="context-menu-item"
               onClick={() => {
                 const position = screenToFlowPosition({ x: canvasMenu.x, y: canvasMenu.y });
@@ -287,6 +343,7 @@ export function BlueprintCanvas() {
           ))}
           <div style={{ height: 1, background: 'var(--node-border)', margin: '4px 0' }} />
           <div
+            data-testid="ctx-auto-layout"
             className="context-menu-item"
             onClick={() => { autoLayout('LR'); setCanvasMenu(null); }}
           >

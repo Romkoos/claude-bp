@@ -1,0 +1,135 @@
+{
+  "id": "SUITE-009",
+  "name": "Context Menu",
+  "tests": [
+    {
+      "id": "TC-080",
+      "name": "Right-click on canvas shows create node options",
+      "priority": "high",
+      "phase": 2,
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "rightClick", "target": ".react-flow__pane", "offsetX": 400, "offsetY": 300 }
+      ],
+      "assertions": [
+        { "type": "visible", "target": "[data-testid='context-menu']", "description": "Context menu appears" },
+        { "type": "visible", "target": "[data-testid='ctx-add-rules']", "description": "Add Rules option" },
+        { "type": "visible", "target": "[data-testid='ctx-add-skill']", "description": "Add Skill option" },
+        { "type": "visible", "target": "[data-testid='ctx-add-subagent']", "description": "Add Subagent option" },
+        { "type": "visible", "target": "[data-testid='ctx-add-hook']", "description": "Add Hook option" },
+        { "type": "visible", "target": "[data-testid='ctx-add-tool']", "description": "Add Tool option" },
+        { "type": "visible", "target": "[data-testid='ctx-add-mcp']", "description": "Add MCP option" },
+        { "type": "visible", "target": "[data-testid='ctx-add-plugin']", "description": "Add Plugin option" },
+        { "type": "visible", "target": "[data-testid='ctx-auto-layout']", "description": "Auto-layout option" }
+      ]
+    },
+    {
+      "id": "TC-081",
+      "name": "Creating node via context menu places it at click position",
+      "priority": "high",
+      "phase": 2,
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "rightClick", "target": ".react-flow__pane", "offsetX": 400, "offsetY": 300 },
+        { "action": "click", "target": "[data-testid='ctx-add-skill']" }
+      ],
+      "assertions": [
+        { "type": "count", "target": ".react-flow__node[data-type='skill']", "expected": 1, "description": "Skill node created via context menu" }
+      ]
+    },
+    {
+      "id": "TC-082",
+      "name": "Right-click on node shows node actions",
+      "priority": "high",
+      "phase": 1,
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "dragAndDrop", "source": "[data-testid='palette-node-skill']", "target": ".react-flow__pane", "offsetX": 400, "offsetY": 300 },
+        { "action": "rightClick", "target": ".react-flow__node[data-type='skill']" }
+      ],
+      "assertions": [
+        { "type": "visible", "target": "[data-testid='ctx-delete-node']", "description": "Delete option visible" },
+        { "type": "visible", "target": "[data-testid='ctx-duplicate-node']", "description": "Duplicate option visible" },
+        { "type": "visible", "target": "[data-testid='ctx-disconnect-all']", "description": "Disconnect all option visible" },
+        { "type": "visible", "target": "[data-testid='ctx-group-into-plugin']", "description": "Group into Plugin option visible" }
+      ]
+    },
+    {
+      "id": "TC-083",
+      "name": "Duplicate node via context menu",
+      "priority": "high",
+      "phase": 1,
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "dragAndDrop", "source": "[data-testid='palette-node-skill']", "target": ".react-flow__pane", "offsetX": 400, "offsetY": 300 },
+        { "action": "rightClick", "target": ".react-flow__node[data-type='skill']" },
+        { "action": "click", "target": "[data-testid='ctx-duplicate-node']" }
+      ],
+      "assertions": [
+        { "type": "count", "target": ".react-flow__node[data-type='skill']", "expected": 2, "description": "Two skill nodes after duplicate" }
+      ]
+    },
+    {
+      "id": "TC-084",
+      "name": "Delete node via context menu",
+      "priority": "high",
+      "phase": 1,
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "dragAndDrop", "source": "[data-testid='palette-node-skill']", "target": ".react-flow__pane", "offsetX": 400, "offsetY": 300 },
+        { "action": "rightClick", "target": ".react-flow__node[data-type='skill']" },
+        { "action": "click", "target": "[data-testid='ctx-delete-node']" }
+      ],
+      "assertions": [
+        { "type": "count", "target": ".react-flow__node", "expected": 0, "description": "Node deleted" }
+      ]
+    },
+    {
+      "id": "TC-085",
+      "name": "Group into Plugin via context menu (multi-select)",
+      "priority": "high",
+      "phase": 2,
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "dragAndDrop", "source": "[data-testid='palette-node-skill']", "target": ".react-flow__pane", "offsetX": 300, "offsetY": 300 },
+        { "action": "dragAndDrop", "source": "[data-testid='palette-node-hook']", "target": ".react-flow__pane", "offsetX": 300, "offsetY": 500 },
+        { "action": "keyDown", "key": "Shift" },
+        { "action": "click", "target": ".react-flow__node[data-type='skill']" },
+        { "action": "click", "target": ".react-flow__node[data-type='hook']" },
+        { "action": "keyUp", "key": "Shift" },
+        { "action": "rightClick", "target": ".react-flow__node[data-type='skill']" },
+        { "action": "click", "target": "[data-testid='ctx-group-into-plugin']" }
+      ],
+      "assertions": [
+        { "type": "count", "target": ".react-flow__node[data-type='plugin']", "expected": 1, "description": "Plugin container created" }
+      ]
+    },
+    {
+      "id": "TC-086",
+      "name": "Remove from Plugin via context menu",
+      "priority": "high",
+      "phase": 2,
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "dragAndDrop", "source": "[data-testid='palette-node-skill']", "target": ".react-flow__pane", "offsetX": 300, "offsetY": 300 },
+        { "action": "dragAndDrop", "source": "[data-testid='palette-node-hook']", "target": ".react-flow__pane", "offsetX": 350, "offsetY": 500 },
+        { "action": "rightClick", "target": ".react-flow__node[data-type='skill']" },
+        { "action": "click", "target": "[data-testid='ctx-group-into-plugin']" },
+        { "action": "wait_for_timeout", "timeout": 500 },
+        { "action": "rightClick", "target": ".react-flow__node[data-type='skill']" },
+        { "action": "click", "target": "[data-testid='ctx-remove-from-plugin']" },
+        { "action": "wait_for_timeout", "timeout": 300 }
+      ],
+      "assertions": [
+        { "type": "count", "target": ".react-flow__node", "expectedMin": 2, "description": "Skill and hook nodes still exist after removal from plugin" }
+      ]
+    }
+  ]
+}

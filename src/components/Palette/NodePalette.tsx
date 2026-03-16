@@ -1,9 +1,16 @@
-import { FileText, Zap, Bot, Webhook, Wrench, Plug, Package, type LucideIcon } from 'lucide-react';
+import { FileText, Zap, Bot, Webhook, Wrench, Plug, Package, StickyNote, type LucideIcon } from 'lucide-react';
 import { useReactFlow } from '@xyflow/react';
 import type { BlueprintNodeType } from '../../types/nodes';
 import { NODE_COLORS } from '../../constants/theme';
 import { TEMPLATES } from '../../constants/templates';
 import { useGraphStore } from '../../store/useGraphStore';
+
+const TEMPLATE_TEST_IDS: Record<string, string> = {
+  'pr-review': 'template-pr-review',
+  'multi-research': 'template-multi-research',
+  'safe-deploy': 'template-safe-deploy',
+  'starter': 'template-starter',
+};
 
 interface PaletteItem {
   type: BlueprintNodeType;
@@ -50,6 +57,7 @@ export function NodePalette() {
 
   return (
     <div
+      data-testid="node-palette"
       className="w-60 flex-shrink-0 overflow-y-auto"
       style={{
         background: '#161b22',
@@ -71,6 +79,7 @@ export function NodePalette() {
                 key={type}
                 draggable
                 onDragStart={(e) => onDragStart(e, type)}
+                data-testid={`palette-node-${type}`}
                 className="rounded-lg cursor-grab active:cursor-grabbing transition-all hover:scale-[1.02]"
                 style={{
                   background: 'var(--node-bg)',
@@ -79,7 +88,7 @@ export function NodePalette() {
                 }}
               >
                 <div className="p-2.5 flex items-start gap-2.5">
-                  <Icon size={16} style={{ color: colors.header, marginTop: 1, flexShrink: 0 }} />
+                  <Icon size={16} data-testid="palette-color-indicator" style={{ color: colors.header, marginTop: 1, flexShrink: 0 }} />
                   <div className="min-w-0">
                     <div className="text-xs font-medium" style={{ color: 'var(--text-primary)' }}>
                       {label}
@@ -94,6 +103,40 @@ export function NodePalette() {
           })}
         </div>
 
+        <div className="mt-4 mb-4" style={{ borderTop: '1px solid var(--node-border)' }} />
+
+        <h3
+          className="text-[10px] font-semibold uppercase tracking-widest mb-3"
+          style={{ color: 'var(--text-muted)' }}
+        >
+          Notes
+        </h3>
+        <div className="space-y-2">
+          <div
+            draggable
+            onDragStart={(e) => onDragStart(e, 'comment')}
+            data-testid="palette-node-comment"
+            className="rounded-lg cursor-grab active:cursor-grabbing transition-all hover:scale-[1.02]"
+            style={{
+              background: 'var(--node-bg)',
+              border: '1px solid var(--node-border)',
+              borderLeft: '3px solid #eab308',
+            }}
+          >
+            <div className="p-2.5 flex items-start gap-2.5">
+              <StickyNote size={16} data-testid="palette-color-indicator" style={{ color: '#eab308', marginTop: 1, flexShrink: 0 }} />
+              <div className="min-w-0">
+                <div className="text-xs font-medium" style={{ color: 'var(--text-primary)' }}>
+                  Note
+                </div>
+                <div className="text-[10px] mt-0.5" style={{ color: 'var(--text-muted)' }}>
+                  Freeform annotation or reminder
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <h3
           className="text-[10px] font-semibold uppercase tracking-widest mt-6 mb-3"
           style={{ color: 'var(--text-muted)' }}
@@ -105,6 +148,7 @@ export function NodePalette() {
             <button
               key={template.id}
               onClick={() => loadTemplate(template)}
+              data-testid={TEMPLATE_TEST_IDS[template.id]}
               className="w-full text-left rounded-lg transition-all hover:scale-[1.02] cursor-pointer"
               style={{
                 background: 'var(--node-bg)',

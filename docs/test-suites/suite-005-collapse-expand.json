@@ -1,0 +1,60 @@
+{
+  "id": "SUITE-005",
+  "name": "Node Collapse / Expand",
+  "tests": [
+    {
+      "id": "TC-040",
+      "name": "Skill node toggles between compact and expanded",
+      "priority": "high",
+      "phase": 1,
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "dragAndDrop", "source": "[data-testid='palette-node-skill']", "target": ".react-flow__pane", "offsetX": 400, "offsetY": 300 },
+        { "action": "click", "target": ".react-flow__node[data-type='skill'] [data-testid='collapse-toggle']" }
+      ],
+      "assertions": [
+        { "type": "notVisible", "target": ".react-flow__node[data-type='skill'] [data-testid='node-expanded-content']", "description": "Expanded content hidden after collapse" },
+        { "type": "visible", "target": ".react-flow__node[data-type='skill'] [data-testid='node-header']", "description": "Header still visible when collapsed" }
+      ]
+    },
+    {
+      "id": "TC-041",
+      "name": "Collapsed node re-expands on toggle",
+      "priority": "high",
+      "phase": 1,
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "dragAndDrop", "source": "[data-testid='palette-node-skill']", "target": ".react-flow__pane", "offsetX": 400, "offsetY": 300 },
+        { "action": "click", "target": ".react-flow__node[data-type='skill'] [data-testid='collapse-toggle']" },
+        { "action": "click", "target": ".react-flow__node[data-type='skill'] [data-testid='collapse-toggle']" }
+      ],
+      "assertions": [
+        { "type": "visible", "target": ".react-flow__node[data-type='skill'] [data-testid='node-expanded-content']", "description": "Expanded content visible again" }
+      ]
+    },
+    {
+      "id": "TC-042",
+      "name": "All node types support collapse/expand (except Comment)",
+      "priority": "medium",
+      "phase": 2,
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "dragAndDrop", "source": "[data-testid='palette-node-rules']", "target": ".react-flow__pane", "offsetX": 200, "offsetY": 200 },
+        { "action": "dragAndDrop", "source": "[data-testid='palette-node-subagent']", "target": ".react-flow__pane", "offsetX": 200, "offsetY": 400 },
+        { "action": "dragAndDrop", "source": "[data-testid='palette-node-hook']", "target": ".react-flow__pane", "offsetX": 500, "offsetY": 200 },
+        { "action": "dragAndDrop", "source": "[data-testid='palette-node-tool']", "target": ".react-flow__pane", "offsetX": 500, "offsetY": 400 },
+        { "action": "dragAndDrop", "source": "[data-testid='palette-node-mcp']", "target": ".react-flow__pane", "offsetX": 800, "offsetY": 200 }
+      ],
+      "assertions": [
+        { "type": "visible", "target": ".react-flow__node[data-type='rules'] [data-testid='collapse-toggle']", "description": "Rules has collapse toggle" },
+        { "type": "visible", "target": ".react-flow__node[data-type='subagent'] [data-testid='collapse-toggle']", "description": "Subagent has collapse toggle" },
+        { "type": "visible", "target": ".react-flow__node[data-type='hook'] [data-testid='collapse-toggle']", "description": "Hook has collapse toggle" },
+        { "type": "visible", "target": ".react-flow__node[data-type='tool'] [data-testid='collapse-toggle']", "description": "Tool has collapse toggle" },
+        { "type": "visible", "target": ".react-flow__node[data-type='mcp'] [data-testid='collapse-toggle']", "description": "MCP has collapse toggle" }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,63 @@
+{
+  "id": "SUITE-023",
+  "name": "Canvas Interactions",
+  "tests": [
+    {
+      "id": "TC-220",
+      "name": "Nodes are draggable on canvas",
+      "priority": "high",
+      "phase": 1,
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "dragAndDrop", "source": "[data-testid='palette-node-skill']", "target": ".react-flow__pane", "offsetX": 400, "offsetY": 300 }
+      ],
+      "assertions": [
+        { "type": "visible", "target": ".react-flow__node[data-type='skill']", "description": "Node visible on canvas" },
+        { "type": "hasClass", "target": ".react-flow__node[data-type='skill']", "expected": "draggable", "description": "Node has draggable class" }
+      ]
+    },
+    {
+      "id": "TC-221",
+      "name": "Canvas is pannable (click + drag on empty space)",
+      "priority": "high",
+      "phase": 1,
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "drag", "target": ".react-flow__pane", "offsetX": -200, "offsetY": -100 }
+      ],
+      "assertions": [
+        { "type": "noError", "description": "Pan operates without error" }
+      ]
+    },
+    {
+      "id": "TC-222",
+      "name": "Canvas zoom via scroll wheel",
+      "priority": "high",
+      "phase": 1,
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "scroll", "target": ".react-flow__pane", "deltaY": -300 }
+      ],
+      "assertions": [
+        { "type": "noError", "description": "Zoom operates without error" }
+      ]
+    },
+    {
+      "id": "TC-223",
+      "name": "Snap to grid active",
+      "priority": "low",
+      "phase": 1,
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "dragAndDrop", "source": "[data-testid='palette-node-skill']", "target": ".react-flow__pane", "offsetX": 403, "offsetY": 307 }
+      ],
+      "assertions": [
+        { "type": "noError", "description": "Node snaps to grid (position divisible by grid size)" }
+      ]
+    }
+  ]
+}

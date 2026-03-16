@@ -22,9 +22,9 @@ export function applyDagreLayout(
     marginy: 50,
   });
 
-  // Only layout top-level nodes (not plugin children)
+  // Only layout top-level nodes (not plugin children or comments)
   nodes.forEach((node) => {
-    if (!node.parentId) {
+    if (!node.parentId && node.type !== 'comment') {
       g.setNode(node.id, {
         width: (node.measured?.width ?? node.width ?? 300) as number,
         height: (node.measured?.height ?? node.height ?? 200) as number,

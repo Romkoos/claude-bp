@@ -1,4 +1,4 @@
-export type BlueprintNodeType = 'rules' | 'skill' | 'subagent' | 'hook' | 'tool' | 'mcp' | 'plugin';
+export type BlueprintNodeType = 'rules' | 'skill' | 'subagent' | 'hook' | 'tool' | 'mcp' | 'plugin' | 'comment';
 
 export interface BaseNodeData {
   label: string;
@@ -83,6 +83,13 @@ export interface PluginNodeData extends BaseNodeData {
   version: string;
   description: string;
   installScript: string;
+}
+
+export interface CommentNodeData extends BaseNodeData {
+  content: string;
+  color: 'yellow' | 'blue' | 'green' | 'pink';
+  width: number;
+  height: number;
 }
 
 export interface ScopedHook {

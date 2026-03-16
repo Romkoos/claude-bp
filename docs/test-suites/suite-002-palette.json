@@ -1,0 +1,54 @@
+{
+  "id": "SUITE-002",
+  "name": "Node Palette",
+  "tests": [
+    {
+      "id": "TC-010",
+      "name": "All 7 node types visible in palette",
+      "priority": "critical",
+      "phase": 2,
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" }
+      ],
+      "assertions": [
+        { "type": "visible", "target": "[data-testid='palette-node-rules']", "description": "Rules (CLAUDE.md) card visible" },
+        { "type": "visible", "target": "[data-testid='palette-node-skill']", "description": "Skill card visible" },
+        { "type": "visible", "target": "[data-testid='palette-node-subagent']", "description": "Subagent card visible" },
+        { "type": "visible", "target": "[data-testid='palette-node-hook']", "description": "Hook card visible" },
+        { "type": "visible", "target": "[data-testid='palette-node-tool']", "description": "Tool card visible" },
+        { "type": "visible", "target": "[data-testid='palette-node-mcp']", "description": "MCP Server card visible" },
+        { "type": "visible", "target": "[data-testid='palette-node-plugin']", "description": "Plugin card visible" }
+      ]
+    },
+    {
+      "id": "TC-011",
+      "name": "Comment/Note card visible in palette",
+      "priority": "medium",
+      "phase": 3,
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" }
+      ],
+      "assertions": [
+        { "type": "visible", "target": "[data-testid='palette-node-comment']", "description": "Comment/Note card visible in palette" }
+      ]
+    },
+    {
+      "id": "TC-012",
+      "name": "4 templates visible in palette",
+      "priority": "high",
+      "phase": 2,
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" }
+      ],
+      "assertions": [
+        { "type": "visible", "target": "[data-testid='template-pr-review']", "description": "PR Review Pipeline template visible" },
+        { "type": "visible", "target": "[data-testid='template-multi-research']", "description": "Multi-Agent Research template visible" },
+        { "type": "visible", "target": "[data-testid='template-safe-deploy']", "description": "Safe Deployment template visible" },
+        { "type": "visible", "target": "[data-testid='template-starter']", "description": "Starter Config template visible" }
+      ]
+    }
+  ]
+}

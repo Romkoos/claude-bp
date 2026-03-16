@@ -1,0 +1,175 @@
+{
+  "id": "SUITE-010",
+  "name": "Validation",
+  "tests": [
+    {
+      "id": "TC-090",
+      "name": "Skill with context:fork and no agent triggers error",
+      "priority": "critical",
+      "phase": 1,
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "dragAndDrop", "source": "[data-testid='palette-node-skill']", "target": ".react-flow__pane", "offsetX": 400, "offsetY": 300 },
+        { "action": "click", "target": ".react-flow__node[data-type='skill']" },
+        { "action": "select", "target": "[data-testid='field-skill-context'] select", "value": "fork" },
+        { "action": "click", "target": "[data-testid='toolbar-validate']" }
+      ],
+      "assertions": [
+        { "type": "visible", "target": ".react-flow__node[data-type='skill'] [data-testid='validation-error-badge']", "description": "Error badge on node" },
+        { "type": "textContains", "target": "[data-testid='status-bar']", "expected": "error", "description": "Status bar shows errors" }
+      ]
+    },
+    {
+      "id": "TC-091",
+      "name": "Hook without command triggers error",
+      "priority": "critical",
+      "phase": 1,
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "dragAndDrop", "source": "[data-testid='palette-node-hook']", "target": ".react-flow__pane", "offsetX": 400, "offsetY": 300 },
+        { "action": "click", "target": ".react-flow__node[data-type='hook']" },
+        { "action": "clear", "target": "[data-testid='field-hook-command'] input" },
+        { "action": "click", "target": "[data-testid='toolbar-validate']" }
+      ],
+      "assertions": [
+        { "type": "visible", "target": ".react-flow__node[data-type='hook'] [data-testid='validation-error-badge']", "description": "Error badge on hook node" }
+      ]
+    },
+    {
+      "id": "TC-092",
+      "name": "Subagent without system prompt triggers error",
+      "priority": "critical",
+      "phase": 1,
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "dragAndDrop", "source": "[data-testid='palette-node-subagent']", "target": ".react-flow__pane", "offsetX": 400, "offsetY": 300 },
+        { "action": "click", "target": "[data-testid='toolbar-validate']" }
+      ],
+      "assertions": [
+        { "type": "visible", "target": ".react-flow__node[data-type='subagent'] [data-testid='validation-error-badge']", "description": "Error badge on subagent" }
+      ]
+    },
+    {
+      "id": "TC-093",
+      "name": "Skill without description triggers warning",
+      "priority": "high",
+      "phase": 1,
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "dragAndDrop", "source": "[data-testid='palette-node-skill']", "target": ".react-flow__pane", "offsetX": 400, "offsetY": 300 },
+        { "action": "click", "target": "[data-testid='toolbar-validate']" }
+      ],
+      "assertions": [
+        { "type": "visible", "target": ".react-flow__node[data-type='skill'] [data-testid='validation-warning-badge']", "description": "Warning badge on skill" }
+      ]
+    },
+    {
+      "id": "TC-094",
+      "name": "Orphan node triggers warning",
+      "priority": "medium",
+      "phase": 1,
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "dragAndDrop", "source": "[data-testid='palette-node-subagent']", "target": ".react-flow__pane", "offsetX": 400, "offsetY": 300 },
+        { "action": "click", "target": ".react-flow__node[data-type='subagent']" },
+        { "action": "type", "target": "[data-testid='field-subagent-system-prompt'] textarea", "value": "You are a test agent" },
+        { "action": "click", "target": "[data-testid='toolbar-validate']" }
+      ],
+      "assertions": [
+        { "type": "visible", "target": ".react-flow__node[data-type='subagent'] [data-testid='validation-warning-badge']", "description": "Warning: orphan node" }
+      ]
+    },
+    {
+      "id": "TC-095",
+      "name": "MCP Server without URL triggers error",
+      "priority": "high",
+      "phase": 2,
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "dragAndDrop", "source": "[data-testid='palette-node-mcp']", "target": ".react-flow__pane", "offsetX": 400, "offsetY": 300 },
+        { "action": "click", "target": "[data-testid='toolbar-validate']" }
+      ],
+      "assertions": [
+        { "type": "visible", "target": ".react-flow__node[data-type='mcp'] [data-testid='validation-error-badge']", "description": "Error: MCP missing name/URL" }
+      ]
+    },
+    {
+      "id": "TC-096",
+      "name": "Validation results shown in status bar",
+      "priority": "high",
+      "phase": 2,
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "dragAndDrop", "source": "[data-testid='palette-node-hook']", "target": ".react-flow__pane", "offsetX": 400, "offsetY": 300 },
+        { "action": "click", "target": "[data-testid='toolbar-validate']" },
+        { "action": "wait_for_timeout", "timeout": 300 }
+      ],
+      "assertions": [
+        { "type": "textContains", "target": "[data-testid='status-bar']", "expected": "error", "description": "Status bar shows error after validation" }
+      ]
+    },
+    {
+      "id": "TC-097",
+      "name": "Empty Plugin triggers warning",
+      "priority": "medium",
+      "phase": 2,
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "dragAndDrop", "source": "[data-testid='palette-node-plugin']", "target": ".react-flow__pane", "offsetX": 400, "offsetY": 300 },
+        { "action": "click", "target": "[data-testid='toolbar-validate']" },
+        { "action": "wait_for_timeout", "timeout": 300 }
+      ],
+      "assertions": [
+        { "type": "textContains", "target": "[data-testid='status-bar']", "expected": "warning", "description": "Status bar shows warning for empty plugin" }
+      ]
+    },
+    {
+      "id": "TC-098",
+      "name": "Duplicate skill names trigger warning",
+      "priority": "medium",
+      "phase": 2,
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "dragAndDrop", "source": "[data-testid='palette-node-skill']", "target": ".react-flow__pane", "offsetX": 300, "offsetY": 300 },
+        { "action": "dragAndDrop", "source": "[data-testid='palette-node-skill']", "target": ".react-flow__pane", "offsetX": 600, "offsetY": 300 },
+        { "action": "click", "target": ".react-flow__node[data-type='skill']:first-of-type" },
+        { "action": "clear", "target": "[data-testid='field-skill-name'] input" },
+        { "action": "type", "target": "[data-testid='field-skill-name'] input", "value": "my-skill" },
+        { "action": "click", "target": ".react-flow__node[data-type='skill']:last-of-type" },
+        { "action": "clear", "target": "[data-testid='field-skill-name'] input" },
+        { "action": "type", "target": "[data-testid='field-skill-name'] input", "value": "my-skill" },
+        { "action": "click", "target": "[data-testid='toolbar-validate']" }
+      ],
+      "assertions": [
+        { "type": "visible", "target": ".react-flow__node[data-type='skill']:first-of-type [data-testid='validation-warning-badge']", "description": "Warning on first duplicate" },
+        { "type": "visible", "target": ".react-flow__node[data-type='skill']:last-of-type [data-testid='validation-warning-badge']", "description": "Warning on second duplicate" }
+      ]
+    },
+    {
+      "id": "TC-099",
+      "name": "Valid graph shows green validation",
+      "priority": "high",
+      "phase": 1,
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "click", "target": "[data-testid='template-starter']" },
+        { "action": "wait_for_timeout", "timeout": 500 },
+        { "action": "click", "target": "[data-testid='toolbar-validate']" },
+        { "action": "wait_for_timeout", "timeout": 300 }
+      ],
+      "assertions": [
+        { "type": "textContains", "target": "[data-testid='status-bar']", "expected": "Valid", "description": "Status bar shows Valid" }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,136 @@
+{
+  "id": "SUITE-003",
+  "name": "Node Creation — Drag & Drop",
+  "tests": [
+    {
+      "id": "TC-020",
+      "name": "Create Rules node via drag & drop",
+      "priority": "critical",
+      "phase": 1,
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "dragAndDrop", "source": "[data-testid='palette-node-rules']", "target": ".react-flow__pane", "offsetX": 400, "offsetY": 300 }
+      ],
+      "assertions": [
+        { "type": "count", "target": ".react-flow__node[data-type='rules']", "expected": 1, "description": "One Rules node exists on canvas" },
+        { "type": "textContains", "target": "[data-testid='status-bar']", "expected": "Nodes: 1", "description": "Status bar shows 1 node" }
+      ]
+    },
+    {
+      "id": "TC-021",
+      "name": "Create Skill node via drag & drop",
+      "priority": "critical",
+      "phase": 1,
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "dragAndDrop", "source": "[data-testid='palette-node-skill']", "target": ".react-flow__pane", "offsetX": 400, "offsetY": 300 }
+      ],
+      "assertions": [
+        { "type": "count", "target": ".react-flow__node[data-type='skill']", "expected": 1, "description": "One Skill node exists on canvas" },
+        { "type": "textContains", "target": ".react-flow__node[data-type='skill']", "expected": "New Skill", "description": "Skill has default label" }
+      ]
+    },
+    {
+      "id": "TC-022",
+      "name": "Create Subagent node via drag & drop",
+      "priority": "critical",
+      "phase": 1,
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "dragAndDrop", "source": "[data-testid='palette-node-subagent']", "target": ".react-flow__pane", "offsetX": 400, "offsetY": 300 }
+      ],
+      "assertions": [
+        { "type": "count", "target": ".react-flow__node[data-type='subagent']", "expected": 1, "description": "One Subagent node on canvas" }
+      ]
+    },
+    {
+      "id": "TC-023",
+      "name": "Create Hook node via drag & drop",
+      "priority": "critical",
+      "phase": 1,
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "dragAndDrop", "source": "[data-testid='palette-node-hook']", "target": ".react-flow__pane", "offsetX": 400, "offsetY": 300 }
+      ],
+      "assertions": [
+        { "type": "count", "target": ".react-flow__node[data-type='hook']", "expected": 1, "description": "One Hook node on canvas" }
+      ]
+    },
+    {
+      "id": "TC-024",
+      "name": "Create Tool node via drag & drop",
+      "priority": "critical",
+      "phase": 2,
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "dragAndDrop", "source": "[data-testid='palette-node-tool']", "target": ".react-flow__pane", "offsetX": 400, "offsetY": 300 }
+      ],
+      "assertions": [
+        { "type": "count", "target": ".react-flow__node[data-type='tool']", "expected": 1, "description": "One Tool node on canvas" }
+      ]
+    },
+    {
+      "id": "TC-025",
+      "name": "Create MCP Server node via drag & drop",
+      "priority": "critical",
+      "phase": 2,
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "dragAndDrop", "source": "[data-testid='palette-node-mcp']", "target": ".react-flow__pane", "offsetX": 400, "offsetY": 300 }
+      ],
+      "assertions": [
+        { "type": "count", "target": ".react-flow__node[data-type='mcp']", "expected": 1, "description": "One MCP node on canvas" }
+      ]
+    },
+    {
+      "id": "TC-026",
+      "name": "Create Plugin node via drag & drop",
+      "priority": "critical",
+      "phase": 2,
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "dragAndDrop", "source": "[data-testid='palette-node-plugin']", "target": ".react-flow__pane", "offsetX": 400, "offsetY": 300 }
+      ],
+      "assertions": [
+        { "type": "count", "target": ".react-flow__node[data-type='plugin']", "expected": 1, "description": "One Plugin node on canvas" }
+      ]
+    },
+    {
+      "id": "TC-027",
+      "name": "Create Comment node via drag & drop",
+      "priority": "high",
+      "phase": 3,
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "dragAndDrop", "source": "[data-testid='palette-node-comment']", "target": ".react-flow__pane", "offsetX": 400, "offsetY": 300 }
+      ],
+      "assertions": [
+        { "type": "count", "target": ".react-flow__node[data-type='comment']", "expected": 1, "description": "One Comment node on canvas" }
+      ]
+    },
+    {
+      "id": "TC-028",
+      "name": "Create multiple nodes — status bar counts update",
+      "priority": "high",
+      "phase": 1,
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "dragAndDrop", "source": "[data-testid='palette-node-rules']", "target": ".react-flow__pane", "offsetX": 200, "offsetY": 200 },
+        { "action": "dragAndDrop", "source": "[data-testid='palette-node-skill']", "target": ".react-flow__pane", "offsetX": 500, "offsetY": 200 },
+        { "action": "dragAndDrop", "source": "[data-testid='palette-node-hook']", "target": ".react-flow__pane", "offsetX": 500, "offsetY": 400 }
+      ],
+      "assertions": [
+        { "type": "textContains", "target": "[data-testid='status-bar']", "expected": "Nodes: 3", "description": "Status bar shows 3 nodes" }
+      ]
+    }
+  ]
+}

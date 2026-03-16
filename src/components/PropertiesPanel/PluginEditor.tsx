@@ -1,6 +1,7 @@
 import type { PluginNodeData } from '../../types/nodes';
 import { useGraphStore } from '../../store/useGraphStore';
 import { CollapsibleSection } from '../shared/CollapsibleSection';
+import { CodeEditor } from '../shared/CodeEditor';
 
 interface Props {
   nodeId: string;
@@ -56,12 +57,11 @@ export function PluginEditor({ nodeId, data }: Props) {
       </CollapsibleSection>
 
       <CollapsibleSection title="Install Script" defaultOpen={false}>
-        <textarea
+        <CodeEditor
           value={d.installScript}
-          onChange={(e) => updateNodeData(nodeId, { installScript: e.target.value })}
-          placeholder="npm install my-plugin..."
-          className="bp-textarea text-xs font-mono"
-          rows={6}
+          onChange={(value) => updateNodeData(nodeId, { installScript: value })}
+          language="shell"
+          placeholder="Install script..."
         />
       </CollapsibleSection>
 

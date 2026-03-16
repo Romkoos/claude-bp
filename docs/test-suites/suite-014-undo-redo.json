@@ -1,0 +1,66 @@
+{
+  "id": "SUITE-014",
+  "name": "Undo / Redo",
+  "tests": [
+    {
+      "id": "TC-130",
+      "name": "Undo reverts node creation",
+      "priority": "high",
+      "phase": 2,
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "dragAndDrop", "source": "[data-testid='palette-node-skill']", "target": ".react-flow__pane", "offsetX": 400, "offsetY": 300 },
+        { "action": "wait_for_timeout", "timeout": 500 },
+        { "action": "click", "target": "[data-testid='toolbar-undo']" },
+        { "action": "wait_for_timeout", "timeout": 500 }
+      ],
+      "assertions": [
+        { "type": "count", "target": ".react-flow__node", "expected": 0, "description": "Node removed after undo" }
+      ]
+    },
+    {
+      "id": "TC-131",
+      "name": "Redo restores undone action",
+      "priority": "critical",
+      "phase": 2,
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "dragAndDrop", "source": "[data-testid='palette-node-skill']", "target": ".react-flow__pane", "offsetX": 400, "offsetY": 300 },
+        { "action": "keyboard", "keys": "Control+z" },
+        { "action": "keyboard", "keys": "Control+y" }
+      ],
+      "assertions": [
+        { "type": "count", "target": ".react-flow__node", "expected": 1, "description": "Node restored by redo" }
+      ]
+    },
+    {
+      "id": "TC-132",
+      "name": "Toolbar undo button disabled when no history",
+      "priority": "medium",
+      "phase": 2,
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" }
+      ],
+      "assertions": [
+        { "type": "disabled", "target": "[data-testid='toolbar-undo']", "description": "Undo disabled with no history" }
+      ]
+    },
+    {
+      "id": "TC-133",
+      "name": "Toolbar redo button disabled when no future",
+      "priority": "medium",
+      "phase": 2,
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "dragAndDrop", "source": "[data-testid='palette-node-skill']", "target": ".react-flow__pane", "offsetX": 400, "offsetY": 300 }
+      ],
+      "assertions": [
+        { "type": "disabled", "target": "[data-testid='toolbar-redo']", "description": "Redo disabled with no future states" }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,71 @@
+{
+  "id": "SUITE-012",
+  "name": "Templates",
+  "tests": [
+    {
+      "id": "TC-110",
+      "name": "Load PR Review Pipeline template",
+      "priority": "high",
+      "phase": 2,
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "click", "target": "[data-testid='template-pr-review']" },
+        { "action": "click", "target": "[data-testid='confirm-load-template']" }
+      ],
+      "assertions": [
+        { "type": "countMin", "target": ".react-flow__node", "expected": 4, "description": "At least 4 nodes loaded" },
+        { "type": "countMin", "target": ".react-flow__edge", "expected": 3, "description": "At least 3 edges loaded" },
+        { "type": "count", "target": ".react-flow__node[data-type='rules']", "expectedMin": 1, "description": "Has Rules node" },
+        { "type": "count", "target": ".react-flow__node[data-type='skill']", "expectedMin": 1, "description": "Has Skill node" },
+        { "type": "count", "target": ".react-flow__node[data-type='subagent']", "expectedMin": 1, "description": "Has Subagent node" }
+      ]
+    },
+    {
+      "id": "TC-111",
+      "name": "Load Multi-Agent Research template",
+      "priority": "high",
+      "phase": 2,
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "click", "target": "[data-testid='template-multi-research']" },
+        { "action": "click", "target": "[data-testid='confirm-load-template']" }
+      ],
+      "assertions": [
+        { "type": "count", "target": ".react-flow__node[data-type='subagent']", "expectedMin": 3, "description": "Has 3 parallel subagents" }
+      ]
+    },
+    {
+      "id": "TC-112",
+      "name": "Load Starter Config template",
+      "priority": "high",
+      "phase": 2,
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "click", "target": "[data-testid='template-starter']" },
+        { "action": "click", "target": "[data-testid='confirm-load-template']" }
+      ],
+      "assertions": [
+        { "type": "count", "target": ".react-flow__node", "expected": 2, "description": "Starter has exactly 2 nodes" },
+        { "type": "count", "target": ".react-flow__edge", "expected": 1, "description": "Starter has 1 edge" }
+      ]
+    },
+    {
+      "id": "TC-113",
+      "name": "Template load shows confirmation dialog",
+      "priority": "medium",
+      "phase": 2,
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "dragAndDrop", "source": "[data-testid='palette-node-skill']", "target": ".react-flow__pane", "offsetX": 400, "offsetY": 300 },
+        { "action": "click", "target": "[data-testid='template-starter']" }
+      ],
+      "assertions": [
+        { "type": "visible", "target": "[data-testid='confirm-load-template']", "description": "Confirmation dialog shown before replacing graph" }
+      ]
+    }
+  ]
+}

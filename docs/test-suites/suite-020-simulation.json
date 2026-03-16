@@ -1,0 +1,57 @@
+{
+  "id": "SUITE-020",
+  "name": "Execution Simulation",
+  "tests": [
+    {
+      "id": "TC-190",
+      "name": "Play button starts simulation",
+      "priority": "high",
+      "phase": 3,
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "click", "target": "[data-testid='template-pr-review']" },
+        { "action": "click", "target": "[data-testid='confirm-load-template']" },
+        { "action": "click", "target": "[data-testid='toolbar-simulate']" }
+      ],
+      "assertions": [
+        { "type": "visible", "target": ".simulation-active", "description": "A node gets simulation-active class (glow pulse)" }
+      ]
+    },
+    {
+      "id": "TC-191",
+      "name": "Stop button halts simulation",
+      "priority": "medium",
+      "phase": 3,
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "click", "target": "[data-testid='template-pr-review']" },
+        { "action": "wait_for_timeout", "timeout": 500 },
+        { "action": "click", "target": "[data-testid='toolbar-simulate']" },
+        { "action": "wait_for_timeout", "timeout": 300 },
+        { "action": "click", "target": "[data-testid='toolbar-simulate-stop']" },
+        { "action": "wait_for_timeout", "timeout": 500 }
+      ],
+      "assertions": [
+        { "type": "visible", "target": "[data-testid='toolbar-simulate']", "description": "Play button visible again after stop" }
+      ]
+    },
+    {
+      "id": "TC-192",
+      "name": "Simulation without exec edges is safe",
+      "priority": "medium",
+      "phase": 3,
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "dragAndDrop", "source": "[data-testid='palette-node-skill']", "target": ".react-flow__pane", "offsetX": 400, "offsetY": 300 },
+        { "action": "click", "target": "[data-testid='toolbar-simulate']" },
+        { "action": "wait_for_timeout", "timeout": 500 }
+      ],
+      "assertions": [
+        { "type": "visible", "target": "[data-testid='toolbar-simulate']", "description": "Play button still visible (simulation didn't start)" }
+      ]
+    }
+  ]
+}

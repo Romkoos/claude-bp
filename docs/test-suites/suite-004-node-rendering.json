@@ -1,0 +1,126 @@
+{
+  "id": "SUITE-004",
+  "name": "Node Visual Rendering",
+  "tests": [
+    {
+      "id": "TC-030",
+      "name": "Rules node renders with slate header, document icon, pins",
+      "priority": "high",
+      "phase": 1,
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "dragAndDrop", "source": "[data-testid='palette-node-rules']", "target": ".react-flow__pane", "offsetX": 400, "offsetY": 300 }
+      ],
+      "assertions": [
+        { "type": "visible", "target": ".react-flow__node[data-type='rules'] [data-testid='node-header-stripe']", "description": "Colored header stripe present" },
+        { "type": "visible", "target": ".react-flow__node[data-type='rules'] [data-testid='node-icon']", "description": "Node icon visible" },
+        { "type": "count", "target": ".react-flow__node[data-type='rules'] .react-flow__handle[data-handlepos='right']", "expectedMin": 1, "description": "At least 1 output handle (provides context)" },
+        { "type": "count", "target": ".react-flow__node[data-type='rules'] .react-flow__handle[data-handlepos='left']", "expected": 0, "description": "No input handles on Rules node" }
+      ]
+    },
+    {
+      "id": "TC-031",
+      "name": "Skill node renders with emerald header and correct pins",
+      "priority": "high",
+      "phase": 1,
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "dragAndDrop", "source": "[data-testid='palette-node-skill']", "target": ".react-flow__pane", "offsetX": 400, "offsetY": 300 }
+      ],
+      "assertions": [
+        { "type": "count", "target": ".react-flow__node[data-type='skill'] .react-flow__handle[data-handlepos='left']", "expectedMin": 2, "description": "At least 2 input handles (context, trigger, exec)" },
+        { "type": "count", "target": ".react-flow__node[data-type='skill'] .react-flow__handle[data-handlepos='right']", "expectedMin": 3, "description": "At least 3 output handles (delegation, tools, context, exec)" }
+      ]
+    },
+    {
+      "id": "TC-032",
+      "name": "Subagent node renders with violet header and correct pins",
+      "priority": "high",
+      "phase": 1,
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "dragAndDrop", "source": "[data-testid='palette-node-subagent']", "target": ".react-flow__pane", "offsetX": 400, "offsetY": 300 }
+      ],
+      "assertions": [
+        { "type": "count", "target": ".react-flow__node[data-type='subagent'] .react-flow__handle[data-handlepos='left']", "expectedMin": 2, "description": "At least 2 input handles (delegation, context, exec)" },
+        { "type": "count", "target": ".react-flow__node[data-type='subagent'] .react-flow__handle[data-handlepos='right']", "expectedMin": 3, "description": "At least 3 output handles (result, tools, spawn, exec)" }
+      ]
+    },
+    {
+      "id": "TC-033",
+      "name": "Hook node renders with amber header and correct pins",
+      "priority": "high",
+      "phase": 1,
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "dragAndDrop", "source": "[data-testid='palette-node-hook']", "target": ".react-flow__pane", "offsetX": 400, "offsetY": 300 }
+      ],
+      "assertions": [
+        { "type": "count", "target": ".react-flow__node[data-type='hook'] .react-flow__handle[data-handlepos='left']", "expectedMin": 1, "description": "At least 1 input handle (listens to)" },
+        { "type": "count", "target": ".react-flow__node[data-type='hook'] .react-flow__handle[data-handlepos='right']", "expectedMin": 2, "description": "At least 2 output handles (decision, context)" }
+      ]
+    },
+    {
+      "id": "TC-034",
+      "name": "Tool node renders smaller with only input pins",
+      "priority": "high",
+      "phase": 2,
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "dragAndDrop", "source": "[data-testid='palette-node-tool']", "target": ".react-flow__pane", "offsetX": 400, "offsetY": 300 }
+      ],
+      "assertions": [
+        { "type": "count", "target": ".react-flow__node[data-type='tool'] .react-flow__handle[data-handlepos='left']", "expectedMin": 1, "description": "Has input handles" },
+        { "type": "count", "target": ".react-flow__node[data-type='tool'] .react-flow__handle[data-handlepos='right']", "expected": 0, "description": "No output handles (terminal node)" }
+      ]
+    },
+    {
+      "id": "TC-035",
+      "name": "MCP Server node renders with dashed border and output pins",
+      "priority": "high",
+      "phase": 2,
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "dragAndDrop", "source": "[data-testid='palette-node-mcp']", "target": ".react-flow__pane", "offsetX": 400, "offsetY": 300 }
+      ],
+      "assertions": [
+        { "type": "count", "target": ".react-flow__node[data-type='mcp'] .react-flow__handle[data-handlepos='right']", "expectedMin": 1, "description": "Has output handles (provides tools, context)" },
+        { "type": "count", "target": ".react-flow__node[data-type='mcp'] .react-flow__handle[data-handlepos='left']", "expected": 0, "description": "No input handles" }
+      ]
+    },
+    {
+      "id": "TC-036",
+      "name": "Plugin node renders as dashed rose container",
+      "priority": "high",
+      "phase": 2,
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "dragAndDrop", "source": "[data-testid='palette-node-plugin']", "target": ".react-flow__pane", "offsetX": 400, "offsetY": 300 }
+      ],
+      "assertions": [
+        { "type": "visible", "target": ".react-flow__node[data-type='plugin']", "description": "Plugin node visible on canvas" }
+      ]
+    },
+    {
+      "id": "TC-037",
+      "name": "Comment node renders with sticky-note style, no pins",
+      "priority": "medium",
+      "phase": 3,
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "dragAndDrop", "source": "[data-testid='palette-node-comment']", "target": ".react-flow__pane", "offsetX": 400, "offsetY": 300 }
+      ],
+      "assertions": [
+        { "type": "count", "target": ".react-flow__node[data-type='comment'] .react-flow__handle", "expected": 0, "description": "Comment node has no pins" }
+      ]
+    }
+  ]
+}

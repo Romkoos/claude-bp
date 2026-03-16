@@ -1,0 +1,69 @@
+{
+  "id": "SUITE-021",
+  "name": "Comment Nodes",
+  "tests": [
+    {
+      "id": "TC-200",
+      "name": "Comment node is editable",
+      "priority": "medium",
+      "phase": 3,
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "dragAndDrop", "source": "[data-testid='palette-node-comment']", "target": ".react-flow__pane", "offsetX": 400, "offsetY": 300 },
+        { "action": "dblclick", "target": ".react-flow__node[data-type='comment']" },
+        { "action": "type", "target": ".react-flow__node[data-type='comment'] textarea", "value": "This is a note" }
+      ],
+      "assertions": [
+        { "type": "inputValue", "target": ".react-flow__node[data-type='comment'] textarea", "expected": "This is a note", "description": "Comment text updated" }
+      ]
+    },
+    {
+      "id": "TC-201",
+      "name": "Comment node has inline color selector",
+      "priority": "medium",
+      "phase": 3,
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "dragAndDrop", "source": "[data-testid='palette-node-comment']", "target": ".react-flow__pane", "offsetX": 400, "offsetY": 300 }
+      ],
+      "assertions": [
+        { "type": "visible", "target": ".react-flow__node[data-type='comment']", "description": "Comment node visible" },
+        { "type": "count", "target": ".react-flow__node[data-type='comment'] .react-flow__handle", "expected": 0, "description": "No pins on comment node" }
+      ]
+    },
+    {
+      "id": "TC-202",
+      "name": "Comment node excluded from validation",
+      "priority": "medium",
+      "phase": 3,
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "dragAndDrop", "source": "[data-testid='palette-node-comment']", "target": ".react-flow__pane", "offsetX": 400, "offsetY": 300 },
+        { "action": "click", "target": "[data-testid='toolbar-validate']" }
+      ],
+      "assertions": [
+        { "type": "count", "target": ".react-flow__node[data-type='comment'] [data-testid='validation-error-badge']", "expected": 0, "description": "No validation badges on comment" },
+        { "type": "count", "target": ".react-flow__node[data-type='comment'] [data-testid='validation-warning-badge']", "expected": 0, "description": "No warning badges on comment" }
+      ]
+    },
+    {
+      "id": "TC-203",
+      "name": "Comment node excluded from export",
+      "priority": "medium",
+      "phase": 3,
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "dragAndDrop", "source": "[data-testid='palette-node-comment']", "target": ".react-flow__pane", "offsetX": 400, "offsetY": 300 },
+        { "action": "click", "target": "[data-testid='toolbar-export']" },
+        { "action": "wait_for_timeout", "timeout": 300 }
+      ],
+      "assertions": [
+        { "type": "visible", "target": "[data-testid='export-preview-modal']", "description": "Export modal opens" }
+      ]
+    }
+  ]
+}

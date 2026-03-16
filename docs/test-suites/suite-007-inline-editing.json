@@ -1,0 +1,89 @@
+{
+  "id": "SUITE-007",
+  "name": "Inline Editing & Data Binding",
+  "tests": [
+    {
+      "id": "TC-060",
+      "name": "Editing Skill name in Properties Panel updates node label",
+      "priority": "critical",
+      "phase": 1,
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "dragAndDrop", "source": "[data-testid='palette-node-skill']", "target": ".react-flow__pane", "offsetX": 400, "offsetY": 300 },
+        { "action": "click", "target": ".react-flow__node[data-type='skill']" },
+        { "action": "clear", "target": "[data-testid='field-skill-name'] input" },
+        { "action": "type", "target": "[data-testid='field-skill-name'] input", "value": "my-review-skill" }
+      ],
+      "assertions": [
+        { "type": "inputValue", "target": "[data-testid='field-skill-name'] input", "expected": "my-review-skill", "description": "Input has new value" }
+      ]
+    },
+    {
+      "id": "TC-061",
+      "name": "Changing Hook event dropdown updates node display",
+      "priority": "high",
+      "phase": 1,
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "dragAndDrop", "source": "[data-testid='palette-node-hook']", "target": ".react-flow__pane", "offsetX": 400, "offsetY": 300 },
+        { "action": "click", "target": ".react-flow__node[data-type='hook']" },
+        { "action": "select", "target": "[data-testid='field-hook-event'] select", "value": "SessionStart" }
+      ],
+      "assertions": [
+        { "type": "textContains", "target": ".react-flow__node[data-type='hook']", "expected": "SessionStart", "description": "Node shows updated event name" }
+      ]
+    },
+    {
+      "id": "TC-062",
+      "name": "Changing Skill context to fork shows agent dropdown",
+      "priority": "high",
+      "phase": 1,
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "dragAndDrop", "source": "[data-testid='palette-node-skill']", "target": ".react-flow__pane", "offsetX": 400, "offsetY": 300 },
+        { "action": "click", "target": ".react-flow__node[data-type='skill']" },
+        { "action": "select", "target": "[data-testid='field-skill-context'] select", "value": "fork" }
+      ],
+      "assertions": [
+        { "type": "visible", "target": "[data-testid='field-skill-agent']", "description": "Agent dropdown becomes visible when context=fork" }
+      ]
+    },
+    {
+      "id": "TC-063",
+      "name": "MCP connection type toggle shows conditional fields",
+      "priority": "high",
+      "phase": 2,
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "dragAndDrop", "source": "[data-testid='palette-node-mcp']", "target": ".react-flow__pane", "offsetX": 400, "offsetY": 300 },
+        { "action": "click", "target": ".react-flow__node[data-type='mcp']" },
+        { "action": "select", "target": "[data-testid='field-mcp-connection-type'] select", "value": "stdio" }
+      ],
+      "assertions": [
+        { "type": "visible", "target": "[data-testid='field-mcp-command']", "description": "Command field visible for stdio" },
+        { "type": "visible", "target": "[data-testid='field-mcp-args']", "description": "Args field visible for stdio" }
+      ]
+    },
+    {
+      "id": "TC-064",
+      "name": "Delete node button in Properties Panel works",
+      "priority": "high",
+      "phase": 1,
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "dragAndDrop", "source": "[data-testid='palette-node-skill']", "target": ".react-flow__pane", "offsetX": 400, "offsetY": 300 },
+        { "action": "click", "target": ".react-flow__node[data-type='skill']" },
+        { "action": "click", "target": "[data-testid='delete-node-button']" }
+      ],
+      "assertions": [
+        { "type": "count", "target": ".react-flow__node", "expected": 0, "description": "Node deleted from canvas" },
+        { "type": "notVisible", "target": "[data-testid='properties-panel']", "description": "Properties panel closes after delete" }
+      ]
+    }
+  ]
+}

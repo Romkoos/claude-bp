@@ -1,3 +1,4 @@
+import { HelpCircle } from 'lucide-react';
 import { useGraphStore } from '../../store/useGraphStore';
 
 export function StatusBar() {
@@ -5,6 +6,7 @@ export function StatusBar() {
   const edges = useGraphStore((s) => s.edges);
   const configName = useGraphStore((s) => s.configName);
   const validationResults = useGraphStore((s) => s.validationResults);
+  const setShortcutsOpen = useGraphStore((s) => s.setShortcutsOpen);
 
   const errors = validationResults.filter((r) => r.level === 'error').length;
   const warnings = validationResults.filter((r) => r.level === 'warning').length;
@@ -12,6 +14,7 @@ export function StatusBar() {
   return (
     <div
       className="h-7 flex items-center px-4 flex-shrink-0 text-[11px]"
+      data-testid="status-bar"
       style={{
         background: '#161b22',
         borderTop: '1px solid var(--node-border)',
@@ -34,6 +37,14 @@ export function StatusBar() {
           </span>
         )}
       </div>
+      <button
+        onClick={() => setShortcutsOpen(true)}
+        title="Keyboard shortcuts"
+        className="ml-2 p-0.5 rounded hover:bg-white/10 transition-colors"
+        style={{ color: 'var(--text-muted)', lineHeight: 0 }}
+      >
+        <HelpCircle size={13} />
+      </button>
     </div>
   );
 }

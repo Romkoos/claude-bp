@@ -11,7 +11,7 @@ import {
 } from '@xyflow/react';
 import type { BlueprintNodeType } from '../types/nodes';
 import type { GraphSchema } from '../types/graph';
-import { NODE_PIN_DEFINITIONS, createRulesData, createSkillData, createSubagentData, createHookData, createToolData, createMcpData, createPluginData } from '../constants/nodeDefaults';
+import { NODE_PIN_DEFINITIONS, createRulesData, createSkillData, createSubagentData, createHookData, createToolData, createMcpData, createPluginData, createCommentData } from '../constants/nodeDefaults';
 import { generateId } from '../utils/idGenerator';
 import { validateGraph, type ValidationResult } from '../validation/validate';
 import { exportGraph, importGraph } from '../serialization/jsonExporter';
@@ -26,6 +26,7 @@ const DATA_FACTORIES: Record<BlueprintNodeType, () => any> = {
   tool: createToolData,
   mcp: createMcpData,
   plugin: createPluginData,
+  comment: createCommentData,
 };
 
 interface GraphStore {
@@ -54,6 +55,21 @@ interface GraphStore {
   exportJSON: (viewport: { x: number; y: number; zoom: number }) => GraphSchema;
   importJSON: (schema: GraphSchema) => void;
   clearGraph: () => void;
+
+  // Simulation
+  simulationActive: boolean;
+  simulationHighlightedNodeId: string | null;
+  simulationHighlightedEdgeIds: string[];
+  runSimulation: () => Promise<void>;
+  stopSimulation: () => void;
+
+  // UI overlays
+  searchOpen: boolean;
+  shortcutsOpen: boolean;
+  exportPreviewOpen: boolean;
+  setSearchOpen: (open: boolean) => void;
+  setShortcutsOpen: (open: boolean) => void;
+  setExportPreviewOpen: (open: boolean) => void;
 }
 
 export const useGraphStore = create<GraphStore>()(
@@ -65,6 +81,16 @@ export const useGraphStore = create<GraphStore>()(
       configName: 'Untitled Blueprint',
       validationResults: [],
       layouting: false,
+
+      // Simulation
+      simulationActive: false,
+      simulationHighlightedNodeId: null,
+      simulationHighlightedEdgeIds: [],
+
+      // UI overlays
+      searchOpen: false,
+      shortcutsOpen: false,
+      exportPreviewOpen: false,
 
       setNodes: (nodes) => set({ nodes }),
       setEdges: (edges) => set({ edges }),
@@ -299,6 +325,55 @@ export const useGraphStore = create<GraphStore>()(
           configName: 'Untitled Blueprint',
         });
       },
+
+      // UI overlay setters
+      setSearchOpen: (open) => set({ searchOpen: open }),
+      setShortcutsOpen: (open) => set({ shortcutsOpen: open }),
+      setExportPreviewOpen: (open) => set({ exportPreviewOpen: open }),
+
+      // Simulation
+      stopSimulation: () => set({
+        simulationActive: false,
+        simulationHighlightedNodeId: null,
+        simulationHighlightedEdgeIds: [],
+      }),
+
+      runSimulation: async () => {
+        const { edges, nodes } = get();
+        const execEdges = edges.filter(e => e.data?.pinType === 'exec');
+        if (execEdges.length === 0) return;
+
+        set({ simulationActive: true });
+
+        // Find entry nodes (no incoming exec edges)
+        const targetsWithIncoming = new Set(execEdges.map(e => e.target));
+        const entryNodeIds = nodes
+          .filter(n => !targetsWithIncoming.has(n.id) && execEdges.some(e => e.source === n.id))
+          .map(n => n.id);
+
+        const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
+        const animateFromNode = async (nodeId: string): Promise<void> => {
+          if (!get().simulationActive) return;
+          set({ simulationHighlightedNodeId: nodeId });
+          await delay(800);
+          if (!get().simulationActive) return;
+
+          const outgoing = execEdges.filter(e => e.source === nodeId);
+          set({ simulationHighlightedEdgeIds: outgoing.map(e => e.id) });
+          await delay(400);
+          if (!get().simulationActive) return;
+
+          await Promise.all(outgoing.map(edge => animateFromNode(edge.target)));
+        };
+
+        for (const entryId of entryNodeIds) {
+          if (!get().simulationActive) break;
+          await animateFromNode(entryId);
+        }
+
+        set({ simulationActive: false, simulationHighlightedNodeId: null, simulationHighlightedEdgeIds: [] });
+      },
     }),
     {
       // Only track nodes and edges for undo/redo, not UI state
@@ -312,3 +387,9 @@ export const useGraphStore = create<GraphStore>()(
     }
   )
 );
+
+// Expose store for E2E testing
+if (typeof window !== 'undefined') {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  (window as any).__STORE__ = useGraphStore;
+}

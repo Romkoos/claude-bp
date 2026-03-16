@@ -2,6 +2,7 @@ import type { SkillNodeData } from '../../types/nodes';
 import { useGraphStore } from '../../store/useGraphStore';
 import { CollapsibleSection } from '../shared/CollapsibleSection';
 import { MultiSelect } from '../shared/MultiSelect';
+import { CodeEditor } from '../shared/CodeEditor';
 
 const COMMON_TOOLS = [
   'Read', 'Edit', 'Write', 'Bash', 'Glob', 'Grep', 'Agent',
@@ -22,18 +23,18 @@ export function SkillEditor({ nodeId, data }: Props) {
   };
 
   return (
-    <div className="space-y-1">
-      <CollapsibleSection title="Frontmatter">
+    <div className="space-y-1" data-testid="skill-editor">
+      <CollapsibleSection title="Frontmatter" testId="collapsible-section-frontmatter">
         <div className="space-y-2">
-          <div>
+          <div data-testid="field-skill-name">
             <label className="text-[10px] uppercase tracking-wider mb-1 block" style={{ color: 'var(--text-muted)' }}>Name</label>
             <input value={d.frontmatter.name} onChange={(e) => updateFm({ name: e.target.value })} placeholder="skill-name" className="bp-input text-xs" />
           </div>
-          <div>
+          <div data-testid="field-skill-description">
             <label className="text-[10px] uppercase tracking-wider mb-1 block" style={{ color: 'var(--text-muted)' }}>Description</label>
             <textarea value={d.frontmatter.description} onChange={(e) => updateFm({ description: e.target.value })} placeholder="What this skill does..." className="bp-textarea text-xs" rows={2} />
           </div>
-          <div>
+          <div data-testid="field-skill-context">
             <label className="text-[10px] uppercase tracking-wider mb-1 block" style={{ color: 'var(--text-muted)' }}>Context</label>
             <select value={d.frontmatter.context} onChange={(e) => updateFm({ context: e.target.value as 'conversation' | 'fork' })} className="bp-select text-xs">
               <option value="conversation">Conversation</option>
@@ -41,7 +42,7 @@ export function SkillEditor({ nodeId, data }: Props) {
             </select>
           </div>
           {d.frontmatter.context === 'fork' && (
-            <div>
+            <div data-testid="field-skill-agent">
               <label className="text-[10px] uppercase tracking-wider mb-1 block" style={{ color: 'var(--text-muted)' }}>Agent</label>
               <select value={d.frontmatter.agent} onChange={(e) => updateFm({ agent: e.target.value })} className="bp-select text-xs">
                 <option value="inherit">Inherit</option>
@@ -66,6 +67,7 @@ export function SkillEditor({ nodeId, data }: Props) {
         </div>
       </CollapsibleSection>
 
+      <div data-testid="field-skill-allowed-tools">
       <CollapsibleSection title="Allowed Tools">
         <MultiSelect
           options={COMMON_TOOLS}
@@ -74,16 +76,18 @@ export function SkillEditor({ nodeId, data }: Props) {
           placeholder="Select tools..."
         />
       </CollapsibleSection>
+      </div>
 
+      <div data-testid="field-skill-instructions">
       <CollapsibleSection title="Instructions">
-        <textarea
+        <CodeEditor
           value={d.instructions}
-          onChange={(e) => updateNodeData(nodeId, { instructions: e.target.value })}
+          onChange={(value) => updateNodeData(nodeId, { instructions: value })}
+          language="markdown"
           placeholder="Skill instructions..."
-          className="bp-textarea text-xs font-mono"
-          rows={8}
         />
       </CollapsibleSection>
+      </div>
     </div>
   );
 }

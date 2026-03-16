@@ -1,0 +1,130 @@
+{
+  "id": "SUITE-025",
+  "name": "Phase 3 Additional Coverage",
+  "tests": [
+    {
+      "id": "TC-240",
+      "name": "/ shortcut opens search overlay",
+      "priority": "medium",
+      "phase": 3,
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "keyboard", "keys": "/" }
+      ],
+      "assertions": [
+        { "type": "visible", "target": "[data-testid='search-overlay']", "description": "Search overlay opens with / key" }
+      ]
+    },
+    {
+      "id": "TC-241",
+      "name": "Ctrl+D duplicates selected node",
+      "priority": "medium",
+      "phase": 3,
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "dragAndDrop", "source": "[data-testid='palette-node-skill']", "target": ".react-flow__pane", "offsetX": 400, "offsetY": 300 },
+        { "action": "click", "target": ".react-flow__node[data-type='skill']" },
+        { "action": "keyboard", "keys": "Control+d" },
+        { "action": "wait_for_timeout", "timeout": 300 }
+      ],
+      "assertions": [
+        { "type": "count", "target": ".react-flow__node[data-type='skill']", "expected": 2, "description": "Two skill nodes after duplicate" }
+      ]
+    },
+    {
+      "id": "TC-242",
+      "name": "Ctrl+E opens export preview",
+      "priority": "medium",
+      "phase": 3,
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "keyboard", "keys": "Control+e" }
+      ],
+      "assertions": [
+        { "type": "visible", "target": "[data-testid='export-preview-modal']", "description": "Export preview opens" }
+      ]
+    },
+    {
+      "id": "TC-243",
+      "name": "Comment node excluded from auto-layout",
+      "priority": "medium",
+      "phase": 3,
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "dragAndDrop", "source": "[data-testid='palette-node-comment']", "target": ".react-flow__pane", "offsetX": 100, "offsetY": 100 },
+        { "action": "dragAndDrop", "source": "[data-testid='palette-node-skill']", "target": ".react-flow__pane", "offsetX": 400, "offsetY": 300 },
+        { "action": "click", "target": "[data-testid='toolbar-layout']" },
+        { "action": "wait_for_timeout", "timeout": 500 }
+      ],
+      "assertions": [
+        { "type": "count", "target": ".react-flow__node", "expected": 2, "description": "Both nodes still exist after layout" }
+      ]
+    },
+    {
+      "id": "TC-244",
+      "name": "Export preview shows content when nodes exist",
+      "priority": "low",
+      "phase": 3,
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "dragAndDrop", "source": "[data-testid='palette-node-rules']", "target": ".react-flow__pane", "offsetX": 400, "offsetY": 300 },
+        { "action": "click", "target": "[data-testid='toolbar-export']" },
+        { "action": "wait_for_timeout", "timeout": 300 }
+      ],
+      "assertions": [
+        { "type": "visible", "target": "[data-testid='export-preview-modal']", "description": "Export modal open" },
+        { "type": "visible", "target": "[data-testid='export-content-preview']", "description": "Content preview visible" }
+      ]
+    },
+    {
+      "id": "TC-245",
+      "name": "Shortcuts overlay shows all shortcut groups",
+      "priority": "medium",
+      "phase": 3,
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "click", "target": "[data-testid='toolbar-shortcuts']" }
+      ],
+      "assertions": [
+        { "type": "visible", "target": "[data-testid='shortcuts-overlay']", "description": "Shortcuts overlay visible" },
+        { "type": "textContains", "target": "[data-testid='shortcuts-overlay']", "expected": "Save", "description": "Shows Save shortcut" }
+      ]
+    },
+    {
+      "id": "TC-246",
+      "name": "StatusBar help button opens shortcuts overlay",
+      "priority": "low",
+      "phase": 3,
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "click", "target": "[data-testid='status-bar'] button" }
+      ],
+      "assertions": [
+        { "type": "visible", "target": "[data-testid='shortcuts-overlay']", "description": "Shortcuts overlay opens from status bar" }
+      ]
+    },
+    {
+      "id": "TC-247",
+      "name": "Subagent empty tools triggers security warning",
+      "priority": "medium",
+      "phase": 2,
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "dragAndDrop", "source": "[data-testid='palette-node-subagent']", "target": ".react-flow__pane", "offsetX": 400, "offsetY": 300 },
+        { "action": "click", "target": "[data-testid='toolbar-validate']" },
+        { "action": "wait_for_timeout", "timeout": 300 }
+      ],
+      "assertions": [
+        { "type": "textContains", "target": "[data-testid='status-bar']", "expected": "warning", "description": "Status bar shows security warning for empty tools" }
+      ]
+    }
+  ]
+}

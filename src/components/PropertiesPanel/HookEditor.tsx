@@ -22,16 +22,16 @@ export function HookEditor({ nodeId, data }: Props) {
   };
 
   return (
-    <div className="space-y-1">
+    <div className="space-y-1" data-testid="hook-editor">
       <CollapsibleSection title="Event">
         <div className="space-y-2">
-          <div>
+          <div data-testid="field-hook-event">
             <label className="text-[10px] uppercase tracking-wider mb-1 block" style={{ color: 'var(--text-muted)' }}>Lifecycle Event</label>
             <select value={d.event} onChange={(e) => updateNodeData(nodeId, { event: e.target.value })} className="bp-select text-xs">
               {HOOK_EVENTS.map((ev) => <option key={ev} value={ev}>{ev}</option>)}
             </select>
           </div>
-          <div>
+          <div data-testid="field-hook-matcher">
             <label className="text-[10px] uppercase tracking-wider mb-1 block" style={{ color: 'var(--text-muted)' }}>Matcher</label>
             <input value={d.matcher} onChange={(e) => updateNodeData(nodeId, { matcher: e.target.value })} placeholder="* or tool name" className="bp-input text-xs font-mono" />
           </div>
@@ -47,7 +47,7 @@ export function HookEditor({ nodeId, data }: Props) {
               <option value="http">HTTP</option>
             </select>
           </div>
-          <div>
+          <div data-testid="field-hook-command">
             <label className="text-[10px] uppercase tracking-wider mb-1 block" style={{ color: 'var(--text-muted)' }}>Command</label>
             <input value={d.command} onChange={(e) => updateNodeData(nodeId, { command: e.target.value })} placeholder="echo 'hook fired'" className="bp-input text-xs font-mono" />
           </div>
@@ -60,7 +60,7 @@ export function HookEditor({ nodeId, data }: Props) {
 
       <CollapsibleSection title="Decision">
         <div className="space-y-2">
-          <div>
+          <div data-testid="field-hook-decision">
             <label className="text-[10px] uppercase tracking-wider mb-1 block" style={{ color: 'var(--text-muted)' }}>Decision Type</label>
             <select value={d.decision.type} onChange={(e) => updateDecision({ type: e.target.value as HookNodeData['decision']['type'] })} className="bp-select text-xs">
               <option value="none">None</option>

@@ -1,5 +1,6 @@
 import { memo, type ReactNode } from 'react';
 import { ChevronDown, ChevronRight, AlertCircle, AlertTriangle, type LucideIcon } from 'lucide-react';
+import { useReactFlow } from '@xyflow/react';
 import type { BlueprintNodeType } from '../../types/nodes';
 import { PinDirection, type PinDefinition } from '../../types/pins';
 import { NODE_COLORS } from '../../constants/theme';
@@ -23,7 +24,10 @@ interface BaseNodeProps {
 }
 
 function BaseNodeInner({ id, nodeType, data, pins, icon: Icon, children, selected, minWidth = 280, dashed = false }: BaseNodeProps) {
+  const { fitView } = useReactFlow();
   const updateNodeData = useGraphStore((s) => s.updateNodeData);
+  const simulationHighlightedNodeId = useGraphStore((s) => s.simulationHighlightedNodeId);
+  const isSimHighlighted = simulationHighlightedNodeId === id;
   const colors = NODE_COLORS[nodeType];
   const inputPins = pins.filter((p) => p.direction === PinDirection.In);
   const outputPins = pins.filter((p) => p.direction === PinDirection.Out);
@@ -32,30 +36,36 @@ function BaseNodeInner({ id, nodeType, data, pins, icon: Icon, children, selecte
 
   return (
     <div
-      className="blueprint-node rounded-lg overflow-hidden"
+      className={`blueprint-node rounded-lg overflow-hidden${isSimHighlighted ? ' simulation-active' : ''}`}
       style={{
         background: 'var(--node-bg)',
         border: `1px ${dashed ? 'dashed' : 'solid'} ${selected ? colors.header : 'var(--node-border)'}`,
         boxShadow: selected ? `0 0 20px ${colors.glow}` : undefined,
         minWidth,
         maxWidth: 400,
+        ...(isSimHighlighted ? { '--glow-color': colors.header } as React.CSSProperties : {}),
       }}
     >
       {/* Header stripe */}
-      <div style={{ height: 4, background: colors.header }} />
+      <div data-testid="node-header-stripe" style={{ height: 4, background: colors.header }} />
 
       {/* Header row */}
       <div
+        data-testid="node-header"
         className="flex items-center gap-2 px-3 py-2"
         style={{ borderBottom: '1px solid var(--node-border)' }}
+        onDoubleClick={() => {
+          fitView({ nodes: [{ id }], padding: 0.5, duration: 300 });
+        }}
       >
-        <Icon size={16} style={{ color: colors.header }} />
+        <span data-testid="node-icon"><Icon size={16} style={{ color: colors.header }} /></span>
         <span className="text-sm font-medium flex-1 truncate" style={{ color: 'var(--text-primary)' }}>
           {data.label}
         </span>
         {hasErrors && <AlertCircle size={14} style={{ color: '#ef4444' }} />}
         {!hasErrors && hasWarnings && <AlertTriangle size={14} style={{ color: '#f59e0b' }} />}
         <button
+          data-testid="collapse-toggle"
           onClick={(e) => {
             e.stopPropagation();
             updateNodeData(id, { collapsed: !data.collapsed });
@@ -78,7 +88,7 @@ function BaseNodeInner({ id, nodeType, data, pins, icon: Icon, children, selecte
 
         {/* Content */}
         {!data.collapsed && children && (
-          <div className="flex-1 py-2 px-1 min-w-0">
+          <div data-testid="node-expanded-content" className="flex-1 py-2 px-1 min-w-0">
             {children}
           </div>
         )}
@@ -95,6 +105,7 @@ function BaseNodeInner({ id, nodeType, data, pins, icon: Icon, children, selecte
       {(hasErrors || hasWarnings) && (
         <div
           className="px-3 py-1.5 text-[10px] flex items-center gap-1"
+          data-testid={hasErrors ? 'validation-error-badge' : 'validation-warning-badge'}
           style={{
             borderTop: '1px solid var(--node-border)',
             color: hasErrors ? '#ef4444' : '#f59e0b',

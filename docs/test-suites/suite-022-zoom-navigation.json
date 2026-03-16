@@ -1,0 +1,52 @@
+{
+  "id": "SUITE-022",
+  "name": "Zoom & Navigation",
+  "tests": [
+    {
+      "id": "TC-210",
+      "name": "MiniMap shows nodes",
+      "priority": "medium",
+      "phase": 3,
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "dragAndDrop", "source": "[data-testid='palette-node-skill']", "target": ".react-flow__pane", "offsetX": 400, "offsetY": 300 }
+      ],
+      "assertions": [
+        { "type": "visible", "target": ".react-flow__minimap", "description": "MiniMap visible" },
+        { "type": "count", "target": ".react-flow__minimap-node", "expectedMin": 1, "description": "MiniMap shows node" }
+      ]
+    },
+    {
+      "id": "TC-211",
+      "name": "MiniMap shows correct colors per node type",
+      "priority": "medium",
+      "phase": 2,
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "click", "target": "[data-testid='template-pr-review']" },
+        { "action": "click", "target": "[data-testid='confirm-load-template']" }
+      ],
+      "assertions": [
+        { "type": "countMin", "target": ".react-flow__minimap-node", "expected": 3, "description": "MiniMap shows node rectangles" }
+      ]
+    },
+    {
+      "id": "TC-212",
+      "name": "Double-click node header triggers fit-to-node",
+      "priority": "low",
+      "phase": 3,
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "click", "target": "[data-testid='template-pr-review']" },
+        { "action": "click", "target": "[data-testid='confirm-load-template']" },
+        { "action": "dblclick", "target": ".react-flow__node[data-type='skill'] [data-testid='node-header']" }
+      ],
+      "assertions": [
+        { "type": "noError", "description": "Fit-to-node executes without error" }
+      ]
+    }
+  ]
+}

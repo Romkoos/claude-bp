@@ -1,0 +1,19 @@
+{
+  "id": "SUITE-016",
+  "name": "Import — .claude/ ZIP",
+  "tests": [
+    {
+      "id": "TC-151",
+      "name": "Import button is available in toolbar",
+      "priority": "medium",
+      "phase": 3,
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" }
+      ],
+      "assertions": [
+        { "type": "visible", "target": "[data-testid='toolbar-import']", "description": "Import button visible" }
+      ]
+    }
+  ]
+}

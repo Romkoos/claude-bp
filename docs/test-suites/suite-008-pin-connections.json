@@ -1,0 +1,106 @@
+{
+  "id": "SUITE-008",
+  "name": "Pin Connections & Edge Creation",
+  "tests": [
+    {
+      "id": "TC-070",
+      "name": "Connect Rules context output to Skill context input \u2014 creates gray edge",
+      "priority": "critical",
+      "phase": 1,
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "dragAndDrop", "source": "[data-testid='palette-node-rules']", "target": ".react-flow__pane", "offsetX": 200, "offsetY": 300 },
+        { "action": "dragAndDrop", "source": "[data-testid='palette-node-skill']", "target": ".react-flow__pane", "offsetX": 600, "offsetY": 300 },
+        { "action": "dragBetweenHandles", "sourceNode": "rules", "sourceHandle": "out_context", "targetNode": "skill", "targetHandle": "in_context" }
+      ],
+      "assertions": [
+        { "type": "count", "target": ".react-flow__edge", "expected": 1, "description": "One edge created" },
+        { "type": "textContains", "target": "[data-testid='status-bar']", "expected": "Edges: 1", "description": "Status bar shows 1 edge" }
+      ]
+    },
+    {
+      "id": "TC-071",
+      "name": "Connect Skill delegation output to Subagent delegation input \u2014 creates blue edge",
+      "priority": "critical",
+      "phase": 1,
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "dragAndDrop", "source": "[data-testid='palette-node-skill']", "target": ".react-flow__pane", "offsetX": 200, "offsetY": 300 },
+        { "action": "dragAndDrop", "source": "[data-testid='palette-node-subagent']", "target": ".react-flow__pane", "offsetX": 600, "offsetY": 300 },
+        { "action": "dragBetweenHandles", "sourceNode": "skill", "sourceHandle": "out_delegation", "targetNode": "subagent", "targetHandle": "in_delegation" }
+      ],
+      "assertions": [
+        { "type": "count", "target": ".react-flow__edge", "expected": 1, "description": "Delegation edge created" }
+      ]
+    },
+    {
+      "id": "TC-072",
+      "name": "Incompatible pins do NOT create edge (context \u2192 delegation)",
+      "priority": "critical",
+      "phase": 1,
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "dragAndDrop", "source": "[data-testid='palette-node-rules']", "target": ".react-flow__pane", "offsetX": 200, "offsetY": 300 },
+        { "action": "dragAndDrop", "source": "[data-testid='palette-node-subagent']", "target": ".react-flow__pane", "offsetX": 600, "offsetY": 300 },
+        { "action": "dragBetweenHandles", "sourceNode": "rules", "sourceHandle": "out_context", "targetNode": "subagent", "targetHandle": "in_delegation" }
+      ],
+      "assertions": [
+        { "type": "count", "target": ".react-flow__edge", "expected": 0, "description": "No edge created for incompatible pin types" }
+      ]
+    },
+    {
+      "id": "TC-073",
+      "name": "Exec edge is animated",
+      "priority": "medium",
+      "phase": 1,
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "dragAndDrop", "source": "[data-testid='palette-node-skill']", "target": ".react-flow__pane", "offsetX": 200, "offsetY": 300 },
+        { "action": "dragAndDrop", "source": "[data-testid='palette-node-subagent']", "target": ".react-flow__pane", "offsetX": 600, "offsetY": 300 },
+        { "action": "dragBetweenHandles", "sourceNode": "skill", "sourceHandle": "out_exec", "targetNode": "subagent", "targetHandle": "in_exec" }
+      ],
+      "assertions": [
+        { "type": "count", "target": ".react-flow__edge", "expected": 1, "description": "Exec edge created" },
+        { "type": "hasClass", "target": ".react-flow__edge path", "expected": "animated", "description": "Exec edge has animation class" }
+      ]
+    },
+    {
+      "id": "TC-074",
+      "name": "MCP output connects to Skill tool-access input",
+      "priority": "high",
+      "phase": 2,
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "dragAndDrop", "source": "[data-testid='palette-node-mcp']", "target": ".react-flow__pane", "offsetX": 200, "offsetY": 300 },
+        { "action": "dragAndDrop", "source": "[data-testid='palette-node-skill']", "target": ".react-flow__pane", "offsetX": 600, "offsetY": 300 },
+        { "action": "dragBetweenHandles", "sourceNode": "mcp", "sourceHandle": "out_tools", "targetNode": "skill", "targetHandle": "out_tools" }
+      ],
+      "assertions": [
+        { "type": "count", "target": ".react-flow__edge", "expected": 0, "description": "Cannot connect two outputs \u2014 no edge" }
+      ]
+    },
+    {
+      "id": "TC-075",
+      "name": "Multiple edges from one Skill delegation pin to multiple Subagents",
+      "priority": "high",
+      "phase": 1,
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "dragAndDrop", "source": "[data-testid='palette-node-skill']", "target": ".react-flow__pane", "offsetX": 200, "offsetY": 300 },
+        { "action": "dragAndDrop", "source": "[data-testid='palette-node-subagent']", "target": ".react-flow__pane", "offsetX": 600, "offsetY": 200 },
+        { "action": "dragAndDrop", "source": "[data-testid='palette-node-subagent']", "target": ".react-flow__pane", "offsetX": 600, "offsetY": 400 },
+        { "action": "dragBetweenHandles", "sourceNode": "skill", "sourceHandle": "out_delegation", "targetNode": "subagent:0", "targetHandle": "in_delegation" },
+        { "action": "dragBetweenHandles", "sourceNode": "skill", "sourceHandle": "out_delegation", "targetNode": "subagent:1", "targetHandle": "in_delegation" }
+      ],
+      "assertions": [
+        { "type": "count", "target": ".react-flow__edge", "expected": 2, "description": "Two delegation edges from one skill to two subagents" }
+      ]
+    }
+  ]
+}

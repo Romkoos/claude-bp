@@ -1,0 +1,89 @@
+{
+  "id": "SUITE-018",
+  "name": "Search (Command Palette)",
+  "tests": [
+    {
+      "id": "TC-170",
+      "name": "Ctrl+K opens search overlay",
+      "priority": "critical",
+      "phase": 3,
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "keyboard", "keys": "Control+k" }
+      ],
+      "assertions": [
+        { "type": "visible", "target": "[data-testid='search-overlay']", "description": "Search overlay opens" },
+        { "type": "focused", "target": "[data-testid='search-input']", "description": "Search input is focused" }
+      ]
+    },
+    {
+      "id": "TC-171",
+      "name": "Typing in search filters nodes",
+      "priority": "critical",
+      "phase": 3,
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "click", "target": "[data-testid='template-pr-review']" },
+        { "action": "click", "target": "[data-testid='confirm-load-template']" },
+        { "action": "keyboard", "keys": "Control+k" },
+        { "action": "type", "target": "[data-testid='search-input']", "value": "review" }
+      ],
+      "assertions": [
+        { "type": "countMin", "target": "[data-testid='search-result']", "expected": 1, "description": "At least one result for 'review'" }
+      ]
+    },
+    {
+      "id": "TC-172",
+      "name": "Selecting search result centers viewport on node",
+      "priority": "high",
+      "phase": 3,
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "click", "target": "[data-testid='template-pr-review']" },
+        { "action": "click", "target": "[data-testid='confirm-load-template']" },
+        { "action": "keyboard", "keys": "Control+k" },
+        { "action": "type", "target": "[data-testid='search-input']", "value": "review" },
+        { "action": "keyboard", "keys": "Enter" }
+      ],
+      "assertions": [
+        { "type": "notVisible", "target": "[data-testid='search-overlay']", "description": "Search overlay closes" },
+        { "type": "visible", "target": "[data-testid='properties-panel']", "description": "Found node is selected (properties panel open)" }
+      ]
+    },
+    {
+      "id": "TC-173",
+      "name": "Escape closes search overlay",
+      "priority": "medium",
+      "phase": 3,
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "keyboard", "keys": "Control+k" },
+        { "action": "keyboard", "keys": "Escape" }
+      ],
+      "assertions": [
+        { "type": "notVisible", "target": "[data-testid='search-overlay']", "description": "Search overlay closes on Escape" }
+      ]
+    },
+    {
+      "id": "TC-174",
+      "name": "Search by node type",
+      "priority": "medium",
+      "phase": 3,
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "click", "target": "[data-testid='template-pr-review']" },
+        { "action": "click", "target": "[data-testid='confirm-load-template']" },
+        { "action": "keyboard", "keys": "Control+k" },
+        { "action": "type", "target": "[data-testid='search-input']", "value": "hook" }
+      ],
+      "assertions": [
+        { "type": "countMin", "target": "[data-testid='search-result']", "expected": 1, "description": "Finds hook nodes by type name" }
+      ]
+    }
+  ]
+}

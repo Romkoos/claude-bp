@@ -15,10 +15,15 @@ const DEFAULT_LABELS: Record<BlueprintNodeType, string> = {
   tool: 'New Tool',
   mcp: 'New MCP Server',
   plugin: 'New Plugin',
+  comment: '',
 };
 
 export function validateGraph(nodes: Node[], edges: Edge[]): ValidationResult[] {
   const results: ValidationResult[] = [];
+
+  // Filter out comment nodes — they are not validated
+  const validatableNodes = nodes.filter((n) => n.type !== 'comment');
+
   const connectedNodeIds = new Set<string>();
 
   for (const edge of edges) {
@@ -26,7 +31,7 @@ export function validateGraph(nodes: Node[], edges: Edge[]): ValidationResult[] 
     connectedNodeIds.add(edge.target);
   }
 
-  for (const node of nodes) {
+  for (const node of validatableNodes) {
     const nodeType = node.type as BlueprintNodeType;
     const data = node.data as Record<string, unknown>;
 
@@ -178,12 +183,12 @@ export function validateGraph(nodes: Node[], edges: Edge[]): ValidationResult[] 
     stack.delete(nodeId);
   }
 
-  nodes.forEach((n) => {
+  validatableNodes.forEach((n) => {
     if (!visited.has(n.id)) detectCycle(n.id, []);
   });
 
   // Duplicate skill names
-  const skillNodes = nodes.filter((n) => n.type === 'skill');
+  const skillNodes = validatableNodes.filter((n) => n.type === 'skill');
   const skillNameMap = new Map<string, string[]>();
   skillNodes.forEach((n) => {
     const name = (n.data as unknown as SkillNodeData).frontmatter.name;

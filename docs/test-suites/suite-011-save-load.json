@@ -1,0 +1,40 @@
+{
+  "id": "SUITE-011",
+  "name": "JSON Save / Load",
+  "tests": [
+    {
+      "id": "TC-100",
+      "name": "Save button triggers JSON file download",
+      "priority": "critical",
+      "phase": 1,
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "dragAndDrop", "source": "[data-testid='palette-node-skill']", "target": ".react-flow__pane", "offsetX": 400, "offsetY": 300 },
+        { "action": "interceptDownload", "filename": "*.blueprint.json" },
+        { "action": "click", "target": "[data-testid='toolbar-save']" }
+      ],
+      "assertions": [
+        { "type": "downloadTriggered", "filenamePattern": ".blueprint.json", "description": "JSON file download initiated" }
+      ]
+    },
+    {
+      "id": "TC-102",
+      "name": "Clear button removes all nodes and edges",
+      "priority": "high",
+      "phase": 1,
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "dragAndDrop", "source": "[data-testid='palette-node-skill']", "target": ".react-flow__pane", "offsetX": 400, "offsetY": 300 },
+        { "action": "dragAndDrop", "source": "[data-testid='palette-node-hook']", "target": ".react-flow__pane", "offsetX": 400, "offsetY": 500 },
+        { "action": "click", "target": "[data-testid='toolbar-clear']" },
+        { "action": "click", "target": "[data-testid='confirm-clear']" }
+      ],
+      "assertions": [
+        { "type": "count", "target": ".react-flow__node", "expected": 0, "description": "All nodes cleared" },
+        { "type": "count", "target": ".react-flow__edge", "expected": 0, "description": "All edges cleared" }
+      ]
+    }
+  ]
+}

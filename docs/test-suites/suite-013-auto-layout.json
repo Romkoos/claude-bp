@@ -1,0 +1,39 @@
+{
+  "id": "SUITE-013",
+  "name": "Auto-Layout",
+  "tests": [
+    {
+      "id": "TC-120",
+      "name": "Auto-layout button arranges nodes",
+      "priority": "high",
+      "phase": 2,
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "click", "target": "[data-testid='template-pr-review']" },
+        { "action": "wait_for_timeout", "timeout": 500 },
+        { "action": "click", "target": "[data-testid='toolbar-layout']" },
+        { "action": "wait_for_timeout", "timeout": 500 }
+      ],
+      "assertions": [
+        { "type": "count", "target": ".react-flow__node", "expectedMin": 3, "description": "Nodes exist after layout" }
+      ]
+    },
+    {
+      "id": "TC-121",
+      "name": "Auto-layout available in canvas context menu",
+      "priority": "medium",
+      "phase": 2,
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "dragAndDrop", "source": "[data-testid='palette-node-skill']", "target": ".react-flow__pane", "offsetX": 400, "offsetY": 300 },
+        { "action": "rightClick", "target": ".react-flow__pane", "offsetX": 100, "offsetY": 100 },
+        { "action": "click", "target": "[data-testid='ctx-auto-layout']" }
+      ],
+      "assertions": [
+        { "type": "noError", "description": "Auto-layout executes without error" }
+      ]
+    }
+  ]
+}

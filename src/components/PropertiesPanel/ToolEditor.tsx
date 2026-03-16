@@ -18,10 +18,10 @@ export function ToolEditor({ nodeId, data }: Props) {
   const isCustom = !COMMON_TOOLS.includes(d.toolName);
 
   return (
-    <div className="space-y-1">
+    <div className="space-y-1" data-testid="tool-editor">
       <CollapsibleSection title="Tool Configuration">
         <div className="space-y-2">
-          <div>
+          <div data-testid="field-tool-name">
             <label className="text-[10px] uppercase tracking-wider mb-1 block" style={{ color: 'var(--text-muted)' }}>Tool Name</label>
             <select
               value={isCustom ? '__custom__' : d.toolName}
@@ -50,7 +50,7 @@ export function ToolEditor({ nodeId, data }: Props) {
               />
             </div>
           )}
-          <div>
+          <div data-testid="field-tool-pattern">
             <label className="text-[10px] uppercase tracking-wider mb-1 block" style={{ color: 'var(--text-muted)' }}>Pattern</label>
             <input
               value={d.pattern}
@@ -59,7 +59,7 @@ export function ToolEditor({ nodeId, data }: Props) {
               className="bp-input text-xs font-mono"
             />
           </div>
-          <label className="flex items-center gap-2 text-xs cursor-pointer" style={{ color: 'var(--text-secondary)' }}>
+          <label className="flex items-center gap-2 text-xs cursor-pointer" data-testid="field-tool-builtin" style={{ color: 'var(--text-secondary)' }}>
             <input
               type="checkbox"
               checked={d.builtin}

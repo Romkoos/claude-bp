@@ -1,0 +1,62 @@
+{
+  "id": "SUITE-001",
+  "name": "Application Launch & Layout",
+  "tests": [
+    {
+      "id": "TC-001",
+      "name": "App loads with correct layout structure",
+      "priority": "critical",
+      "phase": 1,
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "waitForSelector", "target": ".react-flow" }
+      ],
+      "assertions": [
+        { "type": "visible", "target": "[data-testid='node-palette']", "description": "Node palette (left sidebar) is visible" },
+        { "type": "visible", "target": "[data-testid='blueprint-canvas']", "description": "Blueprint canvas (center) is visible" },
+        { "type": "visible", "target": "[data-testid='toolbar']", "description": "Toolbar (top bar) is visible" },
+        { "type": "visible", "target": "[data-testid='status-bar']", "description": "Status bar (bottom) is visible" },
+        { "type": "notVisible", "target": "[data-testid='properties-panel']", "description": "Properties panel is hidden (no node selected)" }
+      ]
+    },
+    {
+      "id": "TC-003",
+      "name": "Toolbar groups organized correctly (Phase 3 layout)",
+      "priority": "medium",
+      "phase": 3,
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" }
+      ],
+      "assertions": [
+        { "type": "visible", "target": "[data-testid='toolbar-save']", "description": "Save button visible" },
+        { "type": "visible", "target": "[data-testid='toolbar-load']", "description": "Load button visible" },
+        { "type": "visible", "target": "[data-testid='toolbar-import']", "description": "Import .claude/ button visible" },
+        { "type": "visible", "target": "[data-testid='toolbar-export']", "description": "Export button visible" },
+        { "type": "visible", "target": "[data-testid='toolbar-undo']", "description": "Undo button visible" },
+        { "type": "visible", "target": "[data-testid='toolbar-redo']", "description": "Redo button visible" },
+        { "type": "visible", "target": "[data-testid='toolbar-clear']", "description": "Clear button visible" },
+        { "type": "visible", "target": "[data-testid='toolbar-validate']", "description": "Validate button visible" },
+        { "type": "visible", "target": "[data-testid='toolbar-search']", "description": "Search button visible" },
+        { "type": "visible", "target": "[data-testid='toolbar-layout']", "description": "Auto-layout button visible" },
+        { "type": "visible", "target": "[data-testid='toolbar-simulate']", "description": "Play/Simulate button visible" },
+        { "type": "visible", "target": "[data-testid='toolbar-shortcuts']", "description": "Shortcuts help button visible" }
+      ]
+    },
+    {
+      "id": "TC-004",
+      "name": "Status bar shows initial state",
+      "priority": "medium",
+      "phase": 1,
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" }
+      ],
+      "assertions": [
+        { "type": "textContains", "target": "[data-testid='status-bar']", "expected": "Nodes: 0", "description": "Node count is 0" },
+        { "type": "textContains", "target": "[data-testid='status-bar']", "expected": "Edges: 0", "description": "Edge count is 0" }
+      ]
+    }
+  ]
+}

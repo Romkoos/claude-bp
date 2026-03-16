@@ -1,6 +1,7 @@
 import { BaseEdge, getBezierPath, type EdgeProps } from '@xyflow/react';
 import { PinType } from '../../types/pins';
 import { PIN_COLORS } from '../../constants/pinTypes';
+import { useGraphStore } from '../../store/useGraphStore';
 
 interface TypedEdgeData {
   pinType?: PinType;
@@ -21,6 +22,8 @@ export function TypedEdge({
   const edgeData = (data || {}) as TypedEdgeData;
   const pinType = edgeData.pinType || PinType.Exec;
   const color = PIN_COLORS[pinType];
+  const simulationHighlightedEdgeIds = useGraphStore((s) => s.simulationHighlightedEdgeIds);
+  const isSimHighlighted = simulationHighlightedEdgeIds.includes(id);
 
   const [edgePath, labelX, labelY] = getBezierPath({
     sourceX,
@@ -36,7 +39,7 @@ export function TypedEdge({
   const strokeWidth = pinType === PinType.Exec ? 3 : 2;
 
   return (
-    <>
+    <g className={isSimHighlighted ? 'simulation-edge' : undefined}>
       <BaseEdge
         id={id}
         path={edgePath}
@@ -72,6 +75,6 @@ export function TypedEdge({
           </div>
         </foreignObject>
       )}
-    </>
+    </g>
   );
 }

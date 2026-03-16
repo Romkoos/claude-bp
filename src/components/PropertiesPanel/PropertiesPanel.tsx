@@ -1,4 +1,4 @@
-import { FileText, Zap, Bot, Webhook, Wrench, Plug, Package, Trash2, type LucideIcon } from 'lucide-react';
+import { FileText, Zap, Bot, Webhook, Wrench, Plug, Package, StickyNote, Trash2, type LucideIcon } from 'lucide-react';
 import type { BlueprintNodeType } from '../../types/nodes';
 import { NODE_COLORS } from '../../constants/theme';
 import { useGraphStore } from '../../store/useGraphStore';
@@ -18,6 +18,7 @@ const NODE_ICONS: Record<BlueprintNodeType, LucideIcon> = {
   tool: Wrench,
   mcp: Plug,
   plugin: Package,
+  comment: StickyNote,
 };
 
 const NODE_TYPE_LABELS: Record<BlueprintNodeType, string> = {
@@ -28,6 +29,7 @@ const NODE_TYPE_LABELS: Record<BlueprintNodeType, string> = {
   tool: 'Tool',
   mcp: 'MCP Server',
   plugin: 'Plugin',
+  comment: 'Comment',
 };
 
 export function PropertiesPanel() {
@@ -53,6 +55,7 @@ export function PropertiesPanel() {
 
   return (
     <div
+      data-testid="properties-panel"
       className="w-80 flex-shrink-0 flex flex-col overflow-hidden"
       style={{
         background: '#161b22',
@@ -90,6 +93,7 @@ export function PropertiesPanel() {
       <div className="p-3" style={{ borderTop: '1px solid var(--node-border)' }}>
         <button
           onClick={handleDelete}
+          data-testid="delete-node-button"
           className="w-full flex items-center justify-center gap-2 py-2 rounded-md text-xs font-medium transition-colors"
           style={{
             color: '#ef4444',
