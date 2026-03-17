@@ -63,7 +63,7 @@ export function parseFrontmatterMd(content: string): {
 
 export function parseAllowedTools(raw: unknown): string[] {
   if (raw == null) return [];
-  if (typeof raw === 'string') return raw ? [raw] : [];
+  if (typeof raw === 'string') return raw ? raw.split(',').map((s) => s.trim()).filter(Boolean) : [];
   if (Array.isArray(raw)) return raw.map(String);
   return [];
 }
@@ -162,12 +162,13 @@ function buildSkillNode(
     frontmatter: {
       name: typeof fm['name'] === 'string' ? fm['name'] : '',
       description: typeof fm['description'] === 'string' ? fm['description'] : '',
-      context:
-        fm['context'] === 'fork' ? 'fork' : 'conversation',
-      agent: typeof fm['agent'] === 'string' ? fm['agent'] : 'inherit',
-      allowedTools: parseAllowedTools(fm['allowed_tools']),
-      model: typeof fm['model'] === 'string' ? fm['model'] : 'inherit',
-      version: typeof fm['version'] === 'string' ? fm['version'] : '1.0.0',
+      argumentHint: typeof fm['argument-hint'] === 'string' ? fm['argument-hint'] : '',
+      disableModelInvocation: fm['disable-model-invocation'] === true,
+      userInvocable: fm['user-invocable'] !== false,
+      context: fm['context'] === 'fork' ? 'fork' : undefined,
+      agent: typeof fm['agent'] === 'string' ? fm['agent'] : 'general-purpose',
+      allowedTools: parseAllowedTools(fm['allowed-tools'] ?? fm['allowed_tools']),
+      model: typeof fm['model'] === 'string' ? fm['model'] : '',
     },
     scopedHooks: parseScopedHooks(fm['hooks']),
     instructions: body,

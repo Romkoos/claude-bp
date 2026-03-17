@@ -20,11 +20,13 @@ export interface SkillNodeData extends BaseNodeData {
   frontmatter: {
     name: string;
     description: string;
-    context: 'conversation' | 'fork';
-    agent: 'inherit' | 'Explore' | 'Plan' | 'general-purpose' | string;
+    argumentHint: string;
+    disableModelInvocation: boolean;
+    userInvocable: boolean;
+    context: 'fork' | undefined;
+    agent: 'Explore' | 'Plan' | 'general-purpose' | string;
     allowedTools: string[];
-    model: 'inherit' | 'claude-opus-4' | 'claude-sonnet-4' | string;
-    version: string;
+    model: string;
   };
   scopedHooks: ScopedHook[];
   instructions: string;

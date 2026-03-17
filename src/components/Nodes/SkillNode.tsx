@@ -35,13 +35,13 @@ export function SkillNode({ id, data, selected }: NodeProps) {
           <span
             className="bp-badge"
             style={{
-              background: nodeData.frontmatter.context === 'conversation' ? '#10b98130' : '#8b5cf630',
-              color: nodeData.frontmatter.context === 'conversation' ? '#6ee7b7' : '#c4b5fd',
+              background: nodeData.frontmatter.context === 'fork' ? '#8b5cf630' : '#10b98130',
+              color: nodeData.frontmatter.context === 'fork' ? '#c4b5fd' : '#6ee7b7',
             }}
           >
-            {nodeData.frontmatter.context}
+            {nodeData.frontmatter.context === 'fork' ? 'fork' : 'inline'}
           </span>
-          {nodeData.frontmatter.context === 'fork' && nodeData.frontmatter.agent !== 'inherit' && (
+          {nodeData.frontmatter.context === 'fork' && nodeData.frontmatter.agent && (
             <span className="bp-badge" style={{ background: '#3b82f630', color: '#93c5fd' }}>
               {nodeData.frontmatter.agent}
             </span>
@@ -65,11 +65,11 @@ export function SkillNode({ id, data, selected }: NodeProps) {
               rows={2}
             />
             <select
-              value={nodeData.frontmatter.context}
-              onChange={(e) => updateFrontmatter({ context: e.target.value as 'conversation' | 'fork' })}
+              value={nodeData.frontmatter.context ?? ''}
+              onChange={(e) => updateFrontmatter({ context: e.target.value === 'fork' ? 'fork' : undefined })}
               className="bp-select"
             >
-              <option value="conversation">Conversation</option>
+              <option value="">Inline (default)</option>
               <option value="fork">Fork</option>
             </select>
             {nodeData.frontmatter.context === 'fork' && (
@@ -78,10 +78,9 @@ export function SkillNode({ id, data, selected }: NodeProps) {
                 onChange={(e) => updateFrontmatter({ agent: e.target.value })}
                 className="bp-select"
               >
-                <option value="inherit">Inherit</option>
+                <option value="general-purpose">General Purpose</option>
                 <option value="Explore">Explore</option>
                 <option value="Plan">Plan</option>
-                <option value="general-purpose">General Purpose</option>
               </select>
             )}
           </div>

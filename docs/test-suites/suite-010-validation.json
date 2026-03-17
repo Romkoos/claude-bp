@@ -193,6 +193,26 @@
       "assertions": [
         { "type": "textContains", "target": "[data-testid='status-bar']", "expected": "Valid", "description": "Status bar shows Valid" }
       ]
+    },
+    {
+      "id": "TC-322",
+      "name": "Skill with disableModelInvocation and userInvocable=false triggers warning",
+      "priority": "high",
+      "phase": 2,
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "dragAndDrop", "source": "[data-testid='palette-node-skill']", "target": ".react-flow__pane", "offsetX": 400, "offsetY": 300 },
+        { "action": "click", "target": ".react-flow__node[data-type='skill']" },
+        { "action": "click", "target": "[data-testid='field-skill-disable-model-invocation'] input" },
+        { "action": "click", "target": "[data-testid='field-skill-user-invocable'] input" },
+        { "action": "click", "target": "[data-testid='toolbar-validate']" },
+        { "action": "wait_for_timeout", "timeout": 300 }
+      ],
+      "assertions": [
+        { "type": "visible", "target": ".react-flow__node[data-type='skill'] [data-testid='validation-warning-badge']", "description": "Warning: skill will never be invoked" },
+        { "type": "textContains", "target": "[data-testid='status-bar']", "expected": "warning", "description": "Status bar shows warning" }
+      ]
     }
   ]
 }

@@ -194,26 +194,19 @@ export function generateSkillFiles(nodes: Node[], edges: Edge[] = [], allNodes: 
 
     // Build frontmatter — only include non-default values
     const fm: Record<string, unknown> = {};
-    const defaults: Record<string, unknown> = {
-      context: 'conversation',
-      agent: 'inherit',
-      model: 'inherit',
-      version: '1.0.0',
-    };
 
     if (data.frontmatter) {
       if (data.frontmatter.name) fm['name'] = data.frontmatter.name;
       if (data.frontmatter.description) fm['description'] = data.frontmatter.description;
-      if (data.frontmatter.context && data.frontmatter.context !== defaults.context)
-        fm['context'] = data.frontmatter.context;
-      if (data.frontmatter.agent && data.frontmatter.agent !== defaults.agent)
+      if (data.frontmatter.argumentHint) fm['argument-hint'] = data.frontmatter.argumentHint;
+      if (data.frontmatter.disableModelInvocation) fm['disable-model-invocation'] = true;
+      if (data.frontmatter.userInvocable === false) fm['user-invocable'] = false;
+      if (data.frontmatter.context === 'fork') fm['context'] = 'fork';
+      if (data.frontmatter.context === 'fork' && data.frontmatter.agent)
         fm['agent'] = data.frontmatter.agent;
       if (data.frontmatter.allowedTools?.length)
-        fm['allowed_tools'] = data.frontmatter.allowedTools;
-      if (data.frontmatter.model && data.frontmatter.model !== defaults.model)
-        fm['model'] = data.frontmatter.model;
-      if (data.frontmatter.version && data.frontmatter.version !== defaults.version)
-        fm['version'] = data.frontmatter.version;
+        fm['allowed-tools'] = data.frontmatter.allowedTools.join(', ');
+      if (data.frontmatter.model) fm['model'] = data.frontmatter.model;
     }
 
     if (data.scopedHooks?.length) {

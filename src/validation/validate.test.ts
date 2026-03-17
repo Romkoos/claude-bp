@@ -55,7 +55,7 @@ describe('validateGraph', () => {
       frontmatter: {
         ...createSkillData().frontmatter,
         context: 'fork',
-        agent: 'inherit',
+        agent: '',
       },
     };
     const node = makeNode('s1', 'skill', data as unknown as Record<string, unknown>);

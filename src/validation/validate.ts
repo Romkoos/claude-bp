@@ -50,7 +50,7 @@ export function validateGraph(nodes: Node[], edges: Edge[]): ValidationResult[] 
       const skillData = data as unknown as SkillNodeData;
       if (
         skillData.frontmatter.context === 'fork' &&
-        (!skillData.frontmatter.agent || skillData.frontmatter.agent === 'inherit')
+        !skillData.frontmatter.agent
       ) {
         results.push({
           nodeId: node.id,
@@ -108,6 +108,13 @@ export function validateGraph(nodes: Node[], edges: Edge[]): ValidationResult[] 
           nodeId: node.id,
           level: 'warning',
           message: "Skill without description won't be auto-discovered",
+        });
+      }
+      if (skillData.frontmatter.disableModelInvocation && !skillData.frontmatter.userInvocable) {
+        results.push({
+          nodeId: node.id,
+          level: 'warning',
+          message: 'Skill with both disableModelInvocation and userInvocable=false will never be invoked',
         });
       }
     }

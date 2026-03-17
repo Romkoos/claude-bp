@@ -19,6 +19,10 @@
         { "type": "visible", "target": "[data-testid='field-skill-name']", "description": "Skill name field visible" },
         { "type": "visible", "target": "[data-testid='field-skill-description']", "description": "Skill description field visible" },
         { "type": "visible", "target": "[data-testid='field-skill-context']", "description": "Skill context dropdown visible" },
+        { "type": "visible", "target": "[data-testid='field-skill-model']", "description": "Skill model selector visible" },
+        { "type": "visible", "target": "[data-testid='field-skill-argument-hint']", "description": "Skill argument hint field visible" },
+        { "type": "visible", "target": "[data-testid='field-skill-disable-model-invocation']", "description": "Disable model invocation checkbox visible" },
+        { "type": "visible", "target": "[data-testid='field-skill-user-invocable']", "description": "User invocable checkbox visible" },
         { "type": "visible", "target": "[data-testid='field-skill-allowed-tools']", "description": "Allowed tools multi-select visible" }
       ]
     },
@@ -140,6 +144,83 @@
       ],
       "assertions": [
         { "type": "notVisible", "target": "[data-testid='collapsible-section-frontmatter'] [data-testid='section-content']", "description": "Section content hidden after collapse" }
+      ]
+    },
+    {
+      "id": "TC-314",
+      "name": "Skill context selector shows Inline and Fork options",
+      "priority": "high",
+      "phase": 1,
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "dragAndDrop", "source": "[data-testid='palette-node-skill']", "target": ".react-flow__pane", "offsetX": 400, "offsetY": 300 },
+        { "action": "click", "target": ".react-flow__node[data-type='skill']" }
+      ],
+      "assertions": [
+        { "type": "textContains", "target": "[data-testid='field-skill-context']", "expected": "Inline", "description": "Context selector shows Inline option" }
+      ]
+    },
+    {
+      "id": "TC-315",
+      "name": "Skill model selector shows correct options",
+      "priority": "high",
+      "phase": 1,
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "dragAndDrop", "source": "[data-testid='palette-node-skill']", "target": ".react-flow__pane", "offsetX": 400, "offsetY": 300 },
+        { "action": "click", "target": ".react-flow__node[data-type='skill']" }
+      ],
+      "assertions": [
+        { "type": "visible", "target": "[data-testid='field-skill-model']", "description": "Model selector is visible with Not set/Sonnet/Opus/Haiku options" }
+      ]
+    },
+    {
+      "id": "TC-316",
+      "name": "Skill argument hint field accepts text input",
+      "priority": "medium",
+      "phase": 1,
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "dragAndDrop", "source": "[data-testid='palette-node-skill']", "target": ".react-flow__pane", "offsetX": 400, "offsetY": 300 },
+        { "action": "click", "target": ".react-flow__node[data-type='skill']" },
+        { "action": "type", "target": "[data-testid='field-skill-argument-hint'] input", "value": "test-hint" }
+      ],
+      "assertions": [
+        { "type": "value", "target": "[data-testid='field-skill-argument-hint'] input", "expected": "test-hint", "description": "Argument hint field accepts text" }
+      ]
+    },
+    {
+      "id": "TC-317",
+      "name": "Skill disable model invocation checkbox toggles",
+      "priority": "medium",
+      "phase": 1,
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "dragAndDrop", "source": "[data-testid='palette-node-skill']", "target": ".react-flow__pane", "offsetX": 400, "offsetY": 300 },
+        { "action": "click", "target": ".react-flow__node[data-type='skill']" },
+        { "action": "click", "target": "[data-testid='field-skill-disable-model-invocation'] input" }
+      ],
+      "assertions": [
+        { "type": "checked", "target": "[data-testid='field-skill-disable-model-invocation'] input", "description": "Disable model invocation checkbox can be checked" }
+      ]
+    },
+    {
+      "id": "TC-318",
+      "name": "Skill user invocable checkbox is checked by default and toggles",
+      "priority": "medium",
+      "phase": 1,
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "dragAndDrop", "source": "[data-testid='palette-node-skill']", "target": ".react-flow__pane", "offsetX": 400, "offsetY": 300 },
+        { "action": "click", "target": ".react-flow__node[data-type='skill']" }
+      ],
+      "assertions": [
+        { "type": "checked", "target": "[data-testid='field-skill-user-invocable'] input", "description": "User invocable is checked by default" }
       ]
     }
   ]

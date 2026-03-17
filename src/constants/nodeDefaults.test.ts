@@ -78,10 +78,12 @@ describe('createSkillData', () => {
   it('creates default skill data', () => {
     const data = createSkillData();
     expect(data.label).toBe('New Skill');
-    expect(data.frontmatter.context).toBe('conversation');
-    expect(data.frontmatter.agent).toBe('inherit');
-    expect(data.frontmatter.model).toBe('inherit');
-    expect(data.frontmatter.version).toBe('1.0.0');
+    expect(data.frontmatter.context).toBeUndefined();
+    expect(data.frontmatter.agent).toBe('general-purpose');
+    expect(data.frontmatter.model).toBe('');
+    expect(data.frontmatter.argumentHint).toBe('');
+    expect(data.frontmatter.disableModelInvocation).toBe(false);
+    expect(data.frontmatter.userInvocable).toBe(true);
     expect(data.frontmatter.allowedTools).toEqual([]);
     expect(data.scopedHooks).toEqual([]);
     expect(data.instructions).toBe('');

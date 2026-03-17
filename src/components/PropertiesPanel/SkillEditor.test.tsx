@@ -62,9 +62,29 @@ describe('SkillEditor', () => {
     expect(screen.getByTestId('field-skill-agent')).toBeInTheDocument();
   });
 
-  it('hides agent selector when context is conversation', () => {
+  it('hides agent selector when context is inline', () => {
     render(<SkillEditor nodeId={nodeId} data={createSkillData() as unknown as Record<string, unknown>} />);
     expect(screen.queryByTestId('field-skill-agent')).not.toBeInTheDocument();
+  });
+
+  it('shows argument hint field', () => {
+    render(<SkillEditor nodeId={nodeId} data={createSkillData() as unknown as Record<string, unknown>} />);
+    expect(screen.getByTestId('field-skill-argument-hint')).toBeInTheDocument();
+  });
+
+  it('shows disable model invocation checkbox', () => {
+    render(<SkillEditor nodeId={nodeId} data={createSkillData() as unknown as Record<string, unknown>} />);
+    expect(screen.getByTestId('field-skill-disable-model-invocation')).toBeInTheDocument();
+  });
+
+  it('shows user invocable checkbox', () => {
+    render(<SkillEditor nodeId={nodeId} data={createSkillData() as unknown as Record<string, unknown>} />);
+    expect(screen.getByTestId('field-skill-user-invocable')).toBeInTheDocument();
+  });
+
+  it('shows model field', () => {
+    render(<SkillEditor nodeId={nodeId} data={createSkillData() as unknown as Record<string, unknown>} />);
+    expect(screen.getByTestId('field-skill-model')).toBeInTheDocument();
   });
 
   it('updates instructions on change', () => {

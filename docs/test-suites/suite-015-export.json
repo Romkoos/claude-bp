@@ -139,6 +139,69 @@
       "assertions": [
         { "type": "downloadTriggered", "filenamePattern": ".claude-config.zip", "description": "ZIP file download triggered" }
       ]
+    },
+    {
+      "id": "TC-319",
+      "name": "Exported skill frontmatter includes argument-hint when set",
+      "priority": "high",
+      "phase": 3,
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "dragAndDrop", "source": "[data-testid='palette-node-skill']", "target": ".react-flow__pane", "offsetX": 400, "offsetY": 300 },
+        { "action": "click", "target": ".react-flow__node[data-type='skill']" },
+        { "action": "clear", "target": "[data-testid='field-skill-name'] input" },
+        { "action": "type", "target": "[data-testid='field-skill-name'] input", "value": "test-export-skill" },
+        { "action": "type", "target": "[data-testid='field-skill-argument-hint'] input", "value": "provide a file path" },
+        { "action": "click", "target": "[data-testid='toolbar-export']" },
+        { "action": "wait_for_timeout", "timeout": 500 },
+        { "action": "click", "target": "[data-testid='export-file-tree'] >> text=SKILL.md >> nth=0" }
+      ],
+      "assertions": [
+        { "type": "textContains", "target": "[data-testid='export-content-preview']", "expected": "argument-hint", "description": "Exported frontmatter contains argument-hint field" }
+      ]
+    },
+    {
+      "id": "TC-320",
+      "name": "Exported skill frontmatter includes disable-model-invocation when enabled",
+      "priority": "high",
+      "phase": 3,
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "dragAndDrop", "source": "[data-testid='palette-node-skill']", "target": ".react-flow__pane", "offsetX": 400, "offsetY": 300 },
+        { "action": "click", "target": ".react-flow__node[data-type='skill']" },
+        { "action": "clear", "target": "[data-testid='field-skill-name'] input" },
+        { "action": "type", "target": "[data-testid='field-skill-name'] input", "value": "no-model-skill" },
+        { "action": "click", "target": "[data-testid='field-skill-disable-model-invocation'] input" },
+        { "action": "click", "target": "[data-testid='toolbar-export']" },
+        { "action": "wait_for_timeout", "timeout": 500 },
+        { "action": "click", "target": "[data-testid='export-file-tree'] >> text=SKILL.md >> nth=0" }
+      ],
+      "assertions": [
+        { "type": "textContains", "target": "[data-testid='export-content-preview']", "expected": "disable-model-invocation", "description": "Exported frontmatter contains disable-model-invocation field" }
+      ]
+    },
+    {
+      "id": "TC-321",
+      "name": "Exported skill frontmatter includes user-invocable:false when unchecked",
+      "priority": "high",
+      "phase": 3,
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "dragAndDrop", "source": "[data-testid='palette-node-skill']", "target": ".react-flow__pane", "offsetX": 400, "offsetY": 300 },
+        { "action": "click", "target": ".react-flow__node[data-type='skill']" },
+        { "action": "clear", "target": "[data-testid='field-skill-name'] input" },
+        { "action": "type", "target": "[data-testid='field-skill-name'] input", "value": "internal-skill" },
+        { "action": "click", "target": "[data-testid='field-skill-user-invocable'] input" },
+        { "action": "click", "target": "[data-testid='toolbar-export']" },
+        { "action": "wait_for_timeout", "timeout": 500 },
+        { "action": "click", "target": "[data-testid='export-file-tree'] >> text=SKILL.md >> nth=0" }
+      ],
+      "assertions": [
+        { "type": "textContains", "target": "[data-testid='export-content-preview']", "expected": "user-invocable", "description": "Exported frontmatter contains user-invocable: false field" }
+      ]
     }
   ]
 }

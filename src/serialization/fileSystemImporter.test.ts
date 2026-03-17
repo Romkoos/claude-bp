@@ -65,8 +65,12 @@ describe('parseAllowedTools', () => {
     expect(parseAllowedTools(undefined)).toEqual([]);
   });
 
-  it('wraps string in array', () => {
+  it('wraps single string in array', () => {
     expect(parseAllowedTools('Read')).toEqual(['Read']);
+  });
+
+  it('splits comma-separated string', () => {
+    expect(parseAllowedTools('Read, Write, Bash')).toEqual(['Read', 'Write', 'Bash']);
   });
 
   it('returns empty array for empty string', () => {

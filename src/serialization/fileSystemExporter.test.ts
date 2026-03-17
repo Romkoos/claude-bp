@@ -263,11 +263,13 @@ describe('generateSkillFiles', () => {
         ...createSkillData().frontmatter,
         name: 'my-skill',
         description: 'A skill',
+        argumentHint: '<file>',
+        disableModelInvocation: true,
+        userInvocable: false,
         context: 'fork',
         agent: 'Explore',
         allowedTools: ['Read', 'Write'],
         model: 'claude-opus-4',
-        version: '2.0.0',
       },
       instructions: 'Do something',
     };
@@ -281,6 +283,11 @@ describe('generateSkillFiles', () => {
     expect(skillFile!.content).toContain('name: my-skill');
     expect(skillFile!.content).toContain('Do something');
     expect(skillFile!.content).toContain('context: fork');
+    expect(skillFile!.content).toContain('argument-hint:');
+    expect(skillFile!.content).toContain('disable-model-invocation: true');
+    expect(skillFile!.content).toContain('user-invocable: false');
+    expect(skillFile!.content).toContain('allowed-tools: Read, Write');
+    expect(skillFile!.content).not.toContain('version');
   });
 
   it('omits default frontmatter values', () => {
@@ -297,10 +304,14 @@ describe('generateSkillFiles', () => {
     const files = generateSkillFiles([node]);
     const skillFile = files.find((f) => f.path.endsWith('SKILL.md'))!;
     // Default values should be omitted
-    expect(skillFile.content).not.toContain('context: conversation');
-    expect(skillFile.content).not.toContain('agent: inherit');
-    expect(skillFile.content).not.toContain('model: inherit');
-    expect(skillFile.content).not.toContain('version: 1.0.0');
+    expect(skillFile.content).not.toContain('context');
+    expect(skillFile.content).not.toContain('agent');
+    expect(skillFile.content).not.toContain('model');
+    expect(skillFile.content).not.toContain('version');
+    expect(skillFile.content).not.toContain('argument-hint');
+    expect(skillFile.content).not.toContain('disable-model-invocation');
+    expect(skillFile.content).not.toContain('user-invocable');
+    expect(skillFile.content).not.toContain('allowed-tools');
   });
 
   it('generates reference file placeholders', () => {
