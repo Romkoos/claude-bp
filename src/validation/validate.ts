@@ -1,5 +1,5 @@
 import type { Node, Edge } from '@xyflow/react';
-import type { BlueprintNodeType, SkillNodeData, HookNodeData, SubagentNodeData, ToolNodeData, McpNodeData } from '../types/nodes';
+import type { BlueprintNodeType, SkillNodeData, HookNodeData, SubagentNodeData, ToolNodeData, McpNodeData, PluginNodeData } from '../types/nodes';
 
 export interface ValidationResult {
   nodeId: string;
@@ -187,27 +187,85 @@ export function validateGraph(nodes: Node[], edges: Edge[]): ValidationResult[] 
     if (!visited.has(n.id)) detectCycle(n.id, []);
   });
 
-  // Duplicate skill names
-  const skillNodes = validatableNodes.filter((n) => n.type === 'skill');
-  const skillNameMap = new Map<string, string[]>();
-  skillNodes.forEach((n) => {
-    const name = (n.data as unknown as SkillNodeData).frontmatter.name;
-    if (name) {
-      const ids = skillNameMap.get(name) ?? [];
-      ids.push(n.id);
-      skillNameMap.set(name, ids);
-    }
-  });
-  skillNameMap.forEach((ids, name) => {
-    if (ids.length > 1) {
-      ids.forEach((id) => {
-        results.push({
-          nodeId: id,
-          level: 'warning',
-          message: `Duplicate skill name "${name}" — will conflict in .claude/skills/`,
+  // Duplicate labels within same node type (warning)
+  const labelsByType = new Map<string, Map<string, string[]>>();
+  for (const node of validatableNodes) {
+    const nodeType = node.type as BlueprintNodeType;
+    const label = ((node.data as Record<string, unknown>).label as string) ?? '';
+    if (!label || DEFAULT_LABELS[nodeType] === label) continue;
+    if (!labelsByType.has(nodeType)) labelsByType.set(nodeType, new Map());
+    const typeMap = labelsByType.get(nodeType)!;
+    const ids = typeMap.get(label) ?? [];
+    ids.push(node.id);
+    typeMap.set(label, ids);
+  }
+  labelsByType.forEach((typeMap, nodeType) => {
+    typeMap.forEach((ids, label) => {
+      if (ids.length > 1) {
+        ids.forEach((id) => {
+          results.push({
+            nodeId: id,
+            level: 'warning',
+            message: `Duplicate ${nodeType} label "${label}"`,
+          });
         });
-      });
+      }
+    });
+  });
+
+  // Duplicate name fields within same node type (error)
+  // Extracts the identifying "name" field for node types that have one
+  function getNodeName(node: Node): string | null {
+    const nodeType = node.type as BlueprintNodeType;
+    const data = node.data as Record<string, unknown>;
+    switch (nodeType) {
+      case 'skill':
+        return (data as unknown as SkillNodeData).frontmatter.name || null;
+      case 'subagent':
+        return (data as unknown as SubagentNodeData).name || null;
+      case 'tool':
+        return (data as unknown as ToolNodeData).toolName.trim() || null;
+      case 'mcp':
+        return (data as unknown as McpNodeData).serverName.trim() || null;
+      case 'plugin':
+        return (data as unknown as PluginNodeData).pluginName.trim() || null;
+      default:
+        return null;
     }
+  }
+
+  const NAME_FIELD_LABELS: Partial<Record<BlueprintNodeType, string>> = {
+    skill: 'skill name',
+    subagent: 'subagent name',
+    tool: 'tool name',
+    mcp: 'MCP server name',
+    plugin: 'plugin name',
+  };
+
+  const namesByType = new Map<string, Map<string, string[]>>();
+  for (const node of validatableNodes) {
+    const nodeType = node.type as BlueprintNodeType;
+    const name = getNodeName(node);
+    if (!name) continue;
+    if (!namesByType.has(nodeType)) namesByType.set(nodeType, new Map());
+    const typeMap = namesByType.get(nodeType)!;
+    const ids = typeMap.get(name) ?? [];
+    ids.push(node.id);
+    typeMap.set(name, ids);
+  }
+  namesByType.forEach((typeMap, nodeType) => {
+    const fieldLabel = NAME_FIELD_LABELS[nodeType as BlueprintNodeType] ?? nodeType;
+    typeMap.forEach((ids, name) => {
+      if (ids.length > 1) {
+        ids.forEach((id) => {
+          results.push({
+            nodeId: id,
+            level: 'error',
+            message: `Duplicate ${fieldLabel} "${name}" — each ${nodeType} must have a unique name`,
+          });
+        });
+      }
+    });
   });
 
   return results;

@@ -133,8 +133,8 @@
     },
     {
       "id": "TC-098",
-      "name": "Duplicate skill names trigger warning",
-      "priority": "medium",
+      "name": "Duplicate skill names trigger error",
+      "priority": "high",
       "phase": 2,
       "url": "/",
       "steps": [
@@ -150,8 +150,31 @@
         { "action": "click", "target": "[data-testid='toolbar-validate']" }
       ],
       "assertions": [
-        { "type": "visible", "target": ".react-flow__node[data-type='skill']:first-of-type [data-testid='validation-warning-badge']", "description": "Warning on first duplicate" },
-        { "type": "visible", "target": ".react-flow__node[data-type='skill']:last-of-type [data-testid='validation-warning-badge']", "description": "Warning on second duplicate" }
+        { "type": "visible", "target": ".react-flow__node[data-type='skill']:first-of-type [data-testid='validation-error-badge']", "description": "Error on first duplicate" },
+        { "type": "visible", "target": ".react-flow__node[data-type='skill']:last-of-type [data-testid='validation-error-badge']", "description": "Error on second duplicate" }
+      ]
+    },
+    {
+      "id": "TC-307",
+      "name": "Duplicate tool names trigger error",
+      "priority": "high",
+      "phase": 2,
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "dragAndDrop", "source": "[data-testid='palette-node-tool']", "target": ".react-flow__pane", "offsetX": 300, "offsetY": 300 },
+        { "action": "dragAndDrop", "source": "[data-testid='palette-node-tool']", "target": ".react-flow__pane", "offsetX": 600, "offsetY": 300 },
+        { "action": "click", "target": ".react-flow__node[data-type='tool']:first-of-type" },
+        { "action": "clear", "target": "[data-testid='field-tool-name'] input" },
+        { "action": "type", "target": "[data-testid='field-tool-name'] input", "value": "Read" },
+        { "action": "click", "target": ".react-flow__node[data-type='tool']:last-of-type" },
+        { "action": "clear", "target": "[data-testid='field-tool-name'] input" },
+        { "action": "type", "target": "[data-testid='field-tool-name'] input", "value": "Read" },
+        { "action": "click", "target": "[data-testid='toolbar-validate']" }
+      ],
+      "assertions": [
+        { "type": "visible", "target": ".react-flow__node[data-type='tool']:first-of-type [data-testid='validation-error-badge']", "description": "Error on first duplicate tool name" },
+        { "type": "visible", "target": ".react-flow__node[data-type='tool']:last-of-type [data-testid='validation-error-badge']", "description": "Error on second duplicate tool name" }
       ]
     },
     {

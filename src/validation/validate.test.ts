@@ -280,9 +280,9 @@ describe('validateGraph', () => {
     expect(results.some((r) => r.message.includes('Circular delegation'))).toBe(false);
   });
 
-  // --- Duplicate skill names ---
+  // --- Duplicate name fields (error) ---
 
-  it('warns on duplicate skill names', () => {
+  it('errors on duplicate skill names', () => {
     const s1Data: SkillNodeData = {
       ...createSkillData(),
       label: 'Skill A',
@@ -296,10 +296,10 @@ describe('validateGraph', () => {
     const s1 = makeNode('s1', 'skill', s1Data as unknown as Record<string, unknown>);
     const s2 = makeNode('s2', 'skill', s2Data as unknown as Record<string, unknown>);
     const results = validateGraph([s1, s2], [makeEdge('s1', 's2')]);
-    expect(results.some((r) => r.message.includes('Duplicate skill name'))).toBe(true);
+    expect(results.some((r) => r.level === 'error' && r.message.includes('Duplicate skill name "deploy"'))).toBe(true);
   });
 
-  it('no duplicate warning for different names', () => {
+  it('no duplicate error for different skill names', () => {
     const s1Data: SkillNodeData = {
       ...createSkillData(),
       frontmatter: { ...createSkillData().frontmatter, name: 'deploy' },
@@ -311,14 +311,78 @@ describe('validateGraph', () => {
     const s1 = makeNode('s1', 'skill', s1Data as unknown as Record<string, unknown>);
     const s2 = makeNode('s2', 'skill', s2Data as unknown as Record<string, unknown>);
     const results = validateGraph([s1, s2], [makeEdge('s1', 's2')]);
-    expect(results.some((r) => r.message.includes('Duplicate skill name'))).toBe(false);
+    expect(results.some((r) => r.level === 'error' && r.message.includes('Duplicate skill name'))).toBe(false);
   });
 
   it('ignores skills with empty names for duplicate check', () => {
     const s1 = makeNode('s1', 'skill', createSkillData() as unknown as Record<string, unknown>);
     const s2 = makeNode('s2', 'skill', createSkillData() as unknown as Record<string, unknown>);
     const results = validateGraph([s1, s2], []);
-    // Empty names should not trigger duplicate warning
-    expect(results.some((r) => r.message.includes('Duplicate skill name'))).toBe(false);
+    expect(results.some((r) => r.level === 'error' && r.message.includes('Duplicate skill name'))).toBe(false);
+  });
+
+  it('errors on duplicate subagent names', () => {
+    const sa1 = makeNode('sa1', 'subagent', { ...createSubagentData(), name: 'reviewer', label: 'SA1', systemPrompt: 'x' } as unknown as Record<string, unknown>);
+    const sa2 = makeNode('sa2', 'subagent', { ...createSubagentData(), name: 'reviewer', label: 'SA2', systemPrompt: 'y' } as unknown as Record<string, unknown>);
+    const results = validateGraph([sa1, sa2], [makeEdge('sa1', 'sa2')]);
+    expect(results.some((r) => r.level === 'error' && r.message.includes('Duplicate subagent name "reviewer"'))).toBe(true);
+  });
+
+  it('errors on duplicate tool names', () => {
+    const t1 = makeNode('t1', 'tool', { ...createToolData(), toolName: 'Read', label: 'Tool A' } as unknown as Record<string, unknown>);
+    const t2 = makeNode('t2', 'tool', { ...createToolData(), toolName: 'Read', label: 'Tool B' } as unknown as Record<string, unknown>);
+    const results = validateGraph([t1, t2], [makeEdge('t1', 't2')]);
+    expect(results.some((r) => r.level === 'error' && r.message.includes('Duplicate tool name "Read"'))).toBe(true);
+  });
+
+  it('errors on duplicate MCP server names', () => {
+    const m1 = makeNode('m1', 'mcp', { ...createMcpData(), serverName: 'github', label: 'MCP A', connection: { type: 'url', url: 'http://a.com', command: '', args: [] } } as unknown as Record<string, unknown>);
+    const m2 = makeNode('m2', 'mcp', { ...createMcpData(), serverName: 'github', label: 'MCP B', connection: { type: 'url', url: 'http://b.com', command: '', args: [] } } as unknown as Record<string, unknown>);
+    const results = validateGraph([m1, m2], [makeEdge('m1', 'm2')]);
+    expect(results.some((r) => r.level === 'error' && r.message.includes('Duplicate MCP server name "github"'))).toBe(true);
+  });
+
+  it('errors on duplicate plugin names', () => {
+    const p1 = makeNode('p1', 'plugin', { ...createPluginData(), pluginName: 'auth', label: 'Plugin A' } as unknown as Record<string, unknown>);
+    const p2 = makeNode('p2', 'plugin', { ...createPluginData(), pluginName: 'auth', label: 'Plugin B' } as unknown as Record<string, unknown>);
+    const results = validateGraph([p1, p2], [makeEdge('p1', 'p2')]);
+    expect(results.some((r) => r.level === 'error' && r.message.includes('Duplicate plugin name "auth"'))).toBe(true);
+  });
+
+  it('no duplicate name error across different types', () => {
+    const s1 = makeNode('s1', 'skill', { ...createSkillData(), label: 'A', frontmatter: { ...createSkillData().frontmatter, name: 'deploy' } } as unknown as Record<string, unknown>);
+    const t1 = makeNode('t1', 'tool', { ...createToolData(), toolName: 'deploy', label: 'B' } as unknown as Record<string, unknown>);
+    const results = validateGraph([s1, t1], [makeEdge('s1', 't1')]);
+    expect(results.some((r) => r.level === 'error' && r.message.includes('must have a unique name'))).toBe(false);
+  });
+
+  // --- Duplicate labels within same type (warning) ---
+
+  it('warns on duplicate labels within same node type', () => {
+    const t1 = makeNode('t1', 'tool', { ...createToolData(), label: 'Deploy Tool', toolName: 'deploy1' } as unknown as Record<string, unknown>);
+    const t2 = makeNode('t2', 'tool', { ...createToolData(), label: 'Deploy Tool', toolName: 'deploy2' } as unknown as Record<string, unknown>);
+    const results = validateGraph([t1, t2], [makeEdge('t1', 't2')]);
+    expect(results.some((r) => r.level === 'warning' && r.message.includes('Duplicate tool label "Deploy Tool"'))).toBe(true);
+  });
+
+  it('no duplicate label warning for different labels of same type', () => {
+    const t1 = makeNode('t1', 'tool', { ...createToolData(), label: 'Deploy Tool', toolName: 'deploy' } as unknown as Record<string, unknown>);
+    const t2 = makeNode('t2', 'tool', { ...createToolData(), label: 'Test Tool', toolName: 'test' } as unknown as Record<string, unknown>);
+    const results = validateGraph([t1, t2], [makeEdge('t1', 't2')]);
+    expect(results.some((r) => r.message.includes('Duplicate tool label'))).toBe(false);
+  });
+
+  it('no duplicate label warning for same labels of different types', () => {
+    const s1 = makeNode('s1', 'skill', { ...createSkillData(), label: 'Deploy' } as unknown as Record<string, unknown>);
+    const t1 = makeNode('t1', 'tool', { ...createToolData(), label: 'Deploy', toolName: 'deploy' } as unknown as Record<string, unknown>);
+    const results = validateGraph([s1, t1], [makeEdge('s1', 't1')]);
+    expect(results.some((r) => r.message.includes('Duplicate') && r.message.includes('label'))).toBe(false);
+  });
+
+  it('skips default labels for duplicate label check', () => {
+    const s1 = makeNode('s1', 'skill', { ...createSkillData(), label: 'New Skill' } as unknown as Record<string, unknown>);
+    const s2 = makeNode('s2', 'skill', { ...createSkillData(), label: 'New Skill' } as unknown as Record<string, unknown>);
+    const results = validateGraph([s1, s2], []);
+    expect(results.some((r) => r.message.includes('Duplicate') && r.message.includes('label'))).toBe(false);
   });
 });
