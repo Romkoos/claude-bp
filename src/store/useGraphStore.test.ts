@@ -265,6 +265,14 @@ describe('useGraphStore', () => {
     expect(useGraphStore.getState().showMinimap).toBe(true);
   });
 
+  it('toggles paletteCollapsed', () => {
+    expect(useGraphStore.getState().paletteCollapsed).toBe(false);
+    useGraphStore.getState().setPaletteCollapsed(true);
+    expect(useGraphStore.getState().paletteCollapsed).toBe(true);
+    useGraphStore.getState().setPaletteCollapsed(false);
+    expect(useGraphStore.getState().paletteCollapsed).toBe(false);
+  });
+
   // --- groupIntoPlugin ---
 
   it('groups nodes into a plugin', () => {

@@ -1,0 +1,114 @@
+{
+  "id": "SUITE-032",
+  "name": "Palette Collapse/Expand",
+  "tests": [
+    {
+      "id": "TC-286",
+      "name": "Palette is expanded by default",
+      "priority": "critical",
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" }
+      ],
+      "assertions": [
+        { "type": "visible", "target": "[data-testid='node-palette']", "description": "Node palette is visible" },
+        { "type": "visible", "target": "[data-testid='palette-toggle']", "description": "Toggle button is visible" },
+        { "type": "not_exists", "target": "[data-testid='node-palette'][data-collapsed='true']", "description": "Palette is not collapsed" }
+      ]
+    },
+    {
+      "id": "TC-287",
+      "name": "Collapse palette via chevron button",
+      "priority": "critical",
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "click", "target": "[data-testid='palette-toggle']" }
+      ],
+      "assertions": [
+        { "type": "visible", "target": "[data-testid='node-palette'][data-collapsed='true']", "description": "Palette is collapsed" },
+        { "type": "visible", "target": "[data-testid='palette-toggle']", "description": "Toggle button still visible in collapsed state" }
+      ]
+    },
+    {
+      "id": "TC-288",
+      "name": "Expand palette from collapsed state",
+      "priority": "critical",
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "click", "target": "[data-testid='palette-toggle']" },
+        { "action": "click", "target": "[data-testid='palette-toggle']" }
+      ],
+      "assertions": [
+        { "type": "not_exists", "target": "[data-testid='node-palette'][data-collapsed='true']", "description": "Palette is expanded again" },
+        { "type": "visible", "target": "[data-testid='palette-toggle']", "description": "Toggle button visible" }
+      ]
+    },
+    {
+      "id": "TC-289",
+      "name": "All node icons visible in collapsed state",
+      "priority": "high",
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "click", "target": "[data-testid='palette-toggle']" }
+      ],
+      "assertions": [
+        { "type": "visible", "target": "[data-testid='palette-node-rules']", "description": "Rules node icon visible" },
+        { "type": "visible", "target": "[data-testid='palette-node-skill']", "description": "Skill node icon visible" },
+        { "type": "visible", "target": "[data-testid='palette-node-subagent']", "description": "Subagent node icon visible" },
+        { "type": "visible", "target": "[data-testid='palette-node-hook']", "description": "Hook node icon visible" },
+        { "type": "visible", "target": "[data-testid='palette-node-tool']", "description": "Tool node icon visible" },
+        { "type": "visible", "target": "[data-testid='palette-node-mcp']", "description": "MCP node icon visible" },
+        { "type": "visible", "target": "[data-testid='palette-node-plugin']", "description": "Plugin node icon visible" },
+        { "type": "visible", "target": "[data-testid='palette-node-comment']", "description": "Comment node icon visible" }
+      ]
+    },
+    {
+      "id": "TC-290",
+      "name": "Template buttons visible in collapsed state",
+      "priority": "high",
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "click", "target": "[data-testid='palette-toggle']" }
+      ],
+      "assertions": [
+        { "type": "visible", "target": "[data-testid='template-pr-review']", "description": "PR review template visible" },
+        { "type": "visible", "target": "[data-testid='template-multi-research']", "description": "Multi research template visible" },
+        { "type": "visible", "target": "[data-testid='template-safe-deploy']", "description": "Safe deploy template visible" },
+        { "type": "visible", "target": "[data-testid='template-starter']", "description": "Starter template visible" }
+      ]
+    },
+    {
+      "id": "TC-291",
+      "name": "Collapsed palette labels are hidden",
+      "priority": "medium",
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "click", "target": "[data-testid='palette-toggle']" }
+      ],
+      "assertions": [
+        { "type": "not_visible", "target": "text=Nodes", "description": "Nodes header hidden" },
+        { "type": "not_visible", "target": "text=Notes", "description": "Notes header hidden" },
+        { "type": "not_visible", "target": "text=Templates", "description": "Templates header hidden" }
+      ]
+    },
+    {
+      "id": "TC-292",
+      "name": "Drag node from collapsed palette to canvas",
+      "priority": "high",
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "click", "target": "[data-testid='palette-toggle']" },
+        { "action": "drag", "source": "[data-testid='palette-node-skill']", "target": "[data-testid='reactflow']" }
+      ],
+      "assertions": [
+        { "type": "js", "expression": "window.__STORE__.getState().nodes.length > 0", "description": "Node was created on canvas from collapsed palette" }
+      ]
+    }
+  ]
+}

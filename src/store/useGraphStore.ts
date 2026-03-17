@@ -72,8 +72,10 @@ interface GraphStore {
   setExportPreviewOpen: (open: boolean) => void;
   settingsOpen: boolean;
   showMinimap: boolean;
+  paletteCollapsed: boolean;
   setSettingsOpen: (open: boolean) => void;
   setShowMinimap: (show: boolean) => void;
+  setPaletteCollapsed: (collapsed: boolean) => void;
 }
 
 export const useGraphStore = create<GraphStore>()(
@@ -97,6 +99,7 @@ export const useGraphStore = create<GraphStore>()(
       exportPreviewOpen: false,
       settingsOpen: false,
       showMinimap: true,
+      paletteCollapsed: false,
 
       setNodes: (nodes) => set({ nodes }),
       setEdges: (edges) => set({ edges }),
@@ -338,6 +341,7 @@ export const useGraphStore = create<GraphStore>()(
       setExportPreviewOpen: (open) => set({ exportPreviewOpen: open }),
       setSettingsOpen: (open) => set({ settingsOpen: open }),
       setShowMinimap: (show) => set({ showMinimap: show }),
+      setPaletteCollapsed: (collapsed) => set({ paletteCollapsed: collapsed }),
 
       // Simulation
       stopSimulation: () => set({

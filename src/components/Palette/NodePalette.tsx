@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback } from 'react';
-import { FileText, Zap, Bot, Webhook, Wrench, Plug, Package, StickyNote, Info, type LucideIcon } from 'lucide-react';
+import { FileText, Zap, Bot, Webhook, Wrench, Plug, Package, StickyNote, Info, ChevronsLeft, ChevronsRight, type LucideIcon } from 'lucide-react';
 import { useReactFlow } from '@xyflow/react';
 import type { BlueprintNodeType } from '../../types/nodes';
 import { NODE_COLORS } from '../../constants/theme';
@@ -36,6 +36,8 @@ export function NodePalette() {
   const importJSON = useGraphStore((s) => s.importJSON);
   const nodes = useGraphStore((s) => s.nodes);
   const edges = useGraphStore((s) => s.edges);
+  const collapsed = useGraphStore((s) => s.paletteCollapsed);
+  const setCollapsed = useGraphStore((s) => s.setPaletteCollapsed);
   const { fitView } = useReactFlow();
   const modal = useModal();
   const [infoOpen, setInfoOpen] = useState<BlueprintNodeType | null>(null);
@@ -69,6 +71,89 @@ export function NodePalette() {
     setTimeout(() => fitView({ padding: 0.2 }), 100);
   };
 
+  const ToggleIcon = collapsed ? ChevronsRight : ChevronsLeft;
+
+  if (collapsed) {
+    return (
+      <div
+        data-testid="node-palette"
+        data-collapsed="true"
+        className="flex-shrink-0 overflow-y-auto flex flex-col"
+        style={{
+          width: 48,
+          background: '#161b22',
+          borderRight: '1px solid var(--node-border)',
+        }}
+      >
+        {/* Toggle button */}
+        <div className="p-2 flex justify-center" style={{ borderBottom: '1px solid var(--node-border)' }}>
+          <button
+            onClick={() => setCollapsed(false)}
+            data-testid="palette-toggle"
+            className="p-1 rounded hover:bg-[var(--node-border)] transition-colors cursor-pointer"
+            style={{ color: 'var(--text-secondary)' }}
+            title="Expand palette"
+          >
+            <ToggleIcon size={16} />
+          </button>
+        </div>
+
+        {/* Node icons */}
+        <div className="p-1.5 space-y-1">
+          {PALETTE_ITEMS.map(({ type, label, icon: Icon }) => {
+            const colors = NODE_COLORS[type];
+            return (
+              <div
+                key={type}
+                draggable
+                onDragStart={(e) => onDragStart(e, type)}
+                data-testid={`palette-node-${type}`}
+                className="flex items-center justify-center p-2 rounded-md cursor-grab active:cursor-grabbing transition-colors hover:bg-[var(--node-border)]"
+                title={label}
+              >
+                <Icon size={18} style={{ color: colors.header }} />
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Divider */}
+        <div className="mx-2 my-1" style={{ borderTop: '1px solid var(--node-border)' }} />
+
+        {/* Note icon */}
+        <div className="p-1.5">
+          <div
+            draggable
+            onDragStart={(e) => onDragStart(e, 'comment')}
+            data-testid="palette-node-comment"
+            className="flex items-center justify-center p-2 rounded-md cursor-grab active:cursor-grabbing transition-colors hover:bg-[var(--node-border)]"
+            title="Note"
+          >
+            <StickyNote size={18} style={{ color: '#eab308' }} />
+          </div>
+        </div>
+
+        {/* Divider */}
+        <div className="mx-2 my-1" style={{ borderTop: '1px solid var(--node-border)' }} />
+
+        {/* Template icons */}
+        <div className="p-1.5 space-y-1">
+          {TEMPLATES.map((template) => (
+            <button
+              key={template.id}
+              onClick={() => loadTemplate(template)}
+              data-testid={TEMPLATE_TEST_IDS[template.id]}
+              className="w-full flex items-center justify-center p-2 rounded-md transition-colors hover:bg-[var(--node-border)] cursor-pointer"
+              title={template.name}
+            >
+              <span className="text-base">{template.icon}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div
       data-testid="node-palette"
@@ -79,12 +164,24 @@ export function NodePalette() {
       }}
     >
       <div className="p-3">
-        <h3
-          className="text-[10px] font-semibold uppercase tracking-widest mb-3"
-          style={{ color: 'var(--text-muted)' }}
-        >
-          Nodes
-        </h3>
+        {/* Header with toggle */}
+        <div className="flex items-center justify-between mb-3">
+          <h3
+            className="text-[10px] font-semibold uppercase tracking-widest"
+            style={{ color: 'var(--text-muted)' }}
+          >
+            Nodes
+          </h3>
+          <button
+            onClick={() => setCollapsed(true)}
+            data-testid="palette-toggle"
+            className="p-1 rounded hover:bg-[var(--node-border)] transition-colors cursor-pointer"
+            style={{ color: 'var(--text-secondary)' }}
+            title="Collapse palette"
+          >
+            <ToggleIcon size={14} />
+          </button>
+        </div>
         <div className="space-y-2">
           {PALETTE_ITEMS.map(({ type, label, description, icon: Icon }) => {
             const colors = NODE_COLORS[type];
