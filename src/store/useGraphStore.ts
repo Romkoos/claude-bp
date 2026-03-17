@@ -13,6 +13,7 @@ import type { BlueprintNodeType } from '../types/nodes';
 import type { GraphSchema } from '../types/graph';
 import { NODE_PIN_DEFINITIONS, createRulesData, createSkillData, createSubagentData, createHookData, createToolData, createMcpData, createPluginData, createCommentData } from '../constants/nodeDefaults';
 import { generateId } from '../utils/idGenerator';
+import { PLUGIN_MIN_WIDTH, PLUGIN_MIN_HEIGHT } from '../utils/pluginHelpers';
 import { validateGraph, type ValidationResult } from '../validation/validate';
 import { exportGraph, importGraph } from '../serialization/jsonExporter';
 import { applyDagreLayout } from '../utils/layout';
@@ -282,8 +283,8 @@ export const useGraphStore = create<GraphStore>()(
         const children = nodes.filter((n) => n.parentId === pluginId);
         const padding = 60;
         const headerHeight = 50;
-        const minWidth = 400;
-        const minHeight = 200;
+        const minWidth = PLUGIN_MIN_WIDTH;
+        const minHeight = PLUGIN_MIN_HEIGHT;
 
         if (children.length === 0) {
           set({

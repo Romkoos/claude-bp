@@ -6,6 +6,7 @@ import { PinDirection } from '../../types/pins';
 import { NODE_PIN_DEFINITIONS } from '../../constants/nodeDefaults';
 import { TypedHandle } from '../Pins/TypedHandle';
 import { useGraphStore } from '../../store/useGraphStore';
+import { PLUGIN_MIN_WIDTH, PLUGIN_MIN_HEIGHT } from '../../utils/pluginHelpers';
 
 function PluginNodeInner({ id, data, selected }: NodeProps) {
   const nodeData = data as unknown as PluginNodeData;
@@ -42,8 +43,8 @@ function PluginNodeInner({ id, data, selected }: NodeProps) {
         boxShadow: isDropTarget ? '0 0 20px #f43f5e30, inset 0 0 20px #f43f5e10' : 'none',
         transition: 'border-color 0.15s, background 0.15s, box-shadow 0.15s',
         borderRadius: 12,
-        minWidth: 400,
-        minHeight: 200,
+        minWidth: PLUGIN_MIN_WIDTH,
+        minHeight: PLUGIN_MIN_HEIGHT,
         width: '100%',
         height: '100%',
         display: 'flex',
@@ -51,8 +52,8 @@ function PluginNodeInner({ id, data, selected }: NodeProps) {
       }}
     >
       <NodeResizer
-        minWidth={400}
-        minHeight={200}
+        minWidth={PLUGIN_MIN_WIDTH}
+        minHeight={PLUGIN_MIN_HEIGHT}
         isVisible={selected ?? false}
         lineStyle={{ borderColor: '#f43f5e60' }}
         handleStyle={{

@@ -17,6 +17,7 @@ import type { BlueprintNodeType } from '../../types/nodes';
 import { NODE_PIN_DEFINITIONS } from '../../constants/nodeDefaults';
 import { NODE_COLORS } from '../../constants/theme';
 import { canConnect, getCompatibleNodeTypes } from '../../utils/pinCompatibility';
+import { findPluginAtPosition } from '../../utils/pluginHelpers';
 import { useGraphStore } from '../../store/useGraphStore';
 import { RulesNode } from '../Nodes/RulesNode';
 import { SkillNode } from '../Nodes/SkillNode';
@@ -52,26 +53,6 @@ interface ContextMenuState {
   x: number;
   y: number;
   nodeId: string;
-}
-
-/** Find a plugin node whose bounding box contains the given flow position */
-function findPluginAtPosition(
-  nodes: Node[],
-  flowX: number,
-  flowY: number,
-  excludeNodeId: string
-): Node | undefined {
-  return nodes.find((n) => {
-    if (n.type !== 'plugin' || n.id === excludeNodeId) return false;
-    const w = ((n.style as Record<string, unknown>)?.width as number) ?? n.measured?.width ?? 400;
-    const h = ((n.style as Record<string, unknown>)?.height as number) ?? n.measured?.height ?? 200;
-    return (
-      flowX >= n.position.x &&
-      flowX <= n.position.x + w &&
-      flowY >= n.position.y &&
-      flowY <= n.position.y + h
-    );
-  });
 }
 
 export function BlueprintCanvas() {
