@@ -70,6 +70,10 @@ interface GraphStore {
   setSearchOpen: (open: boolean) => void;
   setShortcutsOpen: (open: boolean) => void;
   setExportPreviewOpen: (open: boolean) => void;
+  settingsOpen: boolean;
+  showMinimap: boolean;
+  setSettingsOpen: (open: boolean) => void;
+  setShowMinimap: (show: boolean) => void;
 }
 
 export const useGraphStore = create<GraphStore>()(
@@ -91,6 +95,8 @@ export const useGraphStore = create<GraphStore>()(
       searchOpen: false,
       shortcutsOpen: false,
       exportPreviewOpen: false,
+      settingsOpen: false,
+      showMinimap: true,
 
       setNodes: (nodes) => set({ nodes }),
       setEdges: (edges) => set({ edges }),
@@ -330,6 +336,8 @@ export const useGraphStore = create<GraphStore>()(
       setSearchOpen: (open) => set({ searchOpen: open }),
       setShortcutsOpen: (open) => set({ shortcutsOpen: open }),
       setExportPreviewOpen: (open) => set({ exportPreviewOpen: open }),
+      setSettingsOpen: (open) => set({ settingsOpen: open }),
+      setShowMinimap: (show) => set({ showMinimap: show }),
 
       // Simulation
       stopSimulation: () => set({
