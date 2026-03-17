@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { type Node } from '@xyflow/react';
-import { findPluginAtPosition, PLUGIN_MIN_WIDTH, PLUGIN_MIN_HEIGHT } from './pluginHelpers';
+import { findPluginAtPosition, isNodeOutsidePlugin, PLUGIN_MIN_WIDTH, PLUGIN_MIN_HEIGHT } from './pluginHelpers';
 
 function makePlugin(id: string, x: number, y: number, w?: number, h?: number): Node {
   return {
@@ -73,5 +73,54 @@ describe('findPluginAtPosition', () => {
 
   it('returns undefined for empty nodes array', () => {
     expect(findPluginAtPosition([], 100, 100, 'other')).toBeUndefined();
+  });
+});
+
+describe('isNodeOutsidePlugin', () => {
+  const makePluginNode = (x: number, y: number, w: number, h: number): Node => ({
+    id: 'plugin-1',
+    type: 'plugin',
+    position: { x, y },
+    data: {},
+    style: { width: w, height: h },
+  });
+
+  const makeChild = (relX: number, relY: number, w = 300, h = 200): Node => ({
+    id: 'child-1',
+    type: 'skill',
+    position: { x: relX, y: relY },
+    parentId: 'plugin-1',
+    data: {},
+    measured: { width: w, height: h },
+  });
+
+  it('returns false when node center is inside plugin', () => {
+    const plugin = makePluginNode(0, 0, 600, 400);
+    const child = makeChild(100, 100, 100, 80);
+    expect(isNodeOutsidePlugin(child, plugin)).toBe(false);
+  });
+
+  it('returns true when node center is to the right of plugin', () => {
+    const plugin = makePluginNode(0, 0, 400, 400);
+    const child = makeChild(500, 100, 100, 80);
+    expect(isNodeOutsidePlugin(child, plugin)).toBe(true);
+  });
+
+  it('returns true when node center is above plugin', () => {
+    const plugin = makePluginNode(0, 0, 400, 400);
+    const child = makeChild(100, -300, 100, 80);
+    expect(isNodeOutsidePlugin(child, plugin)).toBe(true);
+  });
+
+  it('returns true when node center is below plugin', () => {
+    const plugin = makePluginNode(0, 0, 400, 300);
+    const child = makeChild(100, 400, 100, 80);
+    expect(isNodeOutsidePlugin(child, plugin)).toBe(true);
+  });
+
+  it('returns true when node center is to the left of plugin', () => {
+    const plugin = makePluginNode(100, 100, 400, 400);
+    const child = makeChild(-200, 100, 100, 80);
+    expect(isNodeOutsidePlugin(child, plugin)).toBe(true);
   });
 });
