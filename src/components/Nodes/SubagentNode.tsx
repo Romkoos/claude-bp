@@ -18,14 +18,14 @@ export function SubagentNode({ id, data, selected }: NodeProps) {
       icon={Bot}
       selected={selected}
     >
-      <div className="space-y-1.5 text-xs">
+      <div className="space-y-1 text-xs">
         {/* Compact */}
         {nodeData.name && (
-          <div className="text-[11px] font-medium truncate" style={{ color: 'var(--text-secondary)' }}>
+          <div className="text-[10px] font-medium truncate" style={{ color: 'var(--text-secondary)' }}>
             {nodeData.name}
           </div>
         )}
-        <div className="flex gap-1.5 flex-wrap">
+        <div className="flex gap-1 flex-wrap">
           <span className="bp-badge" style={{ background: '#8b5cf630', color: '#c4b5fd' }}>
             {nodeData.agentType}
           </span>
@@ -38,17 +38,17 @@ export function SubagentNode({ id, data, selected }: NodeProps) {
 
         {/* Expanded */}
         {!nodeData.collapsed && (
-          <div className="space-y-1.5 pt-1 border-t" style={{ borderColor: 'var(--node-border)' }}>
+          <div className="space-y-1 pt-1 border-t" style={{ borderColor: 'var(--node-border)' }}>
             <input
               value={nodeData.name}
               onChange={(e) => updateNodeData(id, { name: e.target.value })}
               placeholder="Subagent name..."
-              className="bp-input text-xs"
+              className="bp-input"
             />
             <select
               value={nodeData.agentType}
               onChange={(e) => updateNodeData(id, { agentType: e.target.value })}
-              className="bp-select text-xs"
+              className="bp-select"
             >
               <option value="general-purpose">General Purpose</option>
               <option value="Explore">Explore</option>
@@ -58,7 +58,7 @@ export function SubagentNode({ id, data, selected }: NodeProps) {
             <select
               value={nodeData.model}
               onChange={(e) => updateNodeData(id, { model: e.target.value })}
-              className="bp-select text-xs"
+              className="bp-select"
             >
               <option value="inherit">Inherit</option>
               <option value="claude-opus-4">Claude Opus 4</option>
@@ -68,7 +68,7 @@ export function SubagentNode({ id, data, selected }: NodeProps) {
               value={nodeData.systemPrompt}
               onChange={(e) => updateNodeData(id, { systemPrompt: e.target.value })}
               placeholder="System prompt..."
-              className="bp-textarea text-xs font-mono"
+              className="bp-textarea"
               rows={2}
             />
           </div>

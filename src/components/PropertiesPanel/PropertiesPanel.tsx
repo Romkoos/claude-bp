@@ -9,6 +9,7 @@ import { HookEditor } from './HookEditor';
 import { ToolEditor } from './ToolEditor';
 import { McpEditor } from './McpEditor';
 import { PluginEditor } from './PluginEditor';
+import { useModal } from '../shared/useModal';
 
 const NODE_ICONS: Record<BlueprintNodeType, LucideIcon> = {
   rules: FileText,
@@ -37,6 +38,7 @@ export function PropertiesPanel() {
   const nodes = useGraphStore((s) => s.nodes);
   const updateNodeData = useGraphStore((s) => s.updateNodeData);
   const deleteNode = useGraphStore((s) => s.deleteNode);
+  const modal = useModal();
 
   const node = nodes.find((n) => n.id === selectedNodeId);
   if (!node) return null;
@@ -47,8 +49,8 @@ export function PropertiesPanel() {
   const data = node.data as Record<string, unknown>;
   const label = data.label as string;
 
-  const handleDelete = () => {
-    if (window.confirm(`Delete "${label}"?`)) {
+  const handleDelete = async () => {
+    if (await modal.confirm({ title: 'Delete Node', message: `Delete "${label}"?`, danger: true, confirmLabel: 'Delete' })) {
       deleteNode(node.id);
     }
   };

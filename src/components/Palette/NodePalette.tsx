@@ -1,9 +1,12 @@
-import { FileText, Zap, Bot, Webhook, Wrench, Plug, Package, StickyNote, type LucideIcon } from 'lucide-react';
+import { useState, useRef, useCallback } from 'react';
+import { FileText, Zap, Bot, Webhook, Wrench, Plug, Package, StickyNote, Info, type LucideIcon } from 'lucide-react';
 import { useReactFlow } from '@xyflow/react';
 import type { BlueprintNodeType } from '../../types/nodes';
 import { NODE_COLORS } from '../../constants/theme';
 import { TEMPLATES } from '../../constants/templates';
 import { useGraphStore } from '../../store/useGraphStore';
+import { useModal } from '../shared/useModal';
+import { NodeInfoPopover } from './NodeInfoPopover';
 
 const TEMPLATE_TEST_IDS: Record<string, string> = {
   'pr-review': 'template-pr-review',
@@ -31,15 +34,26 @@ const PALETTE_ITEMS: PaletteItem[] = [
 
 export function NodePalette() {
   const importJSON = useGraphStore((s) => s.importJSON);
+  const nodes = useGraphStore((s) => s.nodes);
+  const edges = useGraphStore((s) => s.edges);
   const { fitView } = useReactFlow();
+  const modal = useModal();
+  const [infoOpen, setInfoOpen] = useState<BlueprintNodeType | null>(null);
+  const infoButtonRefs = useRef<Map<BlueprintNodeType, HTMLButtonElement>>(new Map());
+  const setInfoButtonRef = useCallback((type: BlueprintNodeType, el: HTMLButtonElement | null) => {
+    if (el) infoButtonRefs.current.set(type, el);
+    else infoButtonRefs.current.delete(type);
+  }, []);
 
   const onDragStart = (event: React.DragEvent, nodeType: BlueprintNodeType) => {
     event.dataTransfer.setData('application/blueprint-node', nodeType);
     event.dataTransfer.effectAllowed = 'move';
   };
 
-  const loadTemplate = (template: typeof TEMPLATES[0]) => {
-    if (!window.confirm(`Load "${template.name}"? This will replace the current graph.`)) return;
+  const loadTemplate = async (template: typeof TEMPLATES[0]) => {
+    if (nodes.length > 0 || edges.length > 0) {
+      if (!await modal.confirm({ title: 'Load Template', message: `Load "${template.name}"? This will replace the current graph.`, danger: true, confirmLabel: 'Load' })) return;
+    }
     importJSON({
       version: '1.0.0',
       metadata: {
@@ -89,7 +103,7 @@ export function NodePalette() {
               >
                 <div className="p-2.5 flex items-start gap-2.5">
                   <Icon size={16} data-testid="palette-color-indicator" style={{ color: colors.header, marginTop: 1, flexShrink: 0 }} />
-                  <div className="min-w-0">
+                  <div className="min-w-0 flex-1">
                     <div className="text-xs font-medium" style={{ color: 'var(--text-primary)' }}>
                       {label}
                     </div>
@@ -97,10 +111,32 @@ export function NodePalette() {
                       {description}
                     </div>
                   </div>
+                  <button
+                    ref={(el) => setInfoButtonRef(type, el)}
+                    data-testid={`palette-info-${type}`}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      e.preventDefault();
+                      setInfoOpen(infoOpen === type ? null : type);
+                    }}
+                    onMouseDown={(e) => e.stopPropagation()}
+                    draggable={false}
+                    className="p-0.5 rounded hover:bg-[var(--node-border)] transition-colors flex-shrink-0 cursor-pointer"
+                    style={{ color: infoOpen === type ? 'var(--text-primary)' : 'var(--text-muted)' }}
+                  >
+                    <Info size={12} />
+                  </button>
                 </div>
               </div>
             );
           })}
+          {infoOpen && infoOpen !== 'comment' && (
+            <NodeInfoPopover
+              nodeType={infoOpen}
+              anchorRef={{ current: infoButtonRefs.current.get(infoOpen) ?? null }}
+              onClose={() => setInfoOpen(null)}
+            />
+          )}
         </div>
 
         <div className="mt-4 mb-4" style={{ borderTop: '1px solid var(--node-border)' }} />

@@ -1,0 +1,138 @@
+{
+  "id": "SUITE-029",
+  "name": "Confirm Modal Dialog System",
+  "tests": [
+    {
+      "id": "TC-270",
+      "name": "Delete node button shows confirm modal",
+      "priority": "critical",
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "dragAndDrop", "source": "[data-testid='palette-node-rules']", "target": ".react-flow__pane", "offsetX": 300, "offsetY": 300 },
+        { "action": "wait_for_timeout", "timeout": 300 },
+        { "action": "click", "target": ".react-flow__node" },
+        { "action": "wait_for_timeout", "timeout": 200 },
+        { "action": "click", "target": "[data-testid='delete-node-button']" }
+      ],
+      "assertions": [
+        { "type": "visible", "target": "[data-testid='confirm-modal']", "description": "Confirm modal appears" },
+        { "type": "visible", "target": "[data-testid='confirm-modal-confirm']", "description": "Confirm button visible" },
+        { "type": "visible", "target": "[data-testid='confirm-modal-cancel']", "description": "Cancel button visible" }
+      ]
+    },
+    {
+      "id": "TC-271",
+      "name": "Clicking Cancel in confirm modal keeps the node",
+      "priority": "critical",
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "dragAndDrop", "source": "[data-testid='palette-node-rules']", "target": ".react-flow__pane", "offsetX": 300, "offsetY": 300 },
+        { "action": "wait_for_timeout", "timeout": 300 },
+        { "action": "click", "target": ".react-flow__node" },
+        { "action": "wait_for_timeout", "timeout": 200 },
+        { "action": "click", "target": "[data-testid='delete-node-button']" },
+        { "action": "wait_for_timeout", "timeout": 200 },
+        { "action": "click", "target": "[data-testid='confirm-modal-cancel']" }
+      ],
+      "assertions": [
+        { "type": "notVisible", "target": "[data-testid='confirm-modal']", "description": "Modal closed" },
+        { "type": "count", "target": ".react-flow__node", "expected": 1, "description": "Node still exists" }
+      ]
+    },
+    {
+      "id": "TC-272",
+      "name": "Clicking Confirm in delete modal removes the node",
+      "priority": "critical",
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "dragAndDrop", "source": "[data-testid='palette-node-rules']", "target": ".react-flow__pane", "offsetX": 300, "offsetY": 300 },
+        { "action": "wait_for_timeout", "timeout": 300 },
+        { "action": "click", "target": ".react-flow__node" },
+        { "action": "wait_for_timeout", "timeout": 200 },
+        { "action": "click", "target": "[data-testid='delete-node-button']" },
+        { "action": "wait_for_timeout", "timeout": 200 },
+        { "action": "click", "target": "[data-testid='confirm-modal-confirm']" }
+      ],
+      "assertions": [
+        { "type": "notVisible", "target": "[data-testid='confirm-modal']", "description": "Modal closed" },
+        { "type": "count", "target": ".react-flow__node", "expected": 0, "description": "Node deleted" }
+      ]
+    },
+    {
+      "id": "TC-273",
+      "name": "Pressing Escape closes confirm modal without action",
+      "priority": "high",
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "dragAndDrop", "source": "[data-testid='palette-node-rules']", "target": ".react-flow__pane", "offsetX": 300, "offsetY": 300 },
+        { "action": "wait_for_timeout", "timeout": 300 },
+        { "action": "click", "target": ".react-flow__node" },
+        { "action": "wait_for_timeout", "timeout": 200 },
+        { "action": "click", "target": "[data-testid='delete-node-button']" },
+        { "action": "wait_for_timeout", "timeout": 200 },
+        { "action": "keyboard", "keys": "Escape" }
+      ],
+      "assertions": [
+        { "type": "notVisible", "target": "[data-testid='confirm-modal']", "description": "Modal closed on Escape" },
+        { "type": "count", "target": ".react-flow__node", "expected": 1, "description": "Node preserved" }
+      ]
+    },
+    {
+      "id": "TC-274",
+      "name": "Clicking backdrop closes confirm modal",
+      "priority": "medium",
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "dragAndDrop", "source": "[data-testid='palette-node-rules']", "target": ".react-flow__pane", "offsetX": 300, "offsetY": 300 },
+        { "action": "wait_for_timeout", "timeout": 300 },
+        { "action": "click", "target": ".react-flow__node" },
+        { "action": "wait_for_timeout", "timeout": 200 },
+        { "action": "click", "target": "[data-testid='delete-node-button']" },
+        { "action": "wait_for_timeout", "timeout": 200 },
+        { "action": "click", "target": "[data-testid='confirm-modal-backdrop']", "offsetX": 5, "offsetY": 5 }
+      ],
+      "assertions": [
+        { "type": "notVisible", "target": "[data-testid='confirm-modal']", "description": "Modal closed on backdrop click" },
+        { "type": "count", "target": ".react-flow__node", "expected": 1, "description": "Node preserved" }
+      ]
+    },
+    {
+      "id": "TC-275",
+      "name": "Clear canvas button shows confirm modal",
+      "priority": "high",
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "dragAndDrop", "source": "[data-testid='palette-node-rules']", "target": ".react-flow__pane", "offsetX": 300, "offsetY": 300 },
+        { "action": "wait_for_timeout", "timeout": 300 },
+        { "action": "click", "target": "[data-testid='toolbar-clear']" }
+      ],
+      "assertions": [
+        { "type": "visible", "target": "[data-testid='confirm-modal']", "description": "Confirm modal appears for clear canvas" }
+      ]
+    },
+    {
+      "id": "TC-276",
+      "name": "Confirming clear canvas removes all nodes",
+      "priority": "high",
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "dragAndDrop", "source": "[data-testid='palette-node-rules']", "target": ".react-flow__pane", "offsetX": 300, "offsetY": 300 },
+        { "action": "wait_for_timeout", "timeout": 300 },
+        { "action": "click", "target": "[data-testid='toolbar-clear']" },
+        { "action": "wait_for_timeout", "timeout": 200 },
+        { "action": "click", "target": "[data-testid='confirm-modal-confirm']" }
+      ],
+      "assertions": [
+        { "type": "notVisible", "target": "[data-testid='confirm-modal']", "description": "Modal closed" },
+        { "type": "count", "target": ".react-flow__node", "expected": 0, "description": "All nodes removed" }
+      ]
+    }
+  ]
+}

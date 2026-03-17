@@ -1,7 +1,7 @@
 import type { RulesNodeData } from '../../types/nodes';
 import { useGraphStore } from '../../store/useGraphStore';
 import { CollapsibleSection } from '../shared/CollapsibleSection';
-import { CodeEditor } from '../shared/CodeEditor';
+
 
 interface Props {
   nodeId: string;
@@ -38,12 +38,7 @@ export function RulesEditor({ nodeId, data }: Props) {
 
       <div data-testid="field-rules-content">
       <CollapsibleSection title="Content">
-        <CodeEditor
-          value={d.content}
-          onChange={(value) => updateNodeData(nodeId, { content: value })}
-          language="markdown"
-          placeholder="Rules content..."
-        />
+        <textarea value={d.content} onChange={(e) => updateNodeData(nodeId, { content: e.target.value })} placeholder="Rules content..." className="bp-textarea text-xs" rows={8} />
       </CollapsibleSection>
       </div>
     </div>

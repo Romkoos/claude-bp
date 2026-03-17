@@ -1,0 +1,76 @@
+{
+  "id": "SUITE-030",
+  "name": "Node Info Popover",
+  "tests": [
+    {
+      "id": "TC-277",
+      "name": "Info button in palette shows popover for rules node",
+      "priority": "critical",
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "click", "target": "[data-testid='palette-info-rules']" }
+      ],
+      "assertions": [
+        { "type": "visible", "target": "[data-testid='node-info-popover-rules']", "description": "Rules info popover appears" }
+      ]
+    },
+    {
+      "id": "TC-278",
+      "name": "Info button in palette shows popover for skill node",
+      "priority": "high",
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "click", "target": "[data-testid='palette-info-skill']" }
+      ],
+      "assertions": [
+        { "type": "visible", "target": "[data-testid='node-info-popover-skill']", "description": "Skill info popover appears" }
+      ]
+    },
+    {
+      "id": "TC-279",
+      "name": "Clicking info button again closes popover",
+      "priority": "high",
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "click", "target": "[data-testid='palette-info-rules']" },
+        { "action": "wait_for_timeout", "timeout": 200 },
+        { "action": "click", "target": "[data-testid='palette-info-rules']" }
+      ],
+      "assertions": [
+        { "type": "notVisible", "target": "[data-testid='node-info-popover-rules']", "description": "Popover closes on second click" }
+      ]
+    },
+    {
+      "id": "TC-280",
+      "name": "Clicking a different info button switches popover",
+      "priority": "medium",
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "click", "target": "[data-testid='palette-info-rules']" },
+        { "action": "wait_for_timeout", "timeout": 200 },
+        { "action": "click", "target": "[data-testid='palette-info-tool']" }
+      ],
+      "assertions": [
+        { "type": "notVisible", "target": "[data-testid='node-info-popover-rules']", "description": "Previous popover closed" },
+        { "type": "visible", "target": "[data-testid='node-info-popover-tool']", "description": "New popover opened" }
+      ]
+    },
+    {
+      "id": "TC-281",
+      "name": "Info popover for each node type is available",
+      "priority": "medium",
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "click", "target": "[data-testid='palette-info-hook']" }
+      ],
+      "assertions": [
+        { "type": "visible", "target": "[data-testid='node-info-popover-hook']", "description": "Hook info popover appears" }
+      ]
+    }
+  ]
+}

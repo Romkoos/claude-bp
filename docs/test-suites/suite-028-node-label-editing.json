@@ -1,0 +1,78 @@
+{
+  "id": "SUITE-028",
+  "name": "Node Label Inline Editing",
+  "tests": [
+    {
+      "id": "TC-266",
+      "name": "Double-clicking node label enters edit mode",
+      "priority": "critical",
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "dragAndDrop", "source": "[data-testid='palette-node-rules']", "target": ".react-flow__pane", "offsetX": 300, "offsetY": 300 },
+        { "action": "wait_for_timeout", "timeout": 300 },
+        { "action": "dblclick", "target": "[data-testid='node-label']" }
+      ],
+      "assertions": [
+        { "type": "visible", "target": "[data-testid='node-label-input']", "description": "Label input field appears on double-click" }
+      ]
+    },
+    {
+      "id": "TC-267",
+      "name": "Editing label and pressing Enter commits the change",
+      "priority": "critical",
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "dragAndDrop", "source": "[data-testid='palette-node-rules']", "target": ".react-flow__pane", "offsetX": 300, "offsetY": 300 },
+        { "action": "wait_for_timeout", "timeout": 300 },
+        { "action": "dblclick", "target": "[data-testid='node-label']" },
+        { "action": "wait_for_timeout", "timeout": 100 },
+        { "action": "fill", "target": "[data-testid='node-label-input']", "value": "MyRules" },
+        { "action": "keyboard", "keys": "Enter" }
+      ],
+      "assertions": [
+        { "type": "visible", "target": "[data-testid='node-label']", "description": "Label display mode restored after Enter" },
+        { "type": "textContains", "target": "[data-testid='node-label']", "expected": "MyRules", "description": "Label text updated to new value" }
+      ]
+    },
+    {
+      "id": "TC-268",
+      "name": "Pressing Escape during edit cancels changes",
+      "priority": "high",
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "dragAndDrop", "source": "[data-testid='palette-node-rules']", "target": ".react-flow__pane", "offsetX": 300, "offsetY": 300 },
+        { "action": "wait_for_timeout", "timeout": 300 },
+        { "action": "dblclick", "target": "[data-testid='node-label']" },
+        { "action": "wait_for_timeout", "timeout": 100 },
+        { "action": "fill", "target": "[data-testid='node-label-input']", "value": "SomethingElse" },
+        { "action": "keyboard", "keys": "Escape" }
+      ],
+      "assertions": [
+        { "type": "visible", "target": "[data-testid='node-label']", "description": "Label display mode restored after Escape" },
+        { "type": "textContains", "target": "[data-testid='node-label']", "expected": "CLAUDE.md", "description": "Original label preserved after Escape" }
+      ]
+    },
+    {
+      "id": "TC-269",
+      "name": "Clicking outside label input commits the edit (blur)",
+      "priority": "high",
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "dragAndDrop", "source": "[data-testid='palette-node-rules']", "target": ".react-flow__pane", "offsetX": 300, "offsetY": 300 },
+        { "action": "wait_for_timeout", "timeout": 300 },
+        { "action": "dblclick", "target": "[data-testid='node-label']" },
+        { "action": "wait_for_timeout", "timeout": 100 },
+        { "action": "fill", "target": "[data-testid='node-label-input']", "value": "BlurTest" },
+        { "action": "click", "target": ".react-flow__pane" }
+      ],
+      "assertions": [
+        { "type": "visible", "target": "[data-testid='node-label']", "description": "Label display mode restored on blur" },
+        { "type": "textContains", "target": "[data-testid='node-label']", "expected": "BlurTest", "description": "Label committed on blur" }
+      ]
+    }
+  ]
+}

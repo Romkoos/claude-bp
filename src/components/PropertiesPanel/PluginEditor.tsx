@@ -1,7 +1,7 @@
 import type { PluginNodeData } from '../../types/nodes';
 import { useGraphStore } from '../../store/useGraphStore';
 import { CollapsibleSection } from '../shared/CollapsibleSection';
-import { CodeEditor } from '../shared/CodeEditor';
+
 
 interface Props {
   nodeId: string;
@@ -45,24 +45,13 @@ export function PluginEditor({ nodeId, data }: Props) {
             <label className="text-[10px] uppercase tracking-wider mb-1 block" style={{ color: 'var(--text-muted)' }}>
               Description
             </label>
-            <textarea
-              value={d.description}
-              onChange={(e) => updateNodeData(nodeId, { description: e.target.value })}
-              placeholder="What does this plugin do..."
-              className="bp-textarea text-xs"
-              rows={3}
-            />
+            <textarea value={d.description} onChange={(e) => updateNodeData(nodeId, { description: e.target.value })} placeholder="What does this plugin do..." className="bp-textarea text-xs" rows={3} />
           </div>
         </div>
       </CollapsibleSection>
 
       <CollapsibleSection title="Install Script" defaultOpen={false}>
-        <CodeEditor
-          value={d.installScript}
-          onChange={(value) => updateNodeData(nodeId, { installScript: value })}
-          language="shell"
-          placeholder="Install script..."
-        />
+        <textarea value={d.installScript} onChange={(e) => updateNodeData(nodeId, { installScript: e.target.value })} placeholder="Install script..." className="bp-textarea text-xs" rows={4} />
       </CollapsibleSection>
 
       <CollapsibleSection title="Children" defaultOpen>

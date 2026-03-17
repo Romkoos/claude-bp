@@ -73,13 +73,7 @@ export function ToolEditor({ nodeId, data }: Props) {
 
       <CollapsibleSection title="Description" defaultOpen={false}>
         <div>
-          <textarea
-            value={d.description}
-            onChange={(e) => updateNodeData(nodeId, { description: e.target.value })}
-            placeholder="Describe this tool..."
-            className="bp-textarea text-xs"
-            rows={4}
-          />
+          <textarea value={d.description} onChange={(e) => updateNodeData(nodeId, { description: e.target.value })} placeholder="Describe this tool..." className="bp-textarea text-xs" rows={4} />
         </div>
       </CollapsibleSection>
     </div>

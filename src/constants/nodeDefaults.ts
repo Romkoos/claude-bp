@@ -45,7 +45,7 @@ export const NODE_PIN_DEFINITIONS: Record<BlueprintNodeType, PinDefinition[]> = 
 export function createRulesData(): RulesNodeData {
   return {
     label: 'CLAUDE.md',
-    collapsed: false,
+    collapsed: true,
     validation: { errors: [], warnings: [] },
     scope: 'root',
     path: '/',
@@ -57,7 +57,7 @@ export function createRulesData(): RulesNodeData {
 export function createSkillData(): SkillNodeData {
   return {
     label: 'New Skill',
-    collapsed: false,
+    collapsed: true,
     validation: { errors: [], warnings: [] },
     frontmatter: {
       name: '',
@@ -78,7 +78,7 @@ export function createSkillData(): SkillNodeData {
 export function createSubagentData(): SubagentNodeData {
   return {
     label: 'New Subagent',
-    collapsed: false,
+    collapsed: true,
     validation: { errors: [], warnings: [] },
     name: '',
     description: '',
@@ -95,7 +95,7 @@ export function createSubagentData(): SubagentNodeData {
 export function createHookData(): HookNodeData {
   return {
     label: 'New Hook',
-    collapsed: false,
+    collapsed: true,
     validation: { errors: [], warnings: [] },
     event: 'PreToolUse',
     matcher: '*',
@@ -111,7 +111,7 @@ export function createHookData(): HookNodeData {
 export function createToolData(): ToolNodeData {
   return {
     label: 'New Tool',
-    collapsed: false,
+    collapsed: true,
     validation: { errors: [], warnings: [] },
     toolName: 'Bash',
     pattern: '',
@@ -123,7 +123,7 @@ export function createToolData(): ToolNodeData {
 export function createMcpData(): McpNodeData {
   return {
     label: 'New MCP Server',
-    collapsed: false,
+    collapsed: true,
     validation: { errors: [], warnings: [] },
     serverName: '',
     connection: {
@@ -140,7 +140,7 @@ export function createMcpData(): McpNodeData {
 export function createCommentData(): CommentNodeData {
   return {
     label: '',
-    collapsed: false,
+    collapsed: true,
     validation: { errors: [], warnings: [] },
     content: '',
     color: 'yellow',
@@ -152,7 +152,7 @@ export function createCommentData(): CommentNodeData {
 export function createPluginData(): PluginNodeData {
   return {
     label: 'New Plugin',
-    collapsed: false,
+    collapsed: true,
     validation: { errors: [], warnings: [] },
     pluginName: '',
     version: '1.0.0',

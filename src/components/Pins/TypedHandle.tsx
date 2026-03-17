@@ -22,12 +22,12 @@ export function TypedHandle({ pin, style }: TypedHandleProps) {
       className="flex items-center gap-1.5 relative"
       style={{
         justifyContent: isInput ? 'flex-start' : 'flex-end',
-        padding: '3px 0',
+        padding: '2px 0',
       }}
     >
       {!isInput && (
         <span
-          className="text-[10px] whitespace-nowrap"
+          className="text-[9px] whitespace-nowrap"
           style={{ color: 'var(--text-muted)' }}
         >
           {pin.label}
@@ -38,10 +38,10 @@ export function TypedHandle({ pin, style }: TypedHandleProps) {
         position={position}
         id={pin.id}
         style={{
-          width: 10,
-          height: 10,
+          width: 8,
+          height: 8,
           background: isConnected ? color : 'transparent',
-          border: `2px solid ${color}`,
+          border: `1.5px solid ${color}`,
           borderRadius: '50%',
           position: 'relative',
           transform: 'none',
@@ -53,7 +53,7 @@ export function TypedHandle({ pin, style }: TypedHandleProps) {
       />
       {isInput && (
         <span
-          className="text-[10px] whitespace-nowrap"
+          className="text-[9px] whitespace-nowrap"
           style={{ color: 'var(--text-muted)' }}
         >
           {pin.label}

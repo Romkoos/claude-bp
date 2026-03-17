@@ -25,14 +25,14 @@ export function McpNode({ id, data, selected }: NodeProps) {
       selected={selected}
       dashed
     >
-      <div className="space-y-1.5 text-xs">
+      <div className="space-y-1 text-xs">
         {/* Compact */}
-        <div className="text-[11px] font-medium" style={{ color: 'var(--text-secondary)' }}>
+        <div className="text-[10px] font-medium" style={{ color: 'var(--text-secondary)' }}>
           {nodeData.serverName || 'unnamed server'}
         </div>
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-1">
           <span
-            className="inline-block px-1.5 py-0.5 rounded text-[10px] font-medium"
+            className="inline-block px-1 py-0.5 rounded text-[9px] font-medium"
             style={{
               background: nodeData.connection.type === 'url' ? '#06b6d420' : '#a855f720',
               color: nodeData.connection.type === 'url' ? '#06b6d4' : '#a855f7',
@@ -49,17 +49,17 @@ export function McpNode({ id, data, selected }: NodeProps) {
 
         {/* Expanded */}
         {!nodeData.collapsed && (
-          <div className="space-y-1.5 pt-1 border-t" style={{ borderColor: 'var(--node-border)' }}>
+          <div className="space-y-1 pt-1 border-t" style={{ borderColor: 'var(--node-border)' }}>
             <input
               value={nodeData.serverName}
               onChange={(e) => updateNodeData(id, { serverName: e.target.value })}
               placeholder="Server name..."
-              className="bp-input text-xs"
+              className="bp-input"
             />
             <select
               value={nodeData.connection.type}
               onChange={(e) => updateConnection({ type: e.target.value as McpNodeData['connection']['type'] })}
-              className="bp-select text-xs"
+              className="bp-select"
             >
               <option value="url">URL</option>
               <option value="stdio">Stdio</option>
@@ -69,7 +69,7 @@ export function McpNode({ id, data, selected }: NodeProps) {
                 value={nodeData.connection.url}
                 onChange={(e) => updateConnection({ url: e.target.value })}
                 placeholder="http://localhost:3000/mcp"
-                className="bp-input text-xs font-mono"
+                className="bp-input"
               />
             )}
             {nodeData.connection.type === 'stdio' && (
@@ -78,7 +78,7 @@ export function McpNode({ id, data, selected }: NodeProps) {
                   value={nodeData.connection.command}
                   onChange={(e) => updateConnection({ command: e.target.value })}
                   placeholder="Command..."
-                  className="bp-input text-xs font-mono"
+                  className="bp-input"
                 />
                 <input
                   value={nodeData.connection.args.join(', ')}
@@ -88,7 +88,7 @@ export function McpNode({ id, data, selected }: NodeProps) {
                     })
                   }
                   placeholder="Args (comma-separated)..."
-                  className="bp-input text-xs font-mono"
+                  className="bp-input"
                 />
               </>
             )}

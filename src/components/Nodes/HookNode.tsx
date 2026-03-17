@@ -38,12 +38,12 @@ export function HookNode({ id, data, selected }: NodeProps) {
       icon={Webhook}
       selected={selected}
     >
-      <div className="space-y-1.5 text-xs">
+      <div className="space-y-1 text-xs">
         {/* Compact */}
-        <div className="text-[11px] font-medium" style={{ color: 'var(--text-secondary)' }}>
+        <div className="text-[10px] font-medium" style={{ color: 'var(--text-secondary)' }}>
           {nodeData.event}
         </div>
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-1">
           <span className="font-mono text-[10px]" style={{ color: 'var(--text-muted)' }}>
             {nodeData.matcher}
           </span>
@@ -55,11 +55,11 @@ export function HookNode({ id, data, selected }: NodeProps) {
 
         {/* Expanded */}
         {!nodeData.collapsed && (
-          <div className="space-y-1.5 pt-1 border-t" style={{ borderColor: 'var(--node-border)' }}>
+          <div className="space-y-1 pt-1 border-t" style={{ borderColor: 'var(--node-border)' }}>
             <select
               value={nodeData.event}
               onChange={(e) => updateNodeData(id, { event: e.target.value })}
-              className="bp-select text-xs"
+              className="bp-select"
             >
               {HOOK_EVENTS.map((ev) => (
                 <option key={ev} value={ev}>{ev}</option>
@@ -69,12 +69,12 @@ export function HookNode({ id, data, selected }: NodeProps) {
               value={nodeData.matcher}
               onChange={(e) => updateNodeData(id, { matcher: e.target.value })}
               placeholder="Matcher pattern..."
-              className="bp-input text-xs font-mono"
+              className="bp-input"
             />
             <select
               value={nodeData.hookType}
               onChange={(e) => updateNodeData(id, { hookType: e.target.value })}
-              className="bp-select text-xs"
+              className="bp-select"
             >
               <option value="command">Command</option>
               <option value="http">HTTP</option>
@@ -83,12 +83,12 @@ export function HookNode({ id, data, selected }: NodeProps) {
               value={nodeData.command}
               onChange={(e) => updateNodeData(id, { command: e.target.value })}
               placeholder="Command..."
-              className="bp-input text-xs font-mono"
+              className="bp-input"
             />
             <select
               value={nodeData.decision.type}
               onChange={(e) => updateDecision({ type: e.target.value as HookNodeData['decision']['type'] })}
-              className="bp-select text-xs"
+              className="bp-select"
             >
               <option value="none">None</option>
               <option value="allow">Allow</option>
@@ -101,7 +101,7 @@ export function HookNode({ id, data, selected }: NodeProps) {
                 value={nodeData.decision.reason}
                 onChange={(e) => updateDecision({ reason: e.target.value })}
                 placeholder="Reason..."
-                className="bp-input text-xs"
+                className="bp-input"
               />
             )}
           </div>

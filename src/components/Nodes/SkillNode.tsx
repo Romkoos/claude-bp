@@ -24,14 +24,14 @@ export function SkillNode({ id, data, selected }: NodeProps) {
       icon={Zap}
       selected={selected}
     >
-      <div className="space-y-1.5 text-xs">
+      <div className="space-y-1 text-xs">
         {/* Compact */}
         {nodeData.frontmatter.name && (
-          <div className="text-[11px] font-medium truncate" style={{ color: 'var(--text-secondary)' }}>
+          <div className="text-[10px] font-medium truncate" style={{ color: 'var(--text-secondary)' }}>
             {nodeData.frontmatter.name}
           </div>
         )}
-        <div className="flex gap-1.5 flex-wrap">
+        <div className="flex gap-1 flex-wrap">
           <span
             className="bp-badge"
             style={{
@@ -50,24 +50,24 @@ export function SkillNode({ id, data, selected }: NodeProps) {
 
         {/* Expanded */}
         {!nodeData.collapsed && (
-          <div className="space-y-1.5 pt-1 border-t" style={{ borderColor: 'var(--node-border)' }}>
+          <div className="space-y-1 pt-1 border-t" style={{ borderColor: 'var(--node-border)' }}>
             <input
               value={nodeData.frontmatter.name}
               onChange={(e) => updateFrontmatter({ name: e.target.value })}
               placeholder="Skill name..."
-              className="bp-input text-xs"
+              className="bp-input"
             />
             <textarea
               value={nodeData.frontmatter.description}
               onChange={(e) => updateFrontmatter({ description: e.target.value })}
               placeholder="Description..."
-              className="bp-textarea text-xs"
+              className="bp-textarea"
               rows={2}
             />
             <select
               value={nodeData.frontmatter.context}
               onChange={(e) => updateFrontmatter({ context: e.target.value as 'conversation' | 'fork' })}
-              className="bp-select text-xs"
+              className="bp-select"
             >
               <option value="conversation">Conversation</option>
               <option value="fork">Fork</option>
@@ -76,7 +76,7 @@ export function SkillNode({ id, data, selected }: NodeProps) {
               <select
                 value={nodeData.frontmatter.agent}
                 onChange={(e) => updateFrontmatter({ agent: e.target.value })}
-                className="bp-select text-xs"
+                className="bp-select"
               >
                 <option value="inherit">Inherit</option>
                 <option value="Explore">Explore</option>

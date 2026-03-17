@@ -1,0 +1,157 @@
+{
+  "id": "SUITE-027",
+  "name": "Settings Panel & Minimap Toggle",
+  "tests": [
+    {
+      "id": "TC-256",
+      "name": "Settings button in toolbar opens settings panel",
+      "priority": "critical",
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "click", "target": "[data-testid='toolbar-settings']" }
+      ],
+      "assertions": [
+        { "type": "visible", "target": "[data-testid='settings-panel']", "description": "Settings panel is visible" },
+        { "type": "visible", "target": "[data-testid='toggle-minimap']", "description": "Minimap toggle is visible" },
+        { "type": "visible", "target": "[data-testid='settings-close']", "description": "Close button is visible" }
+      ]
+    },
+    {
+      "id": "TC-257",
+      "name": "Settings panel close button hides the panel",
+      "priority": "critical",
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "click", "target": "[data-testid='toolbar-settings']" },
+        { "action": "wait_for_timeout", "timeout": 200 },
+        { "action": "click", "target": "[data-testid='settings-close']" }
+      ],
+      "assertions": [
+        { "type": "notVisible", "target": "[data-testid='settings-panel']", "description": "Settings panel is hidden after close" }
+      ]
+    },
+    {
+      "id": "TC-258",
+      "name": "Clicking settings button again toggles panel closed",
+      "priority": "high",
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "click", "target": "[data-testid='toolbar-settings']" },
+        { "action": "wait_for_timeout", "timeout": 200 },
+        { "action": "click", "target": "[data-testid='toolbar-settings']" }
+      ],
+      "assertions": [
+        { "type": "notVisible", "target": "[data-testid='settings-panel']", "description": "Settings panel toggles closed" }
+      ]
+    },
+    {
+      "id": "TC-259",
+      "name": "Minimap toggle turns minimap off",
+      "priority": "critical",
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "click", "target": "[data-testid='toolbar-settings']" },
+        { "action": "wait_for_timeout", "timeout": 200 },
+        { "action": "click", "target": "[data-testid='toggle-minimap']" }
+      ],
+      "assertions": [
+        { "type": "notVisible", "target": ".react-flow__minimap", "description": "Minimap is hidden after toggle off" }
+      ]
+    },
+    {
+      "id": "TC-260",
+      "name": "Minimap toggle turns minimap back on",
+      "priority": "critical",
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "click", "target": "[data-testid='toolbar-settings']" },
+        { "action": "wait_for_timeout", "timeout": 200 },
+        { "action": "click", "target": "[data-testid='toggle-minimap']" },
+        { "action": "wait_for_timeout", "timeout": 200 },
+        { "action": "click", "target": "[data-testid='toggle-minimap']" }
+      ],
+      "assertions": [
+        { "type": "visible", "target": ".react-flow__minimap", "description": "Minimap is visible again after toggling back on" }
+      ]
+    },
+    {
+      "id": "TC-261",
+      "name": "Ctrl+, keyboard shortcut opens settings panel",
+      "priority": "high",
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "keyboard", "keys": "Control+," }
+      ],
+      "assertions": [
+        { "type": "visible", "target": "[data-testid='settings-panel']", "description": "Settings panel opens via Ctrl+," }
+      ]
+    },
+    {
+      "id": "TC-262",
+      "name": "Ctrl+, keyboard shortcut toggles settings panel closed",
+      "priority": "high",
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "keyboard", "keys": "Control+," },
+        { "action": "wait_for_timeout", "timeout": 200 },
+        { "action": "keyboard", "keys": "Control+," }
+      ],
+      "assertions": [
+        { "type": "notVisible", "target": "[data-testid='settings-panel']", "description": "Settings panel closes on second Ctrl+," }
+      ]
+    },
+    {
+      "id": "TC-263",
+      "name": "Escape key closes settings panel",
+      "priority": "high",
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "click", "target": "[data-testid='toolbar-settings']" },
+        { "action": "wait_for_timeout", "timeout": 200 },
+        { "action": "keyboard", "keys": "Escape" }
+      ],
+      "assertions": [
+        { "type": "notVisible", "target": "[data-testid='settings-panel']", "description": "Settings panel closes on Escape" }
+      ]
+    },
+    {
+      "id": "TC-264",
+      "name": "Settings panel replaces properties panel when open",
+      "priority": "high",
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "dragAndDrop", "source": "[data-testid='palette-node-rules']", "target": ".react-flow__pane", "offsetX": 300, "offsetY": 300 },
+        { "action": "wait_for_timeout", "timeout": 300 },
+        { "action": "click", "target": ".react-flow__node" },
+        { "action": "wait_for_timeout", "timeout": 200 },
+        { "action": "click", "target": "[data-testid='toolbar-settings']" }
+      ],
+      "assertions": [
+        { "type": "visible", "target": "[data-testid='settings-panel']", "description": "Settings panel is visible" },
+        { "type": "notVisible", "target": "[data-testid='properties-panel']", "description": "Properties panel is hidden while settings is open" }
+      ]
+    },
+    {
+      "id": "TC-265",
+      "name": "Minimap is visible by default on load",
+      "priority": "medium",
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "wait_for_timeout", "timeout": 500 }
+      ],
+      "assertions": [
+        { "type": "visible", "target": ".react-flow__minimap", "description": "Minimap is visible by default" }
+      ]
+    }
+  ]
+}

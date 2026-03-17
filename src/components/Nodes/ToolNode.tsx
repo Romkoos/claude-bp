@@ -23,14 +23,14 @@ export function ToolNode({ id, data, selected }: NodeProps) {
       pins={NODE_PIN_DEFINITIONS.tool}
       icon={Wrench}
       selected={selected}
-      minWidth={200}
+      minWidth={180}
     >
-      <div className="space-y-1.5 text-xs">
+      <div className="space-y-1 text-xs">
         {/* Compact: tool name, pattern badge, built-in badge */}
-        <div className="text-[11px] font-medium" style={{ color: 'var(--text-secondary)' }}>
+        <div className="text-[10px] font-medium" style={{ color: 'var(--text-secondary)' }}>
           {nodeData.toolName || 'Unnamed'}
         </div>
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-1">
           {nodeData.pattern && (
             <span
               className="bp-badge font-mono"
@@ -51,7 +51,7 @@ export function ToolNode({ id, data, selected }: NodeProps) {
 
         {/* Expanded */}
         {!nodeData.collapsed && (
-          <div className="space-y-1.5 pt-1 border-t" style={{ borderColor: 'var(--node-border)' }}>
+          <div className="space-y-1 pt-1 border-t" style={{ borderColor: 'var(--node-border)' }}>
             <select
               value={isCustom ? '__custom__' : nodeData.toolName}
               onChange={(e) => {
@@ -62,7 +62,7 @@ export function ToolNode({ id, data, selected }: NodeProps) {
                   updateNodeData(id, { toolName: val });
                 }
               }}
-              className="bp-select text-xs"
+              className="bp-select"
             >
               {COMMON_TOOLS.map((t) => (
                 <option key={t} value={t}>{t}</option>
@@ -74,14 +74,14 @@ export function ToolNode({ id, data, selected }: NodeProps) {
                 value={nodeData.toolName}
                 onChange={(e) => updateNodeData(id, { toolName: e.target.value })}
                 placeholder="Custom tool name..."
-                className="bp-input text-xs font-mono"
+                className="bp-input"
               />
             )}
             <input
               value={nodeData.pattern}
               onChange={(e) => updateNodeData(id, { pattern: e.target.value })}
               placeholder="No restriction"
-              className="bp-input text-xs font-mono"
+              className="bp-input"
             />
             <label className="flex items-center gap-2 text-xs cursor-pointer" style={{ color: 'var(--text-secondary)' }}>
               <input

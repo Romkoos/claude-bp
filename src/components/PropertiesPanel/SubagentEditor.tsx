@@ -2,7 +2,7 @@ import type { SubagentNodeData } from '../../types/nodes';
 import { useGraphStore } from '../../store/useGraphStore';
 import { CollapsibleSection } from '../shared/CollapsibleSection';
 import { MultiSelect } from '../shared/MultiSelect';
-import { CodeEditor } from '../shared/CodeEditor';
+
 
 const COMMON_TOOLS = [
   'Read', 'Edit', 'Write', 'Bash', 'Glob', 'Grep', 'Agent',
@@ -28,7 +28,7 @@ export function SubagentEditor({ nodeId, data }: Props) {
           </div>
           <div>
             <label className="text-[10px] uppercase tracking-wider mb-1 block" style={{ color: 'var(--text-muted)' }}>Description</label>
-            <textarea value={d.description} onChange={(e) => updateNodeData(nodeId, { description: e.target.value })} placeholder="What this agent does..." className="bp-textarea text-xs" rows={2} />
+            <textarea value={d.description} onChange={(e) => updateNodeData(nodeId, { description: e.target.value })} placeholder="What this agent does..." className="bp-textarea text-xs" rows={4} />
           </div>
           <div data-testid="field-subagent-agent-type">
             <label className="text-[10px] uppercase tracking-wider mb-1 block" style={{ color: 'var(--text-muted)' }}>Agent Type</label>
@@ -71,12 +71,7 @@ export function SubagentEditor({ nodeId, data }: Props) {
 
       <div data-testid="field-subagent-system-prompt">
       <CollapsibleSection title="System Prompt">
-        <CodeEditor
-          value={d.systemPrompt}
-          onChange={(value) => updateNodeData(nodeId, { systemPrompt: value })}
-          language="markdown"
-          placeholder="System prompt..."
-        />
+        <textarea value={d.systemPrompt} onChange={(e) => updateNodeData(nodeId, { systemPrompt: e.target.value })} placeholder="System prompt..." className="bp-textarea text-xs" rows={10} />
       </CollapsibleSection>
       </div>
     </div>

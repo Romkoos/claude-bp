@@ -1,0 +1,66 @@
+{
+  "id": "SUITE-031",
+  "name": "Node Collapse Defaults & Validation Display",
+  "tests": [
+    {
+      "id": "TC-282",
+      "name": "Newly created rules node starts collapsed",
+      "priority": "critical",
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "dragAndDrop", "source": "[data-testid='palette-node-rules']", "target": ".react-flow__pane", "offsetX": 300, "offsetY": 300 },
+        { "action": "wait_for_timeout", "timeout": 300 }
+      ],
+      "assertions": [
+        { "type": "visible", "target": "[data-testid='collapse-toggle']", "description": "Collapse toggle exists" },
+        { "type": "notVisible", "target": "[data-testid='node-expanded-content']", "description": "Node body is collapsed by default" }
+      ]
+    },
+    {
+      "id": "TC-283",
+      "name": "Newly created skill node starts collapsed",
+      "priority": "high",
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "dragAndDrop", "source": "[data-testid='palette-node-skill']", "target": ".react-flow__pane", "offsetX": 300, "offsetY": 300 },
+        { "action": "wait_for_timeout", "timeout": 300 }
+      ],
+      "assertions": [
+        { "type": "notVisible", "target": "[data-testid='node-expanded-content']", "description": "Skill node body is collapsed by default" }
+      ]
+    },
+    {
+      "id": "TC-284",
+      "name": "Expanding collapsed node reveals content",
+      "priority": "critical",
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "dragAndDrop", "source": "[data-testid='palette-node-rules']", "target": ".react-flow__pane", "offsetX": 300, "offsetY": 300 },
+        { "action": "wait_for_timeout", "timeout": 300 },
+        { "action": "click", "target": "[data-testid='collapse-toggle']" }
+      ],
+      "assertions": [
+        { "type": "visible", "target": "[data-testid='node-expanded-content']", "description": "Node body visible after expanding" }
+      ]
+    },
+    {
+      "id": "TC-285",
+      "name": "Validation errors display as message list in footer",
+      "priority": "high",
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "dragAndDrop", "source": "[data-testid='palette-node-rules']", "target": ".react-flow__pane", "offsetX": 300, "offsetY": 300 },
+        { "action": "wait_for_timeout", "timeout": 300 },
+        { "action": "click", "target": "[data-testid='toolbar-validate']" },
+        { "action": "wait_for_timeout", "timeout": 500 }
+      ],
+      "assertions": [
+        { "type": "visible", "target": "[data-testid='validation-error-badge'], [data-testid='validation-warning-badge']", "description": "Validation badge with messages appears after validation" }
+      ]
+    }
+  ]
+}

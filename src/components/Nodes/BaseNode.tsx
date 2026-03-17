@@ -1,4 +1,4 @@
-import { memo, type ReactNode } from 'react';
+import { memo, useState, useRef, useEffect, useCallback, type ReactNode } from 'react';
 import { ChevronDown, ChevronRight, AlertCircle, AlertTriangle, type LucideIcon } from 'lucide-react';
 import { useReactFlow } from '@xyflow/react';
 import type { BlueprintNodeType } from '../../types/nodes';
@@ -23,12 +23,29 @@ interface BaseNodeProps {
   dashed?: boolean;
 }
 
-function BaseNodeInner({ id, nodeType, data, pins, icon: Icon, children, selected, minWidth = 280, dashed = false }: BaseNodeProps) {
+function BaseNodeInner({ id, nodeType, data, pins, icon: Icon, children, selected, minWidth = 240, dashed = false }: BaseNodeProps) {
   const { fitView } = useReactFlow();
   const updateNodeData = useGraphStore((s) => s.updateNodeData);
   const simulationHighlightedNodeId = useGraphStore((s) => s.simulationHighlightedNodeId);
   const isSimHighlighted = simulationHighlightedNodeId === id;
   const colors = NODE_COLORS[nodeType];
+
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState(data.label);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => { setDraft(data.label); }, [data.label]);
+  useEffect(() => { if (editing) inputRef.current?.select(); }, [editing]);
+
+  const commitEdit = useCallback(() => {
+    setEditing(false);
+    const trimmed = draft.trim();
+    if (trimmed && trimmed !== data.label) {
+      updateNodeData(id, { label: trimmed });
+    } else {
+      setDraft(data.label);
+    }
+  }, [draft, data.label, id, updateNodeData]);
   const inputPins = pins.filter((p) => p.direction === PinDirection.In);
   const outputPins = pins.filter((p) => p.direction === PinDirection.Out);
   const hasErrors = data.validation.errors.length > 0;
@@ -41,29 +58,59 @@ function BaseNodeInner({ id, nodeType, data, pins, icon: Icon, children, selecte
         background: 'var(--node-bg)',
         border: `1px ${dashed ? 'dashed' : 'solid'} ${selected ? colors.header : 'var(--node-border)'}`,
         boxShadow: selected ? `0 0 20px ${colors.glow}` : undefined,
-        minWidth,
-        maxWidth: 400,
+        minWidth: data.collapsed ? undefined : minWidth,
+        maxWidth: 360,
         ...(isSimHighlighted ? { '--glow-color': colors.header } as React.CSSProperties : {}),
       }}
     >
       {/* Header stripe */}
-      <div data-testid="node-header-stripe" style={{ height: 4, background: colors.header }} />
+      <div data-testid="node-header-stripe" style={{ height: 2, background: colors.header }} />
 
       {/* Header row */}
       <div
         data-testid="node-header"
-        className="flex items-center gap-2 px-3 py-2"
+        className="flex items-center gap-1.5 px-2 py-1"
         style={{ borderBottom: '1px solid var(--node-border)' }}
-        onDoubleClick={() => {
-          fitView({ nodes: [{ id }], padding: 0.5, duration: 300 });
-        }}
       >
-        <span data-testid="node-icon"><Icon size={16} style={{ color: colors.header }} /></span>
-        <span className="text-sm font-medium flex-1 truncate" style={{ color: 'var(--text-primary)' }}>
-          {data.label}
+        <span
+          data-testid="node-icon"
+          onDoubleClick={() => {
+            fitView({ nodes: [{ id }], padding: 0.5, duration: 300 });
+          }}
+        >
+          <Icon size={14} style={{ color: colors.header }} />
         </span>
-        {hasErrors && <AlertCircle size={14} style={{ color: '#ef4444' }} />}
-        {!hasErrors && hasWarnings && <AlertTriangle size={14} style={{ color: '#f59e0b' }} />}
+        {editing ? (
+          <input
+            ref={inputRef}
+            data-testid="node-label-input"
+            className="text-xs font-medium flex-1 min-w-0 bg-transparent border-none outline-none p-0 nopan nodrag"
+            style={{ color: 'var(--text-primary)' }}
+            value={draft}
+            onChange={(e) => setDraft(e.target.value)}
+            onBlur={commitEdit}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') commitEdit();
+              if (e.key === 'Escape') { setDraft(data.label); setEditing(false); }
+              e.stopPropagation();
+            }}
+            onClick={(e) => e.stopPropagation()}
+          />
+        ) : (
+          <span
+            data-testid="node-label"
+            className="text-xs font-medium flex-1 truncate cursor-text"
+            style={{ color: 'var(--text-primary)' }}
+            onDoubleClick={(e) => {
+              e.stopPropagation();
+              setEditing(true);
+            }}
+          >
+            {data.label}
+          </span>
+        )}
+        {hasErrors && <AlertCircle size={14} style={{ color: '#ef4444' }} title={data.validation.errors.join('\n')} />}
+        {!hasErrors && hasWarnings && <AlertTriangle size={14} style={{ color: '#f59e0b' }} title={data.validation.warnings.join('\n')} />}
         <button
           data-testid="collapse-toggle"
           onClick={(e) => {
@@ -80,7 +127,7 @@ function BaseNodeInner({ id, nodeType, data, pins, icon: Icon, children, selecte
       {/* Body: pins + content */}
       <div className="flex">
         {/* Input pins */}
-        <div className="flex flex-col justify-center py-2 pl-1 min-w-[90px]">
+        <div className="flex flex-col justify-center py-1 pl-1 min-w-[70px]">
           {inputPins.map((pin) => (
             <TypedHandle key={pin.id} pin={pin} />
           ))}
@@ -88,13 +135,16 @@ function BaseNodeInner({ id, nodeType, data, pins, icon: Icon, children, selecte
 
         {/* Content */}
         {!data.collapsed && children && (
-          <div data-testid="node-expanded-content" className="flex-1 py-2 px-1 min-w-0">
+          <div data-testid="node-expanded-content" className="flex-1 py-1 px-1 min-w-0">
             {children}
           </div>
         )}
 
+        {/* Spacer when collapsed to keep pins at edges */}
+        {data.collapsed && <div className="flex-1" />}
+
         {/* Output pins */}
-        <div className="flex flex-col justify-center py-2 pr-1 min-w-[90px]">
+        <div className="flex flex-col justify-center py-1 pr-1 min-w-[70px]">
           {outputPins.map((pin) => (
             <TypedHandle key={pin.id} pin={pin} />
           ))}
@@ -104,18 +154,25 @@ function BaseNodeInner({ id, nodeType, data, pins, icon: Icon, children, selecte
       {/* Validation footer */}
       {(hasErrors || hasWarnings) && (
         <div
-          className="px-3 py-1.5 text-[10px] flex items-center gap-1"
+          className="px-2 py-1 text-[10px] flex flex-col gap-0.5"
           data-testid={hasErrors ? 'validation-error-badge' : 'validation-warning-badge'}
           style={{
             borderTop: '1px solid var(--node-border)',
-            color: hasErrors ? '#ef4444' : '#f59e0b',
             background: hasErrors ? '#ef44440a' : '#f59e0b0a',
           }}
         >
-          {hasErrors ? <AlertCircle size={10} /> : <AlertTriangle size={10} />}
-          {hasErrors
-            ? `${data.validation.errors.length} error${data.validation.errors.length > 1 ? 's' : ''}`
-            : `${data.validation.warnings.length} warning${data.validation.warnings.length > 1 ? 's' : ''}`}
+          {data.validation.errors.map((msg, i) => (
+            <div key={`e-${i}`} className="flex items-start gap-1" style={{ color: '#ef4444' }}>
+              <AlertCircle size={10} className="mt-[1px] shrink-0" />
+              <span>{msg}</span>
+            </div>
+          ))}
+          {data.validation.warnings.map((msg, i) => (
+            <div key={`w-${i}`} className="flex items-start gap-1" style={{ color: '#f59e0b' }}>
+              <AlertTriangle size={10} className="mt-[1px] shrink-0" />
+              <span>{msg}</span>
+            </div>
+          ))}
         </div>
       )}
     </div>

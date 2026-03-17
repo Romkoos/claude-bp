@@ -2,7 +2,7 @@ import type { SkillNodeData } from '../../types/nodes';
 import { useGraphStore } from '../../store/useGraphStore';
 import { CollapsibleSection } from '../shared/CollapsibleSection';
 import { MultiSelect } from '../shared/MultiSelect';
-import { CodeEditor } from '../shared/CodeEditor';
+
 
 const COMMON_TOOLS = [
   'Read', 'Edit', 'Write', 'Bash', 'Glob', 'Grep', 'Agent',
@@ -80,12 +80,7 @@ export function SkillEditor({ nodeId, data }: Props) {
 
       <div data-testid="field-skill-instructions">
       <CollapsibleSection title="Instructions">
-        <CodeEditor
-          value={d.instructions}
-          onChange={(value) => updateNodeData(nodeId, { instructions: value })}
-          language="markdown"
-          placeholder="Skill instructions..."
-        />
+        <textarea value={d.instructions} onChange={(e) => updateNodeData(nodeId, { instructions: e.target.value })} placeholder="Skill instructions..." className="bp-textarea text-xs" rows={8} />
       </CollapsibleSection>
       </div>
     </div>

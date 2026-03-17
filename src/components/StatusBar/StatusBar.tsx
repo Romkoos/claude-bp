@@ -26,7 +26,13 @@ export function StatusBar() {
       <div className="flex-1 text-center" style={{ color: 'var(--text-muted)' }}>
         {configName}
       </div>
-      <div>
+      <div
+        title={
+          errors === 0 && warnings === 0
+            ? undefined
+            : validationResults.map((r) => `[${r.level}] ${r.message}`).join('\n')
+        }
+      >
         {errors === 0 && warnings === 0 ? (
           <span style={{ color: '#22c55e' }}>Valid</span>
         ) : (

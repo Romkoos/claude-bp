@@ -46,11 +46,11 @@ function PluginNodeInner({ id, data, selected }: NodeProps) {
     >
       {/* Header */}
       <div
-        className="flex items-center gap-2 px-3 py-2"
+        className="flex items-center gap-1.5 px-2 py-1"
         style={{ borderBottom: '1px solid #f43f5e30' }}
       >
-        <Package size={16} style={{ color: '#f43f5e' }} />
-        <span className="text-sm font-medium truncate" style={{ color: 'var(--text-primary)' }}>
+        <Package size={14} style={{ color: '#f43f5e' }} />
+        <span className="text-xs font-medium truncate" style={{ color: 'var(--text-primary)' }}>
           {nodeData.label}
         </span>
         {nodeData.version && (
@@ -67,8 +67,8 @@ function PluginNodeInner({ id, data, selected }: NodeProps) {
           </span>
         )}
         <div className="flex-1" />
-        {hasErrors && <AlertCircle size={14} style={{ color: '#ef4444' }} />}
-        {!hasErrors && hasWarnings && <AlertTriangle size={14} style={{ color: '#f59e0b' }} />}
+        {hasErrors && <AlertCircle size={14} style={{ color: '#ef4444' }} title={nodeData.validation.errors.join('\n')} />}
+        {!hasErrors && hasWarnings && <AlertTriangle size={14} style={{ color: '#f59e0b' }} title={nodeData.validation.warnings.join('\n')} />}
         <button
           onClick={(e) => {
             e.stopPropagation();
@@ -89,18 +89,18 @@ function PluginNodeInner({ id, data, selected }: NodeProps) {
 
       {/* Expanded body */}
       {!nodeData.collapsed && (
-        <div className="px-3 py-2 space-y-1.5">
+        <div className="px-2 py-1 space-y-1">
           <input
             value={nodeData.pluginName}
             onChange={(e) => updateNodeData(id, { pluginName: e.target.value })}
             placeholder="Plugin name..."
-            className="bp-input text-xs"
+            className="bp-input"
           />
           <input
             value={nodeData.version}
             onChange={(e) => updateNodeData(id, { version: e.target.value })}
             placeholder="1.0.0"
-            className="bp-input text-xs font-mono"
+            className="bp-input"
           />
         </div>
       )}
@@ -111,18 +111,25 @@ function PluginNodeInner({ id, data, selected }: NodeProps) {
       {/* Validation footer */}
       {(hasErrors || hasWarnings) && (
         <div
-          className="px-3 py-1.5 text-[10px] flex items-center gap-1"
+          className="px-2 py-1 text-[10px] flex flex-col gap-0.5"
           style={{
             borderTop: '1px solid #f43f5e30',
-            color: hasErrors ? '#ef4444' : '#f59e0b',
             background: hasErrors ? '#ef44440a' : '#f59e0b0a',
             borderRadius: '0 0 10px 10px',
           }}
         >
-          {hasErrors ? <AlertCircle size={10} /> : <AlertTriangle size={10} />}
-          {hasErrors
-            ? `${nodeData.validation.errors.length} error${nodeData.validation.errors.length > 1 ? 's' : ''}`
-            : `${nodeData.validation.warnings.length} warning${nodeData.validation.warnings.length > 1 ? 's' : ''}`}
+          {nodeData.validation.errors.map((msg, i) => (
+            <div key={`e-${i}`} className="flex items-start gap-1" style={{ color: '#ef4444' }}>
+              <AlertCircle size={10} className="mt-[1px] shrink-0" />
+              <span>{msg}</span>
+            </div>
+          ))}
+          {nodeData.validation.warnings.map((msg, i) => (
+            <div key={`w-${i}`} className="flex items-start gap-1" style={{ color: '#f59e0b' }}>
+              <AlertTriangle size={10} className="mt-[1px] shrink-0" />
+              <span>{msg}</span>
+            </div>
+          ))}
         </div>
       )}
     </div>

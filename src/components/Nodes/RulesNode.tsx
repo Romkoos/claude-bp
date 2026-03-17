@@ -18,9 +18,9 @@ export function RulesNode({ id, data, selected }: NodeProps) {
       icon={FileText}
       selected={selected}
     >
-      <div className="space-y-1.5 text-xs">
+      <div className="space-y-1 text-xs">
         {/* Compact: scope badge + content preview */}
-        <div className="flex gap-1.5">
+        <div className="flex gap-1">
           <span
             className="bp-badge"
             style={{
@@ -32,7 +32,7 @@ export function RulesNode({ id, data, selected }: NodeProps) {
           </span>
         </div>
         <div
-          className="text-[11px] leading-relaxed line-clamp-2"
+          className="text-[10px] leading-relaxed line-clamp-2"
           style={{ color: 'var(--text-muted)' }}
         >
           {nodeData.content || 'No content...'}
@@ -40,11 +40,11 @@ export function RulesNode({ id, data, selected }: NodeProps) {
 
         {/* Expanded fields */}
         {!nodeData.collapsed && (
-          <div className="space-y-1.5 pt-1 border-t" style={{ borderColor: 'var(--node-border)' }}>
+          <div className="space-y-1 pt-1 border-t" style={{ borderColor: 'var(--node-border)' }}>
             <select
               value={nodeData.scope}
               onChange={(e) => updateNodeData(id, { scope: e.target.value })}
-              className="bp-select text-xs"
+              className="bp-select"
             >
               <option value="root">Root</option>
               <option value="subfolder">Subfolder</option>
@@ -54,14 +54,14 @@ export function RulesNode({ id, data, selected }: NodeProps) {
                 value={nodeData.path}
                 onChange={(e) => updateNodeData(id, { path: e.target.value })}
                 placeholder="Path..."
-                className="bp-input text-xs font-mono"
+                className="bp-input"
               />
             )}
             <textarea
               value={nodeData.content}
               onChange={(e) => updateNodeData(id, { content: e.target.value })}
               placeholder="CLAUDE.md content..."
-              className="bp-textarea text-xs font-mono"
+              className="bp-textarea"
               rows={4}
             />
             <div className="flex items-center gap-2">
@@ -70,7 +70,7 @@ export function RulesNode({ id, data, selected }: NodeProps) {
                 type="number"
                 value={nodeData.priority}
                 onChange={(e) => updateNodeData(id, { priority: parseInt(e.target.value) || 0 })}
-                className="bp-input text-xs w-16"
+                className="bp-input w-16"
               />
             </div>
           </div>

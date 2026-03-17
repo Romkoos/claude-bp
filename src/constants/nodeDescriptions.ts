@@ -1,0 +1,145 @@
+import type { BlueprintNodeType } from '../types/nodes';
+
+export interface PropertyDescription {
+  name: string;
+  description: string;
+}
+
+export interface ConnectorDescription {
+  pinId: string;
+  description: string;
+}
+
+export interface NodeDescription {
+  summary: string;
+  properties: PropertyDescription[];
+  connectors: ConnectorDescription[];
+}
+
+export const NODE_DESCRIPTIONS: Record<Exclude<BlueprintNodeType, 'comment'>, NodeDescription> = {
+  rules: {
+    summary:
+      'CLAUDE.md files provide project-level rules, context, and instructions that are automatically loaded into every conversation. They define coding standards, project structure, and behavioral guidelines.',
+    properties: [
+      { name: 'Scope', description: 'Root or subfolder — determines which part of the project tree this file applies to' },
+      { name: 'Path', description: 'Filesystem path where the CLAUDE.md is located' },
+      { name: 'Content', description: 'Markdown instructions and rules for the agent' },
+      { name: 'Priority', description: 'Loading order when multiple CLAUDE.md files exist (lower = loaded first)' },
+    ],
+    connectors: [
+      { pinId: 'out_context', description: 'Feeds rules and project context into connected skills, subagents, or hooks. Any node that receives this context will follow the instructions defined here.' },
+    ],
+  },
+  skill: {
+    summary:
+      'Skills are on-demand capabilities that can be invoked by the agent or user via slash commands. Each skill has its own instructions, metadata, and can scope hooks and tools.',
+    properties: [
+      { name: 'Name', description: 'Unique identifier used for invocation (e.g., /my-skill)' },
+      { name: 'Description', description: 'Trigger description — helps the agent decide when to invoke this skill' },
+      { name: 'Context', description: '"conversation" keeps the current context; "fork" runs in an isolated context' },
+      { name: 'Agent', description: 'Which agent type executes this skill (inherit, Explore, Plan, general-purpose)' },
+      { name: 'Allowed Tools', description: 'Whitelist of tools the skill can use during execution' },
+      { name: 'Model', description: 'Override the model for this skill (inherit uses the parent\'s model)' },
+      { name: 'Instructions', description: 'The full prompt/body of the skill — what the agent should do when invoked' },
+      { name: 'Scoped Hooks', description: 'Hooks that are active only while this skill is executing' },
+      { name: 'Dynamic Injections', description: 'Glob patterns for files injected into context at invocation time' },
+      { name: 'Reference Files', description: 'Static file paths bundled with the skill' },
+    ],
+    connectors: [
+      { pinId: 'in_context', description: 'Receives project context from CLAUDE.md or other context providers. The skill will follow these rules during execution.' },
+      { pinId: 'in_trigger', description: 'Connects to hooks that determine when this skill should activate (e.g., on a specific event or user command).' },
+      { pinId: 'in_exec', description: 'Execution flow input — this skill runs as part of a sequential pipeline when connected.' },
+      { pinId: 'out_delegation', description: 'Delegates sub-tasks to connected subagents. The skill can spawn and orchestrate subagent work.' },
+      { pinId: 'out_tools', description: 'Grants this skill access to connected tools and MCP servers for performing operations.' },
+      { pinId: 'out_context', description: 'Passes context downstream to other skills or subagents that depend on this skill\'s configuration.' },
+      { pinId: 'out_exec', description: 'Execution flow output — triggers the next node in a sequential pipeline after this skill completes.' },
+    ],
+  },
+  subagent: {
+    summary:
+      'Subagents are isolated worker processes that execute tasks independently. They have their own system prompt, tool access, and can spawn further subagents.',
+    properties: [
+      { name: 'Name', description: 'Display name for the subagent' },
+      { name: 'Description', description: 'What this subagent does — shown in delegation menus' },
+      { name: 'Agent Type', description: 'Archetype: Explore (read-only research), Plan (architecture), general-purpose, or custom' },
+      { name: 'Model', description: 'Override the model for this subagent' },
+      { name: 'Allowed Tools', description: 'Tools this subagent can access' },
+      { name: 'Max Turns', description: 'Maximum conversation turns before the subagent stops (null = unlimited)' },
+      { name: 'System Prompt', description: 'Custom system prompt prepended to every subagent conversation' },
+      { name: 'Scoped Hooks', description: 'Hooks active only while this subagent is running' },
+      { name: 'Skills', description: 'Skills available to this subagent' },
+    ],
+    connectors: [
+      { pinId: 'in_delegation', description: 'Receives work delegated from a parent skill or another subagent. This is how the subagent gets its task.' },
+      { pinId: 'in_context', description: 'Receives project context from CLAUDE.md or other providers. The subagent will follow these rules.' },
+      { pinId: 'in_exec', description: 'Execution flow input — this subagent runs as part of a sequential pipeline.' },
+      { pinId: 'out_result', description: 'Returns the result of the subagent\'s work back to the delegating node.' },
+      { pinId: 'out_tools', description: 'Grants this subagent access to connected tools and MCP servers.' },
+      { pinId: 'out_spawn', description: 'Allows this subagent to spawn child subagents for further parallelization.' },
+      { pinId: 'out_exec', description: 'Execution flow output — triggers the next node after this subagent completes.' },
+    ],
+  },
+  hook: {
+    summary:
+      'Hooks intercept lifecycle events (e.g., before a tool runs, when a session starts) and can block, allow, modify, or inject context into the agent\'s flow.',
+    properties: [
+      { name: 'Event', description: 'Lifecycle event to listen for (PreToolUse, PostToolUse, SessionStart, etc.)' },
+      { name: 'Matcher', description: 'Pattern to filter which events trigger this hook (e.g., tool name glob)' },
+      { name: 'Hook Type', description: '"command" runs a shell command; "http" calls a URL' },
+      { name: 'Command', description: 'Shell command to execute when the hook fires' },
+      { name: 'Timeout', description: 'Maximum execution time in milliseconds before the hook is killed' },
+      { name: 'Decision', description: 'Action to take: none, block, allow, deny, or escalate' },
+      { name: 'Inject System Message', description: 'Message injected into the agent\'s context when the hook fires' },
+      { name: 'Continue After', description: 'Whether the agent continues processing after this hook completes' },
+    ],
+    connectors: [
+      { pinId: 'in_trigger', description: 'Defines which lifecycle event this hook listens to. Connect from skills or subagents whose events should be intercepted.' },
+      { pinId: 'out_decision', description: 'Outputs a block/allow/deny/escalate decision that controls whether the triggering action proceeds.' },
+      { pinId: 'out_context', description: 'Injects a system message into the agent\'s context when the hook fires, adding dynamic instructions.' },
+    ],
+  },
+  tool: {
+    summary:
+      'Tools are atomic operations the agent can perform — reading files, writing code, running commands, etc. Nodes represent both built-in and custom tools.',
+    properties: [
+      { name: 'Tool Name', description: 'Identifier of the tool (e.g., Bash, Read, Write, Edit, Grep)' },
+      { name: 'Pattern', description: 'Glob pattern restricting which files/paths the tool can access' },
+      { name: 'Built-in', description: 'Whether this is a built-in Claude Code tool or a custom/MCP-provided one' },
+      { name: 'Description', description: 'What this tool does — shown to the agent for tool selection' },
+    ],
+    connectors: [
+      { pinId: 'in_used_by', description: 'Connect from skills or subagents that need access to this tool. The connected node will be able to invoke this tool.' },
+      { pinId: 'in_provided_by', description: 'Connect from an MCP server that provides this tool. Indicates this tool comes from an external source rather than being built-in.' },
+    ],
+  },
+  mcp: {
+    summary:
+      'MCP (Model Context Protocol) servers expose external tools and context to the agent over a standardized protocol. They can connect via URL or stdio.',
+    properties: [
+      { name: 'Server Name', description: 'Unique name to identify this MCP server' },
+      { name: 'Connection Type', description: '"url" connects over HTTP/SSE; "stdio" launches a local process' },
+      { name: 'URL', description: 'Endpoint for URL-based connections' },
+      { name: 'Command', description: 'Executable to launch for stdio-based connections' },
+      { name: 'Args', description: 'Command-line arguments for the stdio process' },
+      { name: 'Environment', description: 'Environment variables passed to the MCP server process' },
+      { name: 'Provided Tools', description: 'List of tools this server exposes (name + description)' },
+    ],
+    connectors: [
+      { pinId: 'out_tools', description: 'Exposes the tools provided by this MCP server. Connect to tool nodes or directly to skills/subagents that need access.' },
+      { pinId: 'out_context', description: 'Provides additional context from the MCP server (e.g., resource data, prompts) to connected nodes.' },
+    ],
+  },
+  plugin: {
+    summary:
+      'Plugins are bundle containers that package skills, subagents, hooks, and tools into a single distributable unit with its own install script.',
+    properties: [
+      { name: 'Plugin Name', description: 'Unique name for this plugin' },
+      { name: 'Version', description: 'Semantic version of the plugin' },
+      { name: 'Description', description: 'What this plugin provides' },
+      { name: 'Install Script', description: 'Shell command to run during plugin installation' },
+    ],
+    connectors: [
+      { pinId: 'out_bundle', description: 'Exports all bundled skills, subagents, hooks, and tools as a single distributable package. Connect to the project root or other plugins that depend on this one.' },
+    ],
+  },
+};
