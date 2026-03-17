@@ -1,6 +1,7 @@
 import type { PluginNodeData } from '../../types/nodes';
 import { useGraphStore } from '../../store/useGraphStore';
 import { CollapsibleSection } from '../shared/CollapsibleSection';
+import { Unlink2 } from 'lucide-react';
 
 
 interface Props {
@@ -11,6 +12,7 @@ interface Props {
 export function PluginEditor({ nodeId, data }: Props) {
   const updateNodeData = useGraphStore((s) => s.updateNodeData);
   const nodes = useGraphStore((s) => s.nodes);
+  const removeFromPlugin = useGraphStore((s) => s.removeFromPlugin);
   const d = data as unknown as PluginNodeData;
 
   const children = nodes.filter((n) => n.parentId === nodeId);
@@ -76,9 +78,18 @@ export function PluginEditor({ nodeId, data }: Props) {
                   >
                     {childType}
                   </span>
-                  <span className="text-xs truncate" style={{ color: 'var(--text-primary)' }}>
+                  <span className="text-xs truncate flex-1" style={{ color: 'var(--text-primary)' }}>
                     {childLabel}
                   </span>
+                  <button
+                    data-testid={`unlink-child-${child.id}`}
+                    onClick={() => removeFromPlugin(child.id)}
+                    className="p-0.5 rounded hover:opacity-70 shrink-0"
+                    style={{ color: 'var(--text-muted)' }}
+                    title="Detach from plugin"
+                  >
+                    <Unlink2 size={12} />
+                  </button>
                 </div>
               );
             })}
