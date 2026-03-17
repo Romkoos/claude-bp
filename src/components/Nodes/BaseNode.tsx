@@ -1,5 +1,5 @@
 import { memo, useState, useRef, useEffect, useCallback, type ReactNode } from 'react';
-import { ChevronDown, ChevronRight, AlertCircle, AlertTriangle, type LucideIcon } from 'lucide-react';
+import { ChevronDown, ChevronRight, AlertCircle, AlertTriangle, Link, type LucideIcon } from 'lucide-react';
 import { useReactFlow } from '@xyflow/react';
 import type { BlueprintNodeType } from '../../types/nodes';
 import { PinDirection, type PinDefinition } from '../../types/pins';
@@ -28,6 +28,16 @@ function BaseNodeInner({ id, nodeType, data, pins, icon: Icon, children, selecte
   const updateNodeData = useGraphStore((s) => s.updateNodeData);
   const simulationHighlightedNodeId = useGraphStore((s) => s.simulationHighlightedNodeId);
   const isSimHighlighted = simulationHighlightedNodeId === id;
+  const nodes = useGraphStore((s) => s.nodes);
+  const selectNode = useGraphStore((s) => s.selectNode);
+
+  const currentNode = nodes.find((n) => n.id === id);
+  const parentPlugin = currentNode?.parentId
+    ? nodes.find((n) => n.id === currentNode.parentId)
+    : null;
+  const parentLabel = parentPlugin
+    ? ((parentPlugin.data as Record<string, unknown>)?.label as string) ?? 'Plugin'
+    : null;
   const colors = NODE_COLORS[nodeType];
 
   const [editing, setEditing] = useState(false);
@@ -99,7 +109,7 @@ function BaseNodeInner({ id, nodeType, data, pins, icon: Icon, children, selecte
         ) : (
           <span
             data-testid="node-label"
-            className="text-xs font-medium flex-1 truncate cursor-text"
+            className="text-xs font-medium truncate cursor-text"
             style={{ color: 'var(--text-primary)' }}
             onDoubleClick={(e) => {
               e.stopPropagation();
@@ -109,6 +119,22 @@ function BaseNodeInner({ id, nodeType, data, pins, icon: Icon, children, selecte
             {data.label}
           </span>
         )}
+        {parentPlugin && (
+          <button
+            data-testid="plugin-link-indicator"
+            onClick={(e) => {
+              e.stopPropagation();
+              selectNode(parentPlugin.id);
+              fitView({ nodes: [{ id: parentPlugin.id }], padding: 0.3, duration: 300 });
+            }}
+            className="p-0.5 rounded hover:opacity-70 shrink-0 nopan nodrag"
+            style={{ color: NODE_COLORS.plugin.header }}
+            title={parentLabel ?? 'Plugin'}
+          >
+            <Link size={12} />
+          </button>
+        )}
+        <div className="flex-1" />
         {hasErrors && <AlertCircle size={14} style={{ color: '#ef4444' }} title={data.validation.errors.join('\n')} />}
         {!hasErrors && hasWarnings && <AlertTriangle size={14} style={{ color: '#f59e0b' }} title={data.validation.warnings.join('\n')} />}
         <button
