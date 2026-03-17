@@ -17,7 +17,7 @@ import type { BlueprintNodeType } from '../../types/nodes';
 import { NODE_PIN_DEFINITIONS } from '../../constants/nodeDefaults';
 import { NODE_COLORS } from '../../constants/theme';
 import { canConnect, getCompatibleNodeTypes } from '../../utils/pinCompatibility';
-import { findPluginAtPosition } from '../../utils/pluginHelpers';
+import { findPluginAtPosition, isNodeOutsidePlugin } from '../../utils/pluginHelpers';
 import { useGraphStore } from '../../store/useGraphStore';
 import { RulesNode } from '../Nodes/RulesNode';
 import { SkillNode } from '../Nodes/SkillNode';
@@ -276,10 +276,21 @@ export function BlueprintCanvas() {
       const dragOverId = useGraphStore.getState().dragOverPluginId;
       setDragOverPluginId(null);
 
-      if (!dragOverId || node.type === 'plugin' || node.parentId) return;
+      // Child node dragged outside its parent plugin → detach
+      if (node.parentId) {
+        const currentNodes = useGraphStore.getState().nodes;
+        const parentPlugin = currentNodes.find((n) => n.id === node.parentId);
+        const currentNode = currentNodes.find((n) => n.id === node.id);
+        if (parentPlugin && currentNode && isNodeOutsidePlugin(currentNode, parentPlugin)) {
+          removeFromPlugin(node.id);
+        }
+        return;
+      }
+
+      if (!dragOverId || node.type === 'plugin') return;
       addToPlugin(node.id, dragOverId);
     },
-    [setDragOverPluginId, addToPlugin]
+    [setDragOverPluginId, addToPlugin, removeFromPlugin]
   );
 
   const onConnectStartHandler: OnConnectStart = useCallback((_event, params) => {
