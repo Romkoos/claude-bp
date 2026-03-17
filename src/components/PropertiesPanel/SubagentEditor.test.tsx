@@ -19,9 +19,9 @@ describe('SubagentEditor', () => {
     expect(screen.getByTestId('subagent-editor')).toBeInTheDocument();
   });
 
-  it('shows agent type selector', () => {
+  it('shows permission mode selector', () => {
     render(<SubagentEditor nodeId={nodeId} data={createSubagentData() as unknown as Record<string, unknown>} />);
-    expect(screen.getByTestId('field-subagent-agent-type')).toBeInTheDocument();
+    expect(screen.getByTestId('field-subagent-permission-mode')).toBeInTheDocument();
   });
 
   it('shows system prompt field', () => {
@@ -45,8 +45,44 @@ describe('SubagentEditor', () => {
 
   it('updates description on change', () => {
     render(<SubagentEditor nodeId={nodeId} data={createSubagentData() as unknown as Record<string, unknown>} />);
-    const textarea = screen.getByPlaceholderText('What this agent does...');
+    const textarea = screen.getByPlaceholderText('When Claude should delegate to this subagent...');
     fireEvent.change(textarea, { target: { value: 'Reviews PRs' } });
     expect(useGraphStore.getState().nodes[0].data.description).toBe('Reviews PRs');
+  });
+
+  it('shows bypassPermissions warning when selected', () => {
+    const data = { ...createSubagentData(), permissionMode: 'bypassPermissions' as const };
+    useGraphStore.getState().setNodes([
+      { id: nodeId, type: 'subagent', position: { x: 0, y: 0 }, data },
+    ]);
+    render(<SubagentEditor nodeId={nodeId} data={data as unknown as Record<string, unknown>} />);
+    expect(screen.getByTestId('bypass-permissions-warning')).toBeInTheDocument();
+    expect(screen.getByTestId('bypass-permissions-warning').textContent).toContain('extreme caution');
+  });
+
+  it('does not show bypassPermissions warning for other modes', () => {
+    const data = { ...createSubagentData(), permissionMode: 'default' as const };
+    useGraphStore.getState().setNodes([
+      { id: nodeId, type: 'subagent', position: { x: 0, y: 0 }, data },
+    ]);
+    render(<SubagentEditor nodeId={nodeId} data={data as unknown as Record<string, unknown>} />);
+    expect(screen.queryByTestId('bypass-permissions-warning')).toBeNull();
+  });
+
+  it('shows background checkbox', () => {
+    render(<SubagentEditor nodeId={nodeId} data={createSubagentData() as unknown as Record<string, unknown>} />);
+    expect(screen.getByTestId('field-subagent-background')).toBeInTheDocument();
+  });
+
+  it('shows isolation selector', () => {
+    render(<SubagentEditor nodeId={nodeId} data={createSubagentData() as unknown as Record<string, unknown>} />);
+    expect(screen.getByTestId('field-subagent-isolation')).toBeInTheDocument();
+  });
+
+  it('shows model selector with correct options', () => {
+    render(<SubagentEditor nodeId={nodeId} data={createSubagentData() as unknown as Record<string, unknown>} />);
+    const select = screen.getByTestId('field-subagent-model');
+    expect(select).toBeInTheDocument();
+    expect(select.querySelectorAll('option')).toHaveLength(4); // inherit, sonnet, opus, haiku
   });
 });

@@ -61,7 +61,7 @@ const prReviewPipeline: Template = {
           label: 'Code Reviewer',
           name: 'Code Reviewer',
           description: 'Reviews code changes for quality and correctness',
-          agentType: 'Explore' as const,
+
           allowedTools: ['Read', 'Grep', 'Glob'],
           systemPrompt:
             'You are a senior code reviewer. Analyze the PR diff for bugs, style issues, and potential improvements. Be constructive and specific.',
@@ -191,7 +191,7 @@ const multiAgentResearch: Template = {
           label: 'Web Docs Agent',
           name: 'Web Docs Agent',
           description: 'Searches official documentation and web resources',
-          agentType: 'Explore' as const,
+
           allowedTools: ['WebSearch', 'WebFetch', 'Read'],
           systemPrompt: 'Search official documentation and authoritative web sources to answer the research question.',
         },
@@ -205,7 +205,7 @@ const multiAgentResearch: Template = {
           label: 'StackOverflow Agent',
           name: 'StackOverflow Agent',
           description: 'Searches StackOverflow for community solutions',
-          agentType: 'Explore' as const,
+
           allowedTools: ['WebSearch', 'WebFetch'],
           systemPrompt: 'Search StackOverflow and developer forums for practical solutions and community consensus.',
         },
@@ -219,7 +219,7 @@ const multiAgentResearch: Template = {
           label: 'Codebase Explorer',
           name: 'Codebase Explorer',
           description: 'Explores the local codebase for existing patterns',
-          agentType: 'Explore' as const,
+
           allowedTools: ['Read', 'Grep', 'Glob', 'Bash'],
           systemPrompt: 'Explore the local codebase to find existing patterns, implementations, and relevant code.',
         },
@@ -350,7 +350,7 @@ const safeDeployment: Template = {
           label: 'Test Runner',
           name: 'Test Runner',
           description: 'Runs the test suite to verify deployment',
-          agentType: 'general-purpose' as const,
+
           allowedTools: ['Bash', 'Read', 'Grep'],
           systemPrompt: 'Run the project test suite and report results. Fail the pipeline if any tests fail.',
         },

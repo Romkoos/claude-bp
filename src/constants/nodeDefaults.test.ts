@@ -101,10 +101,13 @@ describe('createSubagentData', () => {
   it('creates default subagent data', () => {
     const data = createSubagentData();
     expect(data.label).toBe('New Subagent');
-    expect(data.agentType).toBe('general-purpose');
     expect(data.model).toBe('inherit');
     expect(data.allowedTools).toEqual([]);
+    expect(data.disallowedTools).toEqual([]);
+    expect(data.permissionMode).toBeNull();
     expect(data.maxTurns).toBeNull();
+    expect(data.background).toBe(false);
+    expect(data.isolation).toBeNull();
     expect(data.systemPrompt).toBe('');
     expect(data.scopedHooks).toEqual([]);
     expect(data.skills).toEqual([]);

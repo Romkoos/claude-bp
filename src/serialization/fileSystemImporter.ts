@@ -7,6 +7,7 @@ import type {
   McpNodeData,
   ScopedHook,
   HookEvent,
+  SubagentPermissionMode,
 } from '../types/nodes';
 import {
   createRulesData,
@@ -181,6 +182,10 @@ function buildSkillNode(
   };
 }
 
+const VALID_PERMISSION_MODES: SubagentPermissionMode[] = [
+  'default', 'acceptEdits', 'dontAsk', 'bypassPermissions', 'plan',
+];
+
 function buildSubagentNode(
   name: string,
   fm: Record<string, unknown>,
@@ -188,19 +193,28 @@ function buildSubagentNode(
   yIndex: number,
 ): Node {
   const base = createSubagentData();
+
+  // Support both new (tools) and legacy (allowed_tools) field names
+  const tools = fm['tools'] ?? fm['allowed_tools'];
+  const disallowedTools = fm['disallowedTools'] ?? fm['disallowed_tools'];
+  const maxTurns = fm['maxTurns'] ?? fm['max_turns'];
+  const permissionMode = fm['permissionMode'] ?? fm['permission_mode'];
+
   const data: SubagentNodeData = {
     ...base,
     label: name,
     name,
     description: typeof fm['description'] === 'string' ? fm['description'] : '',
-    agentType: (['Explore', 'Plan', 'general-purpose', 'custom'] as const).includes(
-      fm['agent_type'] as SubagentNodeData['agentType'],
-    )
-      ? (fm['agent_type'] as SubagentNodeData['agentType'])
-      : 'general-purpose',
     model: typeof fm['model'] === 'string' ? fm['model'] : 'inherit',
-    allowedTools: parseAllowedTools(fm['allowed_tools']),
-    maxTurns: typeof fm['max_turns'] === 'number' ? fm['max_turns'] : null,
+    allowedTools: parseAllowedTools(tools),
+    disallowedTools: parseAllowedTools(disallowedTools),
+    permissionMode:
+      typeof permissionMode === 'string' && VALID_PERMISSION_MODES.includes(permissionMode as SubagentPermissionMode)
+        ? (permissionMode as SubagentPermissionMode)
+        : null,
+    maxTurns: typeof maxTurns === 'number' ? maxTurns : null,
+    background: fm['background'] === true,
+    isolation: fm['isolation'] === 'worktree' ? 'worktree' : null,
     systemPrompt: body,
     scopedHooks: parseScopedHooks(fm['hooks']),
     skills: Array.isArray(fm['skills']) ? fm['skills'].map(String) : [],

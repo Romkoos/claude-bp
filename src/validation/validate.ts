@@ -89,7 +89,18 @@ export function validateGraph(nodes: Node[], edges: Edge[]): ValidationResult[] 
       }
     }
 
-    // Warning checks
+    // Warning checks — subagent permissionMode
+    if (nodeType === 'subagent') {
+      const subagentData = data as unknown as SubagentNodeData;
+      if (subagentData.permissionMode === 'bypassPermissions') {
+        results.push({
+          nodeId: node.id,
+          level: 'warning',
+          message: 'bypassPermissions skips ALL permission checks — use with extreme caution',
+        });
+      }
+    }
+
     if (nodeType === 'skill') {
       const skillData = data as unknown as SkillNodeData;
       if (!skillData.frontmatter.description) {

@@ -154,6 +154,28 @@ describe('validateGraph', () => {
     expect(results.some((r) => r.message.includes('Empty allowed tools'))).toBe(false);
   });
 
+  it('warns on bypassPermissions mode', () => {
+    const data: SubagentNodeData = {
+      ...createSubagentData(),
+      systemPrompt: 'Do stuff',
+      permissionMode: 'bypassPermissions',
+    };
+    const node = makeNode('sa1', 'subagent', data as unknown as Record<string, unknown>);
+    const results = validateGraph([node], []);
+    expect(results.some((r) => r.level === 'warning' && r.message.includes('bypassPermissions'))).toBe(true);
+  });
+
+  it('no warning on non-bypass permission mode', () => {
+    const data: SubagentNodeData = {
+      ...createSubagentData(),
+      systemPrompt: 'Do stuff',
+      permissionMode: 'acceptEdits',
+    };
+    const node = makeNode('sa1', 'subagent', data as unknown as Record<string, unknown>);
+    const results = validateGraph([node], [makeEdge('x', 'sa1')]);
+    expect(results.some((r) => r.message.includes('bypassPermissions'))).toBe(false);
+  });
+
   // --- Tool validations ---
 
   it('errors on tool without name', () => {

@@ -26,12 +26,30 @@ export function SubagentNode({ id, data, selected }: NodeProps) {
           </div>
         )}
         <div className="flex gap-1 flex-wrap">
-          <span className="bp-badge" style={{ background: '#8b5cf630', color: '#c4b5fd' }}>
-            {nodeData.agentType}
-          </span>
           {nodeData.model !== 'inherit' && (
             <span className="bp-badge" style={{ background: '#2d333b', color: 'var(--text-secondary)' }}>
               {nodeData.model}
+            </span>
+          )}
+          {nodeData.permissionMode && (
+            <span
+              className="bp-badge"
+              style={{
+                background: nodeData.permissionMode === 'bypassPermissions' ? '#7f1d1d80' : '#1e3a5f80',
+                color: nodeData.permissionMode === 'bypassPermissions' ? '#fca5a5' : '#93c5fd',
+              }}
+            >
+              {nodeData.permissionMode}
+            </span>
+          )}
+          {nodeData.background && (
+            <span className="bp-badge" style={{ background: '#1c1917', color: '#a8a29e' }}>
+              background
+            </span>
+          )}
+          {nodeData.isolation === 'worktree' && (
+            <span className="bp-badge" style={{ background: '#14532d80', color: '#86efac' }}>
+              worktree
             </span>
           )}
         </div>
@@ -46,23 +64,14 @@ export function SubagentNode({ id, data, selected }: NodeProps) {
               className="bp-input"
             />
             <select
-              value={nodeData.agentType}
-              onChange={(e) => updateNodeData(id, { agentType: e.target.value })}
-              className="bp-select"
-            >
-              <option value="general-purpose">General Purpose</option>
-              <option value="Explore">Explore</option>
-              <option value="Plan">Plan</option>
-              <option value="custom">Custom</option>
-            </select>
-            <select
               value={nodeData.model}
               onChange={(e) => updateNodeData(id, { model: e.target.value })}
               className="bp-select"
             >
               <option value="inherit">Inherit</option>
-              <option value="claude-opus-4">Claude Opus 4</option>
-              <option value="claude-sonnet-4">Claude Sonnet 4</option>
+              <option value="sonnet">Sonnet</option>
+              <option value="opus">Opus</option>
+              <option value="haiku">Haiku</option>
             </select>
             <textarea
               value={nodeData.systemPrompt}

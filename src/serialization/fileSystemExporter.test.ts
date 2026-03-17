@@ -377,8 +377,7 @@ describe('generateSubagentFiles', () => {
       ...createSubagentData(),
       name: 'Code Reviewer',
       description: 'Reviews code',
-      agentType: 'Explore',
-      model: 'claude-opus-4',
+      model: 'opus',
       allowedTools: ['Read'],
       systemPrompt: 'Review code carefully',
     };
@@ -387,21 +386,10 @@ describe('generateSubagentFiles', () => {
     expect(files).toHaveLength(1);
     expect(files[0].path).toBe('.claude/agents/code-reviewer.md');
     expect(files[0].content).toContain('---');
+    expect(files[0].content).toContain('name: Code Reviewer');
     expect(files[0].content).toContain('description: Reviews code');
     expect(files[0].content).toContain('Review code carefully');
     expect(files[0].type).toBe('subagent');
-  });
-
-  it('omits default agent type', () => {
-    const data: SubagentNodeData = {
-      ...createSubagentData(),
-      name: 'basic',
-      agentType: 'general-purpose',
-      systemPrompt: 'test',
-    };
-    const node = makeNode('sa1', 'subagent', data as unknown as Record<string, unknown>);
-    const files = generateSubagentFiles([node]);
-    expect(files[0].content).not.toContain('agent_type');
   });
 
   it('omits default model', () => {
@@ -458,7 +446,7 @@ describe('generateSubagentFiles', () => {
     };
     const node = makeNode('sa1', 'subagent', data as unknown as Record<string, unknown>);
     const files = generateSubagentFiles([node]);
-    expect(files[0].content).toContain('max_turns: 10');
+    expect(files[0].content).toContain('maxTurns: 10');
   });
 
   it('appends integration section when edges exist', () => {
@@ -477,6 +465,170 @@ describe('generateSubagentFiles', () => {
     expect(files[0].content).toContain('MANDATORY');
     expect(files[0].content).toContain('invoked by');
     expect(files[0].content).toContain('orchestrator');
+  });
+
+  it('always includes name in frontmatter', () => {
+    const data: SubagentNodeData = {
+      ...createSubagentData(),
+      name: 'my-agent',
+      systemPrompt: 'test',
+    };
+    const node = makeNode('sa1', 'subagent', data as unknown as Record<string, unknown>);
+    const files = generateSubagentFiles([node]);
+    expect(files[0].content).toContain('name: my-agent');
+  });
+
+  it('includes disallowedTools when set', () => {
+    const data: SubagentNodeData = {
+      ...createSubagentData(),
+      name: 'safe-agent',
+      disallowedTools: ['Write', 'Edit'],
+      systemPrompt: 'test',
+    };
+    const node = makeNode('sa1', 'subagent', data as unknown as Record<string, unknown>);
+    const files = generateSubagentFiles([node]);
+    expect(files[0].content).toContain('disallowedTools:');
+    expect(files[0].content).toContain('Write');
+    expect(files[0].content).toContain('Edit');
+  });
+
+  it('omits disallowedTools when empty', () => {
+    const data: SubagentNodeData = {
+      ...createSubagentData(),
+      name: 'basic',
+      systemPrompt: 'test',
+    };
+    const node = makeNode('sa1', 'subagent', data as unknown as Record<string, unknown>);
+    const files = generateSubagentFiles([node]);
+    expect(files[0].content).not.toContain('disallowedTools');
+  });
+
+  it('includes permissionMode when set', () => {
+    const data: SubagentNodeData = {
+      ...createSubagentData(),
+      name: 'restricted-agent',
+      permissionMode: 'dontAsk',
+      systemPrompt: 'test',
+    };
+    const node = makeNode('sa1', 'subagent', data as unknown as Record<string, unknown>);
+    const files = generateSubagentFiles([node]);
+    expect(files[0].content).toContain('permissionMode: dontAsk');
+  });
+
+  it('omits permissionMode when null', () => {
+    const data: SubagentNodeData = {
+      ...createSubagentData(),
+      name: 'basic',
+      systemPrompt: 'test',
+    };
+    const node = makeNode('sa1', 'subagent', data as unknown as Record<string, unknown>);
+    const files = generateSubagentFiles([node]);
+    expect(files[0].content).not.toContain('permissionMode');
+  });
+
+  it('includes background when true', () => {
+    const data: SubagentNodeData = {
+      ...createSubagentData(),
+      name: 'bg-agent',
+      background: true,
+      systemPrompt: 'test',
+    };
+    const node = makeNode('sa1', 'subagent', data as unknown as Record<string, unknown>);
+    const files = generateSubagentFiles([node]);
+    expect(files[0].content).toContain('background: true');
+  });
+
+  it('omits background when false', () => {
+    const data: SubagentNodeData = {
+      ...createSubagentData(),
+      name: 'basic',
+      systemPrompt: 'test',
+    };
+    const node = makeNode('sa1', 'subagent', data as unknown as Record<string, unknown>);
+    const files = generateSubagentFiles([node]);
+    expect(files[0].content).not.toContain('background');
+  });
+
+  it('includes isolation when set', () => {
+    const data: SubagentNodeData = {
+      ...createSubagentData(),
+      name: 'isolated-agent',
+      isolation: 'worktree',
+      systemPrompt: 'test',
+    };
+    const node = makeNode('sa1', 'subagent', data as unknown as Record<string, unknown>);
+    const files = generateSubagentFiles([node]);
+    expect(files[0].content).toContain('isolation: worktree');
+  });
+
+  it('omits isolation when null', () => {
+    const data: SubagentNodeData = {
+      ...createSubagentData(),
+      name: 'basic',
+      systemPrompt: 'test',
+    };
+    const node = makeNode('sa1', 'subagent', data as unknown as Record<string, unknown>);
+    const files = generateSubagentFiles([node]);
+    expect(files[0].content).not.toContain('isolation');
+  });
+
+  it('uses tools instead of allowed_tools in frontmatter', () => {
+    const data: SubagentNodeData = {
+      ...createSubagentData(),
+      name: 'tool-agent',
+      allowedTools: ['Read', 'Bash'],
+      systemPrompt: 'test',
+    };
+    const node = makeNode('sa1', 'subagent', data as unknown as Record<string, unknown>);
+    const files = generateSubagentFiles([node]);
+    expect(files[0].content).toContain('tools:');
+    expect(files[0].content).not.toContain('allowed_tools');
+  });
+
+  it('includes mcpServers from connected MCP nodes (inline for exclusive)', () => {
+    const mcpData: McpNodeData = {
+      ...createMcpData(),
+      serverName: 'playwright',
+      connection: { type: 'stdio', url: '', command: 'npx', args: ['-y', '@playwright/mcp'] },
+    };
+    const mcpNode = makeNode('m1', 'mcp', mcpData as unknown as Record<string, unknown>);
+    const agentData: SubagentNodeData = {
+      ...createSubagentData(),
+      name: 'browser-agent',
+      systemPrompt: 'test',
+    };
+    const agentNode = makeNode('a1', 'subagent', agentData as unknown as Record<string, unknown>);
+    const edge: Edge = {
+      id: 'e1', source: 'm1', target: 'a1',
+      sourceHandle: 'out_context', targetHandle: 'in_context',
+      data: { pinType: 'context' },
+    };
+    const files = generateSubagentFiles([agentNode], [edge], [mcpNode, agentNode]);
+    expect(files[0].content).toContain('mcpServers:');
+    expect(files[0].content).toContain('playwright');
+  });
+
+  it('includes mcpServers as string ref when shared', () => {
+    const mcpData: McpNodeData = {
+      ...createMcpData(),
+      serverName: 'github',
+      connection: { type: 'url', url: 'http://localhost', command: '', args: [] },
+    };
+    const mcpNode = makeNode('m1', 'mcp', mcpData as unknown as Record<string, unknown>);
+    const agentData: SubagentNodeData = {
+      ...createSubagentData(),
+      name: 'gh-agent',
+      systemPrompt: 'test',
+    };
+    const agentNode = makeNode('a1', 'subagent', agentData as unknown as Record<string, unknown>);
+    const skillNode = makeNode('s1', 'skill', createSkillData() as unknown as Record<string, unknown>);
+    const edges: Edge[] = [
+      { id: 'e1', source: 'm1', target: 'a1', sourceHandle: 'out_context', targetHandle: 'in_context', data: { pinType: 'context' } },
+      { id: 'e2', source: 'm1', target: 's1', sourceHandle: 'out_context', targetHandle: 'in_context', data: { pinType: 'context' } },
+    ];
+    const files = generateSubagentFiles([agentNode], edges, [mcpNode, agentNode, skillNode]);
+    expect(files[0].content).toContain('mcpServers:');
+    expect(files[0].content).toContain('github');
   });
 });
 

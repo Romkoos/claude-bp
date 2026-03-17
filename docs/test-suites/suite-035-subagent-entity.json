@@ -1,0 +1,107 @@
+{
+  "id": "SUITE-035",
+  "name": "Subagent Entity — New Fields & Validation",
+  "tests": [
+    {
+      "id": "TC-307",
+      "name": "Subagent editor shows permission mode selector",
+      "priority": "high",
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "drag", "target": "[data-testid='palette-item-subagent']", "position": { "x": 500, "y": 300 } },
+        { "action": "click", "target": "[data-testid='rf__node-subagent']" }
+      ],
+      "assertions": [
+        { "type": "visible", "target": "[data-testid='field-subagent-permission-mode']", "description": "Permission mode selector is visible in properties panel" }
+      ]
+    },
+    {
+      "id": "TC-308",
+      "name": "Subagent editor shows bypassPermissions warning",
+      "priority": "critical",
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "drag", "target": "[data-testid='palette-item-subagent']", "position": { "x": 500, "y": 300 } },
+        { "action": "click", "target": "[data-testid='rf__node-subagent']" },
+        { "action": "select", "target": "[data-testid='field-subagent-permission-mode'] select", "value": "bypassPermissions" }
+      ],
+      "assertions": [
+        { "type": "visible", "target": "[data-testid='bypass-permissions-warning']", "description": "Warning about bypassPermissions is shown" }
+      ]
+    },
+    {
+      "id": "TC-309",
+      "name": "Subagent editor shows background checkbox",
+      "priority": "medium",
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "drag", "target": "[data-testid='palette-item-subagent']", "position": { "x": 500, "y": 300 } },
+        { "action": "click", "target": "[data-testid='rf__node-subagent']" }
+      ],
+      "assertions": [
+        { "type": "visible", "target": "[data-testid='field-subagent-background']", "description": "Background checkbox is visible" }
+      ]
+    },
+    {
+      "id": "TC-310",
+      "name": "Subagent editor shows isolation selector",
+      "priority": "medium",
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "drag", "target": "[data-testid='palette-item-subagent']", "position": { "x": 500, "y": 300 } },
+        { "action": "click", "target": "[data-testid='rf__node-subagent']" }
+      ],
+      "assertions": [
+        { "type": "visible", "target": "[data-testid='field-subagent-isolation']", "description": "Isolation selector is visible" }
+      ]
+    },
+    {
+      "id": "TC-311",
+      "name": "Subagent model selector has correct options (sonnet, opus, haiku)",
+      "priority": "high",
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "drag", "target": "[data-testid='palette-item-subagent']", "position": { "x": 500, "y": 300 } },
+        { "action": "click", "target": "[data-testid='rf__node-subagent']" }
+      ],
+      "assertions": [
+        { "type": "visible", "target": "[data-testid='field-subagent-model']", "description": "Model selector is visible with inherit/sonnet/opus/haiku options" }
+      ]
+    },
+    {
+      "id": "TC-312",
+      "name": "Subagent validation warns on bypassPermissions",
+      "priority": "critical",
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "drag", "target": "[data-testid='palette-item-subagent']", "position": { "x": 500, "y": 300 } },
+        { "action": "click", "target": "[data-testid='rf__node-subagent']" },
+        { "action": "select", "target": "[data-testid='field-subagent-permission-mode'] select", "value": "bypassPermissions" }
+      ],
+      "assertions": [
+        { "type": "visible", "target": "[data-testid='bypass-permissions-warning']", "description": "Validation warning about bypassPermissions appears" }
+      ]
+    },
+    {
+      "id": "TC-313",
+      "name": "Subagent node compact view shows permissionMode badge",
+      "priority": "medium",
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "drag", "target": "[data-testid='palette-item-subagent']", "position": { "x": 500, "y": 300 } },
+        { "action": "click", "target": "[data-testid='rf__node-subagent']" },
+        { "action": "select", "target": "[data-testid='field-subagent-permission-mode'] select", "value": "acceptEdits" }
+      ],
+      "assertions": [
+        { "type": "contains_text", "target": "[data-testid='rf__node-subagent']", "text": "acceptEdits", "description": "Permission mode badge visible on node" }
+      ]
+    }
+  ]
+}

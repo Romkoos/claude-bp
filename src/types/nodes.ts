@@ -32,13 +32,18 @@ export interface SkillNodeData extends BaseNodeData {
   referenceFiles: string[];
 }
 
+export type SubagentPermissionMode = 'default' | 'acceptEdits' | 'dontAsk' | 'bypassPermissions' | 'plan';
+
 export interface SubagentNodeData extends BaseNodeData {
   name: string;
   description: string;
-  agentType: 'Explore' | 'Plan' | 'general-purpose' | 'custom';
-  model: 'inherit' | 'claude-opus-4' | 'claude-sonnet-4' | string;
+  model: 'inherit' | 'sonnet' | 'opus' | 'haiku' | string;
   allowedTools: string[];
+  disallowedTools: string[];
+  permissionMode: SubagentPermissionMode | null;
   maxTurns: number | null;
+  background: boolean;
+  isolation: 'worktree' | null;
   systemPrompt: string;
   scopedHooks: ScopedHook[];
   skills: string[];

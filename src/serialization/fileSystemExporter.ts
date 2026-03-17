@@ -263,15 +263,60 @@ export function generateSubagentFiles(nodes: Node[], edges: Edge[] = [], allNode
     const name = data.name || 'untitled-agent';
     const slug = slugify(name);
 
-    // Build optional frontmatter
+    // Build frontmatter — name and description are required
     const fm: Record<string, unknown> = {};
+    fm['name'] = name;
     if (data.description) fm['description'] = data.description;
-    if (data.agentType && data.agentType !== 'general-purpose')
-      fm['agent_type'] = data.agentType;
     if (data.model && data.model !== 'inherit') fm['model'] = data.model;
-    if (data.allowedTools?.length) fm['allowed_tools'] = data.allowedTools;
-    if (data.maxTurns != null) fm['max_turns'] = data.maxTurns;
+    if (data.allowedTools?.length) fm['tools'] = data.allowedTools;
+    if (data.disallowedTools?.length) fm['disallowedTools'] = data.disallowedTools;
+    if (data.permissionMode) fm['permissionMode'] = data.permissionMode;
+    if (data.maxTurns != null) fm['maxTurns'] = data.maxTurns;
+    if (data.background) fm['background'] = true;
+    if (data.isolation) fm['isolation'] = data.isolation;
     if (data.skills?.length) fm['skills'] = data.skills;
+
+    // MCP servers from connected MCP nodes
+    const mcpEdges = edges.filter(
+      (e) => e.target === n.id && (e.data as Record<string, unknown>)?.pinType === 'context',
+    );
+    const connectedMcps = mcpEdges
+      .map((e) => allNodes.find((nd) => nd.id === e.source))
+      .filter((nd): nd is Node => nd != null && nd.type === 'mcp');
+
+    if (connectedMcps.length) {
+      const mcpServers: Array<string | Record<string, unknown>> = [];
+      for (const mcpNode of connectedMcps) {
+        const mcpData = mcpNode.data as unknown as McpNodeData;
+        const serverName = mcpData.serverName;
+        if (!serverName) continue;
+
+        // Check if this MCP is also connected to other (non-subagent) nodes
+        const otherEdges = edges.filter(
+          (e) => e.source === mcpNode.id && e.target !== n.id,
+        );
+        if (otherEdges.length > 0) {
+          // Shared MCP — use string reference
+          mcpServers.push(serverName);
+        } else {
+          // Exclusive to this subagent — inline definition
+          const config: Record<string, unknown> = {};
+          if (mcpData.connection.type === 'url') {
+            config['type'] = 'url';
+            config['url'] = mcpData.connection.url;
+          } else {
+            config['type'] = 'stdio';
+            config['command'] = mcpData.connection.command;
+            if (mcpData.connection.args?.length) config['args'] = mcpData.connection.args;
+          }
+          if (mcpData.env && Object.keys(mcpData.env).length) {
+            config['env'] = mcpData.env;
+          }
+          mcpServers.push({ [serverName]: config });
+        }
+      }
+      if (mcpServers.length) fm['mcpServers'] = mcpServers;
+    }
 
     if (data.scopedHooks?.length) {
       fm['hooks'] = data.scopedHooks.map((h: ScopedHook) => ({
