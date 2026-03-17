@@ -106,6 +106,44 @@
         { "type": "count", "target": ".react-flow__node", "expectedMin": 2, "description": "All nodes still present after removing from plugin (plugin + skill)" },
         { "type": "notVisible", "target": "[data-testid='plugin-link-indicator']", "description": "Removed node no longer shows plugin link indicator" }
       ]
+    },
+    {
+      "id": "TC-305",
+      "name": "Add child node via plugin context menu",
+      "priority": "critical",
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "rightClick", "target": ".react-flow__pane", "offsetX": 300, "offsetY": 300 },
+        { "action": "click", "target": "[data-testid='ctx-add-plugin']" },
+        { "action": "wait_for_timeout", "timeout": 500 },
+        { "action": "rightClick", "target": ".react-flow__node[data-type='plugin']" },
+        { "action": "click", "target": "[data-testid='ctx-add-child-skill']" },
+        { "action": "wait_for_timeout", "timeout": 500 }
+      ],
+      "assertions": [
+        { "type": "count", "target": ".react-flow__node[data-type='skill']", "expected": 1, "description": "Skill node created" },
+        { "type": "visible", "target": "[data-testid='plugin-link-indicator']", "description": "New skill node shows plugin link indicator (is child of plugin)" }
+      ]
+    },
+    {
+      "id": "TC-306",
+      "name": "Plugin context menu shows add child options",
+      "priority": "high",
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "rightClick", "target": ".react-flow__pane", "offsetX": 300, "offsetY": 300 },
+        { "action": "click", "target": "[data-testid='ctx-add-plugin']" },
+        { "action": "wait_for_timeout", "timeout": 500 },
+        { "action": "rightClick", "target": ".react-flow__node[data-type='plugin']" }
+      ],
+      "assertions": [
+        { "type": "visible", "target": "[data-testid='ctx-add-child-skill']", "description": "Add Skill option visible in plugin context menu" },
+        { "type": "visible", "target": "[data-testid='ctx-add-child-hook']", "description": "Add Hook option visible in plugin context menu" },
+        { "type": "visible", "target": "[data-testid='ctx-add-child-tool']", "description": "Add Tool option visible in plugin context menu" },
+        { "type": "visible", "target": "[data-testid='ctx-add-child-mcp']", "description": "Add MCP Server option visible in plugin context menu" }
+      ]
     }
   ]
 }

@@ -66,6 +66,7 @@ export function BlueprintCanvas() {
     sourceHandleId: string;
     items: { nodeType: BlueprintNodeType; pinId: string }[];
     draggedFromSource: boolean;
+    targetPluginId?: string;
   } | null>(null);
 
   const connectStartRef = useRef<{
@@ -200,8 +201,20 @@ export function BlueprintCanvas() {
       });
 
       addNode(nodeType, position);
+
+      // Auto-add to plugin if dropped on a plugin area
+      if (nodeType !== 'plugin') {
+        const plugin = findPluginAtPosition(nodes, position.x, position.y, '');
+        if (plugin) {
+          const newNodes = useGraphStore.getState().nodes;
+          const newNode = newNodes[newNodes.length - 1];
+          if (newNode) {
+            addToPlugin(newNode.id, plugin.id);
+          }
+        }
+      }
     },
-    [addNode, screenToFlowPosition]
+    [addNode, screenToFlowPosition, nodes, addToPlugin]
   );
 
   const isValidConnection: IsValidConnection = useCallback(
@@ -315,6 +328,7 @@ export function BlueprintCanvas() {
       }
 
       // If dropped on a node, check if it's a plugin's empty area
+      let droppedOnPluginId: string | undefined;
       const closestNode = target.closest('.react-flow__node');
       if (closestNode) {
         const nodeId = closestNode.getAttribute('data-id');
@@ -323,6 +337,7 @@ export function BlueprintCanvas() {
         if (!nodeInStore || nodeInStore.type !== 'plugin') {
           return;
         }
+        droppedOnPluginId = nodeInStore.id;
       }
 
       // Find the dragged pin definition
@@ -351,6 +366,7 @@ export function BlueprintCanvas() {
         sourceHandleId: startInfo.handleId,
         items,
         draggedFromSource: startInfo.handleType === 'source',
+        targetPluginId: droppedOnPluginId,
       });
     },
     [nodes]
@@ -370,6 +386,11 @@ export function BlueprintCanvas() {
       const newNodes = useGraphStore.getState().nodes;
       const newNode = newNodes[newNodes.length - 1];
       if (!newNode) { setQuickConnectMenu(null); return; }
+
+      // Auto-add to plugin if edge was dropped on a plugin
+      if (quickConnectMenu.targetPluginId && newNode.type !== 'plugin') {
+        addToPlugin(newNode.id, quickConnectMenu.targetPluginId);
+      }
 
       let connection: Connection;
       if (quickConnectMenu.draggedFromSource) {
@@ -391,7 +412,7 @@ export function BlueprintCanvas() {
       onConnectHandler(connection);
       setQuickConnectMenu(null);
     },
-    [quickConnectMenu, screenToFlowPosition, addNode, onConnectHandler]
+    [quickConnectMenu, screenToFlowPosition, addNode, onConnectHandler, addToPlugin]
   );
 
   const minimapNodeColor = (node: { type?: string }) => {
@@ -471,7 +492,47 @@ export function BlueprintCanvas() {
             Disconnect all
           </div>
           <div style={{ height: 1, background: 'var(--node-border)', margin: '4px 0' }} />
-          {!contextMenuNode?.parentId && (
+          {contextMenuNode?.type === 'plugin' && (
+            <>
+              <div style={{ height: 1, background: 'var(--node-border)', margin: '4px 0' }} />
+              {(['rules', 'skill', 'subagent', 'hook', 'tool', 'mcp'] as BlueprintNodeType[]).map((type) => (
+                <div
+                  key={type}
+                  data-testid={`ctx-add-child-${type}`}
+                  className="context-menu-item"
+                  onClick={() => {
+                    const plugin = nodes.find((n) => n.id === contextMenu.nodeId);
+                    if (plugin) {
+                      const position = {
+                        x: plugin.position.x + 80,
+                        y: plugin.position.y + 80,
+                      };
+                      addNode(type, position);
+                      const newNodes = useGraphStore.getState().nodes;
+                      const newNode = newNodes[newNodes.length - 1];
+                      if (newNode) {
+                        addToPlugin(newNode.id, contextMenu.nodeId);
+                      }
+                    }
+                    setContextMenu(null);
+                  }}
+                >
+                  <span
+                    style={{
+                      display: 'inline-block',
+                      width: 8,
+                      height: 8,
+                      borderRadius: '50%',
+                      backgroundColor: NODE_COLORS[type]?.header,
+                      marginRight: 8,
+                    }}
+                  />
+                  Add {type === 'mcp' ? 'MCP Server' : type.charAt(0).toUpperCase() + type.slice(1)}
+                </div>
+              ))}
+            </>
+          )}
+          {!contextMenuNode?.parentId && contextMenuNode?.type !== 'plugin' && (
             <div
               data-testid="ctx-group-into-plugin"
               className="context-menu-item"
