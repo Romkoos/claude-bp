@@ -11,6 +11,7 @@ import {
   type EdgeTypes,
   type OnConnectStart,
   type Connection,
+  type Node,
 } from '@xyflow/react';
 import type { BlueprintNodeType } from '../../types/nodes';
 import { NODE_PIN_DEFINITIONS } from '../../constants/nodeDefaults';
@@ -53,6 +54,26 @@ interface ContextMenuState {
   nodeId: string;
 }
 
+/** Find a plugin node whose bounding box contains the given flow position */
+function findPluginAtPosition(
+  nodes: Node[],
+  flowX: number,
+  flowY: number,
+  excludeNodeId: string
+): Node | undefined {
+  return nodes.find((n) => {
+    if (n.type !== 'plugin' || n.id === excludeNodeId) return false;
+    const w = ((n.style as Record<string, unknown>)?.width as number) ?? n.measured?.width ?? 400;
+    const h = ((n.style as Record<string, unknown>)?.height as number) ?? n.measured?.height ?? 200;
+    return (
+      flowX >= n.position.x &&
+      flowX <= n.position.x + w &&
+      flowY >= n.position.y &&
+      flowY <= n.position.y + h
+    );
+  });
+}
+
 export function BlueprintCanvas() {
   const reactFlowRef = useRef<HTMLDivElement>(null);
   const [contextMenu, setContextMenu] = useState<ContextMenuState | null>(null);
@@ -93,6 +114,8 @@ export function BlueprintCanvas() {
   const autoLayout = useGraphStore((s) => s.autoLayout);
   const layouting = useGraphStore((s) => s.layouting);
   const showMinimap = useGraphStore((s) => s.showMinimap);
+  const setDragOverPluginId = useGraphStore((s) => s.setDragOverPluginId);
+  const addToPlugin = useGraphStore((s) => s.addToPlugin);
 
   const contextMenuNode = contextMenu ? nodes.find((n) => n.id === contextMenu.nodeId) : null;
 
@@ -253,6 +276,31 @@ export function BlueprintCanvas() {
     setCanvasMenu({ x: event.clientX, y: event.clientY });
   }, []);
 
+  const onNodeDrag = useCallback(
+    (_event: React.MouseEvent, node: Node) => {
+      if (node.type === 'plugin' || node.parentId) {
+        setDragOverPluginId(null);
+        return;
+      }
+      const centerX = node.position.x + (node.measured?.width ?? 300) / 2;
+      const centerY = node.position.y + (node.measured?.height ?? 200) / 2;
+      const plugin = findPluginAtPosition(nodes, centerX, centerY, node.id);
+      setDragOverPluginId(plugin?.id ?? null);
+    },
+    [nodes, setDragOverPluginId]
+  );
+
+  const onNodeDragStop = useCallback(
+    (_event: React.MouseEvent, node: Node) => {
+      const dragOverId = useGraphStore.getState().dragOverPluginId;
+      setDragOverPluginId(null);
+
+      if (!dragOverId || node.type === 'plugin' || node.parentId) return;
+      addToPlugin(node.id, dragOverId);
+    },
+    [setDragOverPluginId, addToPlugin]
+  );
+
   const onConnectStartHandler: OnConnectStart = useCallback((_event, params) => {
     connectStartRef.current = {
       nodeId: params.nodeId ?? '',
@@ -363,6 +411,8 @@ export function BlueprintCanvas() {
         isValidConnection={isValidConnection}
         onDrop={onDrop}
         onDragOver={onDragOver}
+        onNodeDrag={onNodeDrag}
+        onNodeDragStop={onNodeDragStop}
         onNodeClick={onNodeClick}
         onPaneClick={onPaneClick}
         onNodeContextMenu={onNodeContextMenu}

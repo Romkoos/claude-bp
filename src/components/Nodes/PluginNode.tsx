@@ -1,5 +1,5 @@
 import { memo } from 'react';
-import { type NodeProps } from '@xyflow/react';
+import { type NodeProps, NodeResizer } from '@xyflow/react';
 import { Package, ChevronDown, ChevronRight, AlertCircle, AlertTriangle } from 'lucide-react';
 import type { PluginNodeData } from '../../types/nodes';
 import { PinDirection } from '../../types/pins';
@@ -11,6 +11,8 @@ function PluginNodeInner({ id, data, selected }: NodeProps) {
   const nodeData = data as unknown as PluginNodeData;
   const updateNodeData = useGraphStore((s) => s.updateNodeData);
   const nodes = useGraphStore((s) => s.nodes);
+  const dragOverPluginId = useGraphStore((s) => s.dragOverPluginId);
+  const isDropTarget = dragOverPluginId === id;
 
   const children = nodes.filter((n) => n.parentId === id);
   const outputPins = NODE_PIN_DEFINITIONS.plugin.filter((p) => p.direction === PinDirection.Out);
@@ -32,9 +34,13 @@ function PluginNodeInner({ id, data, selected }: NodeProps) {
 
   return (
     <div
+      data-testid={`plugin-node-${id}`}
+      data-drop-target={isDropTarget || undefined}
       style={{
-        border: `2px dashed ${selected ? '#f43f5e' : '#f43f5e40'}`,
-        background: '#f43f5e08',
+        border: `2px dashed ${isDropTarget ? '#f43f5e' : selected ? '#f43f5e' : '#f43f5e40'}`,
+        background: isDropTarget ? '#f43f5e18' : '#f43f5e08',
+        boxShadow: isDropTarget ? '0 0 20px #f43f5e30, inset 0 0 20px #f43f5e10' : 'none',
+        transition: 'border-color 0.15s, background 0.15s, box-shadow 0.15s',
         borderRadius: 12,
         minWidth: 400,
         minHeight: 200,
@@ -44,6 +50,19 @@ function PluginNodeInner({ id, data, selected }: NodeProps) {
         flexDirection: 'column',
       }}
     >
+      <NodeResizer
+        minWidth={400}
+        minHeight={200}
+        isVisible={selected ?? false}
+        lineStyle={{ borderColor: '#f43f5e60' }}
+        handleStyle={{
+          width: 8,
+          height: 8,
+          borderRadius: 2,
+          backgroundColor: '#f43f5e',
+          borderColor: '#f43f5e',
+        }}
+      />
       {/* Header */}
       <div
         className="flex items-center gap-1.5 px-2 py-1"
