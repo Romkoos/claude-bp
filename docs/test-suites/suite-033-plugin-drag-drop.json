@@ -1,0 +1,116 @@
+{
+  "id": "SUITE-033",
+  "name": "Plugin Drag-Drop, Resize & Auto-Size",
+  "tests": [
+    {
+      "id": "TC-293",
+      "name": "Plugin node created via context menu has minimum size",
+      "priority": "high",
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "rightClick", "target": ".react-flow__pane", "offsetX": 300, "offsetY": 300 },
+        { "action": "click", "target": "[data-testid='ctx-add-plugin']" },
+        { "action": "wait_for_timeout", "timeout": 500 }
+      ],
+      "assertions": [
+        { "type": "count", "target": ".react-flow__node[data-type='plugin']", "expected": 1, "description": "Plugin node created" },
+        { "type": "visible", "target": "[data-testid^='plugin-node-']", "description": "Plugin node has data-testid" }
+      ]
+    },
+    {
+      "id": "TC-294",
+      "name": "Group into Plugin creates resizable container",
+      "priority": "critical",
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "dragAndDrop", "source": "[data-testid='palette-node-skill']", "target": ".react-flow__pane", "offsetX": 300, "offsetY": 300 },
+        { "action": "dragAndDrop", "source": "[data-testid='palette-node-hook']", "target": ".react-flow__pane", "offsetX": 300, "offsetY": 500 },
+        { "action": "keyDown", "key": "Shift" },
+        { "action": "click", "target": ".react-flow__node[data-type='skill']" },
+        { "action": "click", "target": ".react-flow__node[data-type='hook']" },
+        { "action": "keyUp", "key": "Shift" },
+        { "action": "rightClick", "target": ".react-flow__node[data-type='skill']" },
+        { "action": "click", "target": "[data-testid='ctx-group-into-plugin']" },
+        { "action": "wait_for_timeout", "timeout": 500 },
+        { "action": "click", "target": ".react-flow__node[data-type='plugin']" }
+      ],
+      "assertions": [
+        { "type": "count", "target": ".react-flow__node[data-type='plugin']", "expected": 1, "description": "Plugin container created" },
+        { "type": "visible", "target": ".react-flow__resize-control", "description": "Resize handles visible when plugin is selected" }
+      ]
+    },
+    {
+      "id": "TC-295",
+      "name": "Remove from Plugin recalculates size",
+      "priority": "high",
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "dragAndDrop", "source": "[data-testid='palette-node-skill']", "target": ".react-flow__pane", "offsetX": 200, "offsetY": 200 },
+        { "action": "dragAndDrop", "source": "[data-testid='palette-node-hook']", "target": ".react-flow__pane", "offsetX": 200, "offsetY": 500 },
+        { "action": "keyDown", "key": "Shift" },
+        { "action": "click", "target": ".react-flow__node[data-type='skill']" },
+        { "action": "click", "target": ".react-flow__node[data-type='hook']" },
+        { "action": "keyUp", "key": "Shift" },
+        { "action": "rightClick", "target": ".react-flow__node[data-type='skill']" },
+        { "action": "click", "target": "[data-testid='ctx-group-into-plugin']" },
+        { "action": "wait_for_timeout", "timeout": 500 },
+        { "action": "rightClick", "target": ".react-flow__node[data-type='hook']" },
+        { "action": "click", "target": "[data-testid='ctx-remove-from-plugin']" },
+        { "action": "wait_for_timeout", "timeout": 500 }
+      ],
+      "assertions": [
+        { "type": "count", "target": ".react-flow__node[data-type='plugin']", "expected": 1, "description": "Plugin still exists after child removal" },
+        { "type": "count", "target": ".react-flow__node", "expectedMin": 3, "description": "All nodes still exist (plugin + skill + hook)" }
+      ]
+    },
+    {
+      "id": "TC-296",
+      "name": "Non-plugin nodes do not show resize handles when selected",
+      "priority": "medium",
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "dragAndDrop", "source": "[data-testid='palette-node-skill']", "target": ".react-flow__pane", "offsetX": 300, "offsetY": 300 },
+        { "action": "click", "target": ".react-flow__node[data-type='skill']" },
+        { "action": "wait_for_timeout", "timeout": 300 }
+      ],
+      "assertions": [
+        { "type": "notVisible", "target": ".react-flow__resize-control", "description": "No resize handles on skill node" }
+      ]
+    },
+    {
+      "id": "TC-297",
+      "name": "Plugin node has drop-target data attribute",
+      "priority": "high",
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "rightClick", "target": ".react-flow__pane", "offsetX": 300, "offsetY": 300 },
+        { "action": "click", "target": "[data-testid='ctx-add-plugin']" },
+        { "action": "wait_for_timeout", "timeout": 500 }
+      ],
+      "assertions": [
+        { "type": "visible", "target": "[data-testid^='plugin-node-']", "description": "Plugin node has plugin-specific data-testid" }
+      ]
+    },
+    {
+      "id": "TC-298",
+      "name": "Plugin resize handles hidden when not selected",
+      "priority": "medium",
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "rightClick", "target": ".react-flow__pane", "offsetX": 300, "offsetY": 300 },
+        { "action": "click", "target": "[data-testid='ctx-add-plugin']" },
+        { "action": "wait_for_timeout", "timeout": 500 },
+        { "action": "click", "target": ".react-flow__pane", "offsetX": 100, "offsetY": 100 }
+      ],
+      "assertions": [
+        { "type": "notVisible", "target": ".react-flow__resize-control", "description": "Resize handles not visible when plugin is not selected" }
+      ]
+    }
+  ]
+}
