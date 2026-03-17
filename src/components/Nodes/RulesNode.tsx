@@ -60,7 +60,7 @@ export function RulesNode({ id, data, selected }: NodeProps) {
             <textarea
               value={nodeData.content}
               onChange={(e) => updateNodeData(id, { content: e.target.value })}
-              placeholder="CLAUDE.md content..."
+              placeholder="Rules content..."
               className="bp-textarea"
               rows={4}
             />

@@ -22,7 +22,7 @@
     },
     {
       "id": "TC-141",
-      "name": "Export file tree contains CLAUDE.md for Rules node",
+      "name": "Export file tree co-locates rules with linked skill",
       "priority": "critical",
       "phase": 3,
       "url": "/",
@@ -33,7 +33,7 @@
         { "action": "click", "target": "[data-testid='toolbar-export']" }
       ],
       "assertions": [
-        { "type": "textContains", "target": "[data-testid='export-file-tree']", "expected": "CLAUDE.md", "description": "CLAUDE.md file in tree" }
+        { "type": "textContains", "target": "[data-testid='export-file-tree']", "expected": "project-rules.md", "description": "Rules file named from node label in tree" }
       ]
     },
     {
@@ -101,6 +101,25 @@
       "assertions": [
         { "type": "textContains", "target": "[data-testid='export-file-tree']", "expected": "agents", "description": ".claude/agents/ directory present" },
         { "type": "textContains", "target": "[data-testid='export-file-tree']", "expected": "settings.json", "description": "settings.json present (for hooks)" }
+      ]
+    },
+    {
+      "id": "TC-308",
+      "name": "Exported skill file contains MANDATORY integration section when connected",
+      "priority": "high",
+      "phase": 3,
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "click", "target": "[data-testid='template-starter']" },
+        { "action": "click", "target": "[data-testid='confirm-load-template']" },
+        { "action": "click", "target": "[data-testid='toolbar-export']" },
+        { "action": "wait_for_timeout", "timeout": 500 },
+        { "action": "click", "target": "[data-testid='export-file-tree'] >> text=SKILL.md >> nth=0" }
+      ],
+      "assertions": [
+        { "type": "textContains", "target": "[data-testid='export-content-preview']", "expected": "MANDATORY", "description": "Skill file contains MANDATORY integration section" },
+        { "type": "textContains", "target": "[data-testid='export-content-preview']", "expected": "project-rules.md", "description": "Integration section references the co-located rules file" }
       ]
     },
     {

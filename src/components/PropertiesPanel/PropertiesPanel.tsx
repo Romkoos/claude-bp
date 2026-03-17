@@ -23,7 +23,7 @@ const NODE_ICONS: Record<BlueprintNodeType, LucideIcon> = {
 };
 
 const NODE_TYPE_LABELS: Record<BlueprintNodeType, string> = {
-  rules: 'CLAUDE.md',
+  rules: 'Rules',
   skill: 'Skill',
   subagent: 'Subagent',
   hook: 'Hook',

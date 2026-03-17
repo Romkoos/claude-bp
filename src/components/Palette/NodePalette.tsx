@@ -23,7 +23,7 @@ interface PaletteItem {
 }
 
 const PALETTE_ITEMS: PaletteItem[] = [
-  { type: 'rules', label: 'CLAUDE.md', description: 'Project-level rules and context', icon: FileText },
+  { type: 'rules', label: 'Rules', description: 'Project-level rules and context', icon: FileText },
   { type: 'skill', label: 'Skill', description: 'On-demand skill with instructions', icon: Zap },
   { type: 'subagent', label: 'Subagent', description: 'Isolated worker with system prompt', icon: Bot },
   { type: 'hook', label: 'Hook', description: 'Lifecycle event interceptor', icon: Webhook },

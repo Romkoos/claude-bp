@@ -28,7 +28,7 @@ describe('PropertiesPanel', () => {
     useGraphStore.getState().selectNode(nodeId);
     renderWithProvider();
     expect(screen.getByTestId('properties-panel')).toBeInTheDocument();
-    expect(screen.getByText('CLAUDE.md')).toBeInTheDocument();
+    expect(screen.getByText('Rules')).toBeInTheDocument();
   });
 
   it('shows correct type label for skill', () => {

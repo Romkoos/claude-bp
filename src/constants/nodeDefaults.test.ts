@@ -56,7 +56,7 @@ describe('NODE_PIN_DEFINITIONS', () => {
 describe('createRulesData', () => {
   it('creates default rules data', () => {
     const data = createRulesData();
-    expect(data.label).toBe('CLAUDE.md');
+    expect(data.label).toBe('Rules');
     expect(data.collapsed).toBe(true);
     expect(data.validation).toEqual({ errors: [], warnings: [] });
     expect(data.scope).toBe('root');

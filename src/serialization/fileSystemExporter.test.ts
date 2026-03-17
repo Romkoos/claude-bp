@@ -1,11 +1,13 @@
 import { describe, it, expect } from 'vitest';
 import {
   slugify,
+  getNodeDir,
   generateRulesFiles,
   generateSkillFiles,
   generateSubagentFiles,
   generateSettingsJson,
   generateFileTree,
+  buildIntegrationSection,
 } from './fileSystemExporter';
 import type { Node, Edge } from '@xyflow/react';
 import {
@@ -60,62 +62,196 @@ describe('slugify', () => {
   });
 });
 
+describe('getNodeDir', () => {
+  it('returns skill directory', () => {
+    const node = makeNode('s1', 'skill', {
+      ...createSkillData(),
+      frontmatter: { ...createSkillData().frontmatter, name: 'deploy' },
+    } as unknown as Record<string, unknown>);
+    expect(getNodeDir(node)).toBe('.claude/skills/deploy');
+  });
+
+  it('returns agents directory for subagent', () => {
+    const node = makeNode('a1', 'subagent', {
+      ...createSubagentData(),
+      name: 'reviewer',
+    } as unknown as Record<string, unknown>);
+    expect(getNodeDir(node)).toBe('.claude/agents');
+  });
+
+  it('returns null for non-skill/non-subagent nodes', () => {
+    const node = makeNode('r1', 'rules', createRulesData() as unknown as Record<string, unknown>);
+    expect(getNodeDir(node)).toBeNull();
+  });
+
+  it('returns skill directory with slugified name', () => {
+    const node = makeNode('s1', 'skill', {
+      ...createSkillData(),
+      frontmatter: { ...createSkillData().frontmatter, name: 'My Cool Skill' },
+    } as unknown as Record<string, unknown>);
+    expect(getNodeDir(node)).toBe('.claude/skills/my-cool-skill');
+  });
+});
+
 describe('generateRulesFiles', () => {
-  it('generates CLAUDE.md for root scope', () => {
+  it('places rules in root when no connections', () => {
     const data: RulesNodeData = {
       ...createRulesData(),
+      label: 'Backend Rules',
       scope: 'root',
-      path: '/',
       content: '# Rules',
     };
     const node = makeNode('r1', 'rules', data as unknown as Record<string, unknown>);
-    const files = generateRulesFiles([node]);
+    const files = generateRulesFiles([node], [], [node]);
     expect(files).toHaveLength(1);
-    expect(files[0].path).toBe('CLAUDE.md');
+    expect(files[0].path).toBe('backend-rules.md');
     expect(files[0].content).toBe('# Rules');
-    expect(files[0].type).toBe('rules');
   });
 
-  it('generates subfolder CLAUDE.md', () => {
+  it('places rules in subfolder when no connections and scope=subfolder', () => {
     const data: RulesNodeData = {
       ...createRulesData(),
+      label: 'Component Rules',
       scope: 'subfolder',
       path: 'src/components',
-      content: 'Component rules',
+      content: 'rules',
     };
-    const node = makeNode('r2', 'rules', data as unknown as Record<string, unknown>);
-    const files = generateRulesFiles([node]);
-    expect(files).toHaveLength(1);
-    expect(files[0].path).toBe('src/components/CLAUDE.md');
+    const node = makeNode('r1', 'rules', data as unknown as Record<string, unknown>);
+    const files = generateRulesFiles([node], [], [node]);
+    expect(files[0].path).toBe('src/components/component-rules.md');
   });
 
-  it('strips trailing slashes from path', () => {
+  it('falls back to rules.md for empty label', () => {
     const data: RulesNodeData = {
       ...createRulesData(),
+      label: '',
+      scope: 'root',
+      content: 'content',
+    };
+    const node = makeNode('r1', 'rules', data as unknown as Record<string, unknown>);
+    const files = generateRulesFiles([node], [], [node]);
+    expect(files[0].path).toBe('rules.md');
+  });
+
+  it('co-locates rules with linked skill', () => {
+    const rulesNode = makeNode('r1', 'rules', {
+      ...createRulesData(),
+      label: 'Security Rules',
+      content: '# Security',
+    } as unknown as Record<string, unknown>);
+    const skillNode = makeNode('s1', 'skill', {
+      ...createSkillData(),
+      frontmatter: { ...createSkillData().frontmatter, name: 'deploy' },
+    } as unknown as Record<string, unknown>);
+    const edge: Edge = {
+      id: 'e1', source: 'r1', target: 's1',
+      sourceHandle: 'out_context', targetHandle: 'in_context',
+      data: { pinType: 'context' },
+    };
+    const files = generateRulesFiles([rulesNode], [edge], [rulesNode, skillNode]);
+    expect(files).toHaveLength(1);
+    expect(files[0].path).toBe('.claude/skills/deploy/security-rules.md');
+    expect(files[0].content).toBe('# Security');
+  });
+
+  it('co-locates rules with linked subagent', () => {
+    const rulesNode = makeNode('r1', 'rules', {
+      ...createRulesData(),
+      label: 'Review Rules',
+      content: '# Review',
+    } as unknown as Record<string, unknown>);
+    const agentNode = makeNode('a1', 'subagent', {
+      ...createSubagentData(),
+      name: 'code-reviewer',
+    } as unknown as Record<string, unknown>);
+    const edge: Edge = {
+      id: 'e1', source: 'r1', target: 'a1',
+      sourceHandle: 'out_context', targetHandle: 'in_context',
+      data: { pinType: 'context' },
+    };
+    const files = generateRulesFiles([rulesNode], [edge], [rulesNode, agentNode]);
+    expect(files).toHaveLength(1);
+    expect(files[0].path).toBe('.claude/agents/review-rules.md');
+  });
+
+  it('duplicates rules for multiple linked targets', () => {
+    const rulesNode = makeNode('r1', 'rules', {
+      ...createRulesData(),
+      label: 'Shared Rules',
+      content: '# Shared',
+    } as unknown as Record<string, unknown>);
+    const skill1 = makeNode('s1', 'skill', {
+      ...createSkillData(),
+      frontmatter: { ...createSkillData().frontmatter, name: 'skill-a' },
+    } as unknown as Record<string, unknown>);
+    const skill2 = makeNode('s2', 'skill', {
+      ...createSkillData(),
+      frontmatter: { ...createSkillData().frontmatter, name: 'skill-b' },
+    } as unknown as Record<string, unknown>);
+    const edges: Edge[] = [
+      { id: 'e1', source: 'r1', target: 's1', sourceHandle: 'out_context', targetHandle: 'in_context', data: { pinType: 'context' } },
+      { id: 'e2', source: 'r1', target: 's2', sourceHandle: 'out_context', targetHandle: 'in_context', data: { pinType: 'context' } },
+    ];
+    const files = generateRulesFiles([rulesNode], edges, [rulesNode, skill1, skill2]);
+    expect(files).toHaveLength(2);
+    expect(files[0].path).toBe('.claude/skills/skill-a/shared-rules.md');
+    expect(files[1].path).toBe('.claude/skills/skill-b/shared-rules.md');
+  });
+
+  it('ignores non-context edges', () => {
+    const rulesNode = makeNode('r1', 'rules', {
+      ...createRulesData(),
+      label: 'My Rules',
+      content: 'content',
+    } as unknown as Record<string, unknown>);
+    const skillNode = makeNode('s1', 'skill', {
+      ...createSkillData(),
+      frontmatter: { ...createSkillData().frontmatter, name: 'test' },
+    } as unknown as Record<string, unknown>);
+    const edge: Edge = {
+      id: 'e1', source: 'r1', target: 's1',
+      sourceHandle: 'out_context', targetHandle: 'in_exec',
+      data: { pinType: 'exec' },
+    };
+    const files = generateRulesFiles([rulesNode], [edge], [rulesNode, skillNode]);
+    expect(files).toHaveLength(1);
+    expect(files[0].path).toBe('my-rules.md');
+  });
+
+  it('deduplicates when multiple targets share same directory', () => {
+    const rulesNode = makeNode('r1', 'rules', {
+      ...createRulesData(),
+      label: 'Agent Rules',
+      content: '# Rules',
+    } as unknown as Record<string, unknown>);
+    const agent1 = makeNode('a1', 'subagent', { ...createSubagentData(), name: 'agent-a' } as unknown as Record<string, unknown>);
+    const agent2 = makeNode('a2', 'subagent', { ...createSubagentData(), name: 'agent-b' } as unknown as Record<string, unknown>);
+    const edges: Edge[] = [
+      { id: 'e1', source: 'r1', target: 'a1', sourceHandle: 'out_context', targetHandle: 'in_context', data: { pinType: 'context' } },
+      { id: 'e2', source: 'r1', target: 'a2', sourceHandle: 'out_context', targetHandle: 'in_context', data: { pinType: 'context' } },
+    ];
+    const files = generateRulesFiles([rulesNode], edges, [rulesNode, agent1, agent2]);
+    // Both subagents share .claude/agents/ — only one copy
+    expect(files).toHaveLength(1);
+    expect(files[0].path).toBe('.claude/agents/agent-rules.md');
+  });
+
+  it('strips trailing slashes from subfolder path', () => {
+    const data: RulesNodeData = {
+      ...createRulesData(),
+      label: 'Src Rules',
       scope: 'subfolder',
       path: 'src/',
       content: '',
     };
-    const node = makeNode('r3', 'rules', data as unknown as Record<string, unknown>);
-    const files = generateRulesFiles([node]);
-    expect(files[0].path).toBe('src/CLAUDE.md');
+    const node = makeNode('r1', 'rules', data as unknown as Record<string, unknown>);
+    const files = generateRulesFiles([node], [], [node]);
+    expect(files[0].path).toBe('src/src-rules.md');
   });
 
   it('skips non-rules nodes', () => {
     const node = makeNode('s1', 'skill', createSkillData() as unknown as Record<string, unknown>);
-    expect(generateRulesFiles([node])).toHaveLength(0);
-  });
-
-  it('handles empty path as root', () => {
-    const data: RulesNodeData = {
-      ...createRulesData(),
-      scope: 'root',
-      path: '',
-      content: 'content',
-    };
-    const node = makeNode('r4', 'rules', data as unknown as Record<string, unknown>);
-    const files = generateRulesFiles([node]);
-    expect(files[0].path).toBe('CLAUDE.md');
+    expect(generateRulesFiles([node], [], [node])).toHaveLength(0);
   });
 });
 
@@ -216,6 +352,23 @@ describe('generateSkillFiles', () => {
     const skillFile = files.find((f) => f.path.endsWith('SKILL.md'))!;
     expect(skillFile.content).toContain('dynamic_injections:');
   });
+
+  it('appends integration section when edges exist', () => {
+    const rulesNode = makeNode('r1', 'rules', { ...createRulesData(), label: 'Security Rules' } as unknown as Record<string, unknown>);
+    const skillData: SkillNodeData = {
+      ...createSkillData(),
+      frontmatter: { ...createSkillData().frontmatter, name: 'deploy' },
+      instructions: 'Deploy the app',
+    };
+    const skillNode = makeNode('s1', 'skill', skillData as unknown as Record<string, unknown>);
+    const edge: Edge = { id: 'e1', source: 'r1', target: 's1', sourceHandle: 'out_context', targetHandle: 'in_context', data: { pinType: 'context' } };
+    const allNodes = [rulesNode, skillNode];
+    const files = generateSkillFiles([skillNode], [edge], allNodes);
+    const skillFile = files.find((f) => f.path.endsWith('SKILL.md'))!;
+    expect(skillFile.content).toContain('Deploy the app');
+    expect(skillFile.content).toContain('MANDATORY');
+    expect(skillFile.content).toContain('security-rules.md');
+  });
 });
 
 describe('generateSubagentFiles', () => {
@@ -306,6 +459,112 @@ describe('generateSubagentFiles', () => {
     const node = makeNode('sa1', 'subagent', data as unknown as Record<string, unknown>);
     const files = generateSubagentFiles([node]);
     expect(files[0].content).toContain('max_turns: 10');
+  });
+
+  it('appends integration section when edges exist', () => {
+    const skillNode = makeNode('s1', 'skill', { ...createSkillData(), frontmatter: { ...createSkillData().frontmatter, name: 'orchestrator' } } as unknown as Record<string, unknown>);
+    const agentData: SubagentNodeData = {
+      ...createSubagentData(),
+      name: 'Code Reviewer',
+      description: 'Reviews code',
+      systemPrompt: 'Review carefully',
+    };
+    const agentNode = makeNode('a1', 'subagent', agentData as unknown as Record<string, unknown>);
+    const edge: Edge = { id: 'e1', source: 's1', target: 'a1', sourceHandle: 'out_delegation', targetHandle: 'in_delegation', data: { pinType: 'delegation' } };
+    const allNodes = [skillNode, agentNode];
+    const files = generateSubagentFiles([agentNode], [edge], allNodes);
+    expect(files[0].content).toContain('Review carefully');
+    expect(files[0].content).toContain('MANDATORY');
+    expect(files[0].content).toContain('invoked by');
+    expect(files[0].content).toContain('orchestrator');
+  });
+});
+
+describe('buildIntegrationSection', () => {
+  it('returns empty string when no connections exist', () => {
+    const node = makeNode('s1', 'skill', createSkillData() as unknown as Record<string, unknown>);
+    const result = buildIntegrationSection(node, [], []);
+    expect(result).toBe('');
+  });
+
+  it('includes context source (rules) as co-located file reference', () => {
+    const rulesNode = makeNode('r1', 'rules', { ...createRulesData(), label: 'Backend Rules' } as unknown as Record<string, unknown>);
+    const skillNode = makeNode('s1', 'skill', { ...createSkillData(), frontmatter: { ...createSkillData().frontmatter, name: 'deploy' } } as unknown as Record<string, unknown>);
+    const edge: Edge = { id: 'e1', source: 'r1', target: 's1', sourceHandle: 'out_context', targetHandle: 'in_context', data: { pinType: 'context' } };
+    const result = buildIntegrationSection(skillNode, [edge], [rulesNode, skillNode]);
+    expect(result).toContain('MANDATORY');
+    expect(result).toContain('backend-rules.md');
+    expect(result).toContain('co-located in this directory');
+  });
+
+  it('includes delegation targets', () => {
+    const skillNode = makeNode('s1', 'skill', createSkillData() as unknown as Record<string, unknown>);
+    const agentNode = makeNode('a1', 'subagent', { ...createSubagentData(), name: 'Code Review Agent' } as unknown as Record<string, unknown>);
+    const edge: Edge = { id: 'e1', source: 's1', target: 'a1', sourceHandle: 'out_delegation', targetHandle: 'in_delegation', data: { pinType: 'delegation' } };
+    const result = buildIntegrationSection(skillNode, [edge], [skillNode, agentNode]);
+    expect(result).toContain('MUST delegate');
+    expect(result).toContain('Code Review Agent');
+  });
+
+  it('includes exec handoff', () => {
+    const skill1 = makeNode('s1', 'skill', createSkillData() as unknown as Record<string, unknown>);
+    const skill2 = makeNode('s2', 'skill', { ...createSkillData(), frontmatter: { ...createSkillData().frontmatter, name: 'next-step' } } as unknown as Record<string, unknown>);
+    const edge: Edge = { id: 'e1', source: 's1', target: 's2', sourceHandle: 'out_exec', targetHandle: 'in_exec', data: { pinType: 'exec' } };
+    const result = buildIntegrationSection(skill1, [edge], [skill1, skill2]);
+    expect(result).toContain('MUST hand off execution to');
+  });
+
+  it('includes trigger source', () => {
+    const hookNode = makeNode('h1', 'hook', { ...createHookData(), label: 'Lint Hook' } as unknown as Record<string, unknown>);
+    const skillNode = makeNode('s1', 'skill', createSkillData() as unknown as Record<string, unknown>);
+    const edge: Edge = { id: 'e1', source: 'h1', target: 's1', sourceHandle: 'out_context', targetHandle: 'in_trigger', data: { pinType: 'trigger' } };
+    const result = buildIntegrationSection(skillNode, [edge], [hookNode, skillNode]);
+    expect(result).toContain('triggered by hook');
+    expect(result).toContain('Lint Hook');
+  });
+
+  it('includes tool access', () => {
+    const skillNode = makeNode('s1', 'skill', createSkillData() as unknown as Record<string, unknown>);
+    const toolNode = makeNode('t1', 'tool', { ...createToolData(), toolName: 'Read', label: 'Read' } as unknown as Record<string, unknown>);
+    const edge: Edge = { id: 'e1', source: 's1', target: 't1', sourceHandle: 'out_tools', targetHandle: 'in_used_by', data: { pinType: 'tool-access' } };
+    const result = buildIntegrationSection(skillNode, [edge], [skillNode, toolNode]);
+    expect(result).toContain('access to tool');
+    expect(result).toContain('Read');
+  });
+
+  it('includes MCP context', () => {
+    const mcpNode = makeNode('m1', 'mcp', { ...createMcpData(), serverName: 'github-mcp', label: 'GitHub MCP' } as unknown as Record<string, unknown>);
+    const skillNode = makeNode('s1', 'skill', createSkillData() as unknown as Record<string, unknown>);
+    const edge: Edge = { id: 'e1', source: 'm1', target: 's1', sourceHandle: 'out_context', targetHandle: 'in_context', data: { pinType: 'context' } };
+    const result = buildIntegrationSection(skillNode, [edge], [mcpNode, skillNode]);
+    expect(result).toContain('MUST use MCP server');
+    expect(result).toContain('github-mcp');
+  });
+
+  it('includes delegation source (invoked by)', () => {
+    const skillNode = makeNode('s1', 'skill', { ...createSkillData(), frontmatter: { ...createSkillData().frontmatter, name: 'caller' } } as unknown as Record<string, unknown>);
+    const agentNode = makeNode('a1', 'subagent', { ...createSubagentData(), name: 'Worker' } as unknown as Record<string, unknown>);
+    const edge: Edge = { id: 'e1', source: 's1', target: 'a1', sourceHandle: 'out_delegation', targetHandle: 'in_delegation', data: { pinType: 'delegation' } };
+    const result = buildIntegrationSection(agentNode, [edge], [skillNode, agentNode]);
+    expect(result).toContain('invoked by');
+    expect(result).toContain('caller');
+  });
+
+  it('includes exec source (receives execution from)', () => {
+    const skill1 = makeNode('s1', 'skill', { ...createSkillData(), frontmatter: { ...createSkillData().frontmatter, name: 'prev-step' } } as unknown as Record<string, unknown>);
+    const skill2 = makeNode('s2', 'skill', createSkillData() as unknown as Record<string, unknown>);
+    const edge: Edge = { id: 'e1', source: 's1', target: 's2', sourceHandle: 'out_exec', targetHandle: 'in_exec', data: { pinType: 'exec' } };
+    const result = buildIntegrationSection(skill2, [edge], [skill1, skill2]);
+    expect(result).toContain('receive execution from');
+  });
+
+  it('includes bundle source (plugin)', () => {
+    const pluginNode = makeNode('p1', 'plugin', { label: 'Deploy Plugin', collapsed: true, validation: { errors: [], warnings: [] }, pluginName: 'deploy', version: '1.0.0', description: '', installScript: '' } as unknown as Record<string, unknown>);
+    const skillNode = makeNode('s1', 'skill', createSkillData() as unknown as Record<string, unknown>);
+    const edge: Edge = { id: 'e1', source: 'p1', target: 's1', sourceHandle: 'out_bundle', targetHandle: 'in_context', data: { pinType: 'bundle' } };
+    const result = buildIntegrationSection(skillNode, [edge], [pluginNode, skillNode]);
+    expect(result).toContain('plugin bundle');
+    expect(result).toContain('Deploy Plugin');
   });
 });
 
@@ -432,7 +691,7 @@ describe('generateSettingsJson', () => {
 
 describe('generateFileTree', () => {
   it('combines all file types', () => {
-    const rules = makeNode('r1', 'rules', { ...createRulesData(), content: '# Rules' } as unknown as Record<string, unknown>);
+    const rules = makeNode('r1', 'rules', { ...createRulesData(), label: 'Project Rules', content: '# Rules' } as unknown as Record<string, unknown>);
     const skill = makeNode('s1', 'skill', {
       ...createSkillData(),
       frontmatter: { ...createSkillData().frontmatter, name: 'test' },
@@ -444,7 +703,7 @@ describe('generateFileTree', () => {
       command: 'echo',
     } as unknown as Record<string, unknown>);
     const files = generateFileTree([rules, skill, hook], []);
-    expect(files.some((f) => f.path === 'CLAUDE.md')).toBe(true);
+    expect(files.some((f) => f.path === 'project-rules.md')).toBe(true);
     expect(files.some((f) => f.path.includes('SKILL.md'))).toBe(true);
     expect(files.some((f) => f.path === '.claude/settings.json')).toBe(true);
   });

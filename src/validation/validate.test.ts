@@ -385,4 +385,36 @@ describe('validateGraph', () => {
     const results = validateGraph([s1, s2], []);
     expect(results.some((r) => r.message.includes('Duplicate') && r.message.includes('label'))).toBe(false);
   });
+
+  // --- Duplicate rules labels targeting same node (error) ---
+
+  it('errors on duplicate rules labels targeting the same node', () => {
+    const rules1 = makeNode('r1', 'rules', { ...createRulesData(), label: 'Shared Rules' });
+    const rules2 = makeNode('r2', 'rules', { ...createRulesData(), label: 'Shared Rules' });
+    const skill = makeNode('s1', 'skill', { ...createSkillData(), frontmatter: { ...createSkillData().frontmatter, name: 'deploy', description: 'test' } });
+    const edges: Edge[] = [
+      { id: 'e1', source: 'r1', target: 's1', sourceHandle: 'out_context', targetHandle: 'in_context', data: { pinType: 'context' } },
+      { id: 'e2', source: 'r2', target: 's1', sourceHandle: 'out_context', targetHandle: 'in_context', data: { pinType: 'context' } },
+    ];
+    const results = validateGraph([rules1, rules2, skill], edges);
+    const dupErrors = results.filter((r) => r.message.includes('Duplicate rules name'));
+    expect(dupErrors).toHaveLength(2);
+    expect(dupErrors[0].level).toBe('error');
+    expect(dupErrors[0].message).toContain('Shared Rules');
+    expect(dupErrors[0].message).toContain('deploy');
+  });
+
+  it('no error for same rules label targeting different nodes', () => {
+    const rules1 = makeNode('r1', 'rules', { ...createRulesData(), label: 'Common Rules' });
+    const rules2 = makeNode('r2', 'rules', { ...createRulesData(), label: 'Common Rules' });
+    const skill1 = makeNode('s1', 'skill', { ...createSkillData(), frontmatter: { ...createSkillData().frontmatter, name: 'skill-a', description: 'test' } });
+    const skill2 = makeNode('s2', 'skill', { ...createSkillData(), frontmatter: { ...createSkillData().frontmatter, name: 'skill-b', description: 'test' } });
+    const edges: Edge[] = [
+      { id: 'e1', source: 'r1', target: 's1', sourceHandle: 'out_context', targetHandle: 'in_context', data: { pinType: 'context' } },
+      { id: 'e2', source: 'r2', target: 's2', sourceHandle: 'out_context', targetHandle: 'in_context', data: { pinType: 'context' } },
+    ];
+    const results = validateGraph([rules1, rules2, skill1, skill2], edges);
+    const dupErrors = results.filter((r) => r.message.includes('Duplicate rules name'));
+    expect(dupErrors).toHaveLength(0);
+  });
 });

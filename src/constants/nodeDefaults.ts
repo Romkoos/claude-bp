@@ -44,7 +44,7 @@ export const NODE_PIN_DEFINITIONS: Record<BlueprintNodeType, PinDefinition[]> = 
 
 export function createRulesData(): RulesNodeData {
   return {
-    label: 'CLAUDE.md',
+    label: 'Rules',
     collapsed: true,
     validation: { errors: [], warnings: [] },
     scope: 'root',

@@ -37,22 +37,152 @@ export function slugify(value: string): string {
 }
 
 // ---------------------------------------------------------------------------
+// Node directory helper
+// ---------------------------------------------------------------------------
+
+export function getNodeDir(node: Node): string | null {
+  if (node.type === 'skill') {
+    const data = node.data as unknown as SkillNodeData;
+    const name = data.frontmatter?.name || 'untitled-skill';
+    return `.claude/skills/${slugify(name)}`;
+  }
+  if (node.type === 'subagent') {
+    return '.claude/agents';
+  }
+  return null;
+}
+
+// ---------------------------------------------------------------------------
+// Integration section helper
+// ---------------------------------------------------------------------------
+
+function getNodeLabel(nodeId: string, allNodes: Node[]): string {
+  const node = allNodes.find((n) => n.id === nodeId);
+  if (!node) return 'unknown';
+  const data = node.data as Record<string, unknown>;
+  if (node.type === 'subagent') return (data.name as string) || (data.label as string) || 'unknown';
+  if (node.type === 'skill') {
+    const fm = data.frontmatter as Record<string, unknown> | undefined;
+    return (fm?.name as string) || (data.label as string) || 'unknown';
+  }
+  if (node.type === 'mcp') return (data.serverName as string) || (data.label as string) || 'unknown';
+  if (node.type === 'tool') return (data.toolName as string) || (data.label as string) || 'unknown';
+  return (data.label as string) || 'unknown';
+}
+
+export function buildIntegrationSection(
+  node: Node,
+  edges: Edge[],
+  allNodes: Node[],
+): string {
+  const lines: string[] = [];
+
+  const incoming = edges.filter((e) => e.target === node.id);
+  const outgoing = edges.filter((e) => e.source === node.id);
+
+  for (const e of incoming) {
+    const sourceNode = allNodes.find((n) => n.id === e.source);
+    if (!sourceNode) continue;
+    const pinType = (e.data as Record<string, unknown>)?.pinType;
+    const label = getNodeLabel(e.source, allNodes);
+
+    switch (pinType) {
+      case 'context':
+        if (sourceNode.type === 'mcp') {
+          lines.push(`You MUST use MCP server "${label}" and its provided tools.`);
+        } else if (sourceNode.type === 'rules') {
+          const rulesData = sourceNode.data as unknown as RulesNodeData;
+          const rulesFilename = `${slugify(rulesData.label) || 'rules'}.md`;
+          lines.push(`You MUST load and follow all rules from file: "${rulesFilename}" (co-located in this directory).`);
+        } else {
+          lines.push(`You MUST load and follow all rules from: "${label}".`);
+        }
+        break;
+      case 'delegation':
+        lines.push(`You are invoked by: "${label}".`);
+        break;
+      case 'exec':
+        lines.push(`You receive execution from: "${label}".`);
+        break;
+      case 'trigger':
+        lines.push(`You are triggered by hook: "${label}".`);
+        break;
+      case 'bundle':
+        lines.push(`You are part of plugin bundle: "${label}".`);
+        break;
+    }
+  }
+
+  for (const e of outgoing) {
+    const targetNode = allNodes.find((n) => n.id === e.target);
+    if (!targetNode) continue;
+    const pinType = (e.data as Record<string, unknown>)?.pinType;
+    const label = getNodeLabel(e.target, allNodes);
+
+    switch (pinType) {
+      case 'delegation':
+        lines.push(`You MUST delegate to the "${label}" subagent when appropriate.`);
+        break;
+      case 'exec':
+        lines.push(`After completion, you MUST hand off execution to: "${label}".`);
+        break;
+      case 'tool-access':
+        lines.push(`You have access to tool: "${label}".`);
+        break;
+    }
+  }
+
+  if (lines.length === 0) return '';
+
+  return `\n\n---\n## MANDATORY: Integration Requirements\n${lines.join('\n')}`;
+}
+
+// ---------------------------------------------------------------------------
 // Generators
 // ---------------------------------------------------------------------------
 
-export function generateRulesFiles(nodes: Node[]): ExportedFile[] {
+export function generateRulesFiles(nodes: Node[], edges: Edge[] = [], allNodes: Node[] = []): ExportedFile[] {
   const rulesNodes = nodes.filter((n) => n.type === 'rules');
-  return rulesNodes.map((n) => {
+  return rulesNodes.flatMap((n) => {
     const data = n.data as unknown as RulesNodeData;
+    const filename = `${slugify(data.label) || 'rules'}.md`;
+    const content = data.content ?? '';
+
+    // Find context edges from this rules node
+    const contextTargets = edges
+      .filter((e) => e.source === n.id && (e.data as Record<string, unknown>)?.pinType === 'context')
+      .map((e) => allNodes.find((nd) => nd.id === e.target))
+      .filter((nd): nd is Node => nd != null);
+
+    // If linked to targets, co-locate with each target (deduplicate by path)
+    if (contextTargets.length > 0) {
+      const seen = new Set<string>();
+      return contextTargets
+        .map((target) => {
+          const dir = getNodeDir(target);
+          return {
+            path: dir ? `${dir}/${filename}` : filename,
+            content,
+            type: 'rules' as const,
+          };
+        })
+        .filter((f) => {
+          if (seen.has(f.path)) return false;
+          seen.add(f.path);
+          return true;
+        });
+    }
+
+    // No connections — use scope/path as fallback
     const filePath =
       data.scope === 'root' || !data.path
-        ? 'CLAUDE.md'
-        : `${data.path.replace(/\/+$/, '')}/CLAUDE.md`;
-    return { path: filePath, content: data.content ?? '', type: 'rules' as const };
+        ? filename
+        : `${data.path.replace(/\/+$/, '')}/${filename}`;
+    return [{ path: filePath, content, type: 'rules' as const }];
   });
 }
 
-export function generateSkillFiles(nodes: Node[]): ExportedFile[] {
+export function generateSkillFiles(nodes: Node[], edges: Edge[] = [], allNodes: Node[] = []): ExportedFile[] {
   const skillNodes = nodes.filter((n) => n.type === 'skill');
   return skillNodes.flatMap((n) => {
     const data = n.data as unknown as SkillNodeData;
@@ -104,9 +234,10 @@ export function generateSkillFiles(nodes: Node[]): ExportedFile[] {
       : '';
 
     const body = data.instructions ?? '';
+    const integrationSection = buildIntegrationSection(n, edges, allNodes);
     files.push({
       path: `${dirPath}/SKILL.md`,
-      content: `${fmBlock}${body}`,
+      content: `${fmBlock}${body}${integrationSection}`,
       type: 'skill',
     });
 
@@ -125,7 +256,7 @@ export function generateSkillFiles(nodes: Node[]): ExportedFile[] {
   });
 }
 
-export function generateSubagentFiles(nodes: Node[]): ExportedFile[] {
+export function generateSubagentFiles(nodes: Node[], edges: Edge[] = [], allNodes: Node[] = []): ExportedFile[] {
   const subagentNodes = nodes.filter((n) => n.type === 'subagent');
   return subagentNodes.map((n) => {
     const data = n.data as unknown as SubagentNodeData;
@@ -156,10 +287,11 @@ export function generateSubagentFiles(nodes: Node[]): ExportedFile[] {
       : '';
 
     const body = data.systemPrompt ?? '';
+    const integrationSection = buildIntegrationSection(n, edges, allNodes);
 
     return {
       path: `.claude/agents/${slug}.md`,
-      content: `${fmBlock}${body}`,
+      content: `${fmBlock}${body}${integrationSection}`,
       type: 'subagent' as const,
     };
   });
@@ -281,9 +413,9 @@ export function generateFileTree(nodes: Node[], edges: Edge[]): ExportedFile[] {
   const filteredNodes = nodes.filter((n) => n.type !== 'comment');
 
   return [
-    ...generateRulesFiles(filteredNodes),
-    ...generateSkillFiles(filteredNodes),
-    ...generateSubagentFiles(filteredNodes),
+    ...generateRulesFiles(filteredNodes, edges, filteredNodes),
+    ...generateSkillFiles(filteredNodes, edges, filteredNodes),
+    ...generateSubagentFiles(filteredNodes, edges, filteredNodes),
     ...generateSettingsJson(filteredNodes, edges),
   ];
 }

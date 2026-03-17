@@ -58,7 +58,7 @@ describe('useGraphStore', () => {
     const [skill, rules] = useGraphStore.getState().nodes;
     useGraphStore.getState().updateNodeData(skill.id, { label: 'Changed' });
     const rulesAfter = useGraphStore.getState().nodes.find((n) => n.id === rules.id);
-    expect(rulesAfter!.data.label).toBe('CLAUDE.md');
+    expect(rulesAfter!.data.label).toBe('Rules');
   });
 
   // --- deleteNode ---

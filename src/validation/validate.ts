@@ -8,7 +8,7 @@ export interface ValidationResult {
 }
 
 const DEFAULT_LABELS: Record<BlueprintNodeType, string> = {
-  rules: 'CLAUDE.md',
+  rules: 'Rules',
   skill: 'New Skill',
   subagent: 'New Subagent',
   hook: 'New Hook',
@@ -17,6 +17,16 @@ const DEFAULT_LABELS: Record<BlueprintNodeType, string> = {
   plugin: 'New Plugin',
   comment: '',
 };
+
+function getNodeLabel(node: Node): string {
+  const data = node.data as Record<string, unknown>;
+  if (node.type === 'subagent') return (data.name as string) || (data.label as string) || 'unknown';
+  if (node.type === 'skill') {
+    const fm = data.frontmatter as Record<string, unknown> | undefined;
+    return (fm?.name as string) || (data.label as string) || 'unknown';
+  }
+  return (data.label as string) || 'unknown';
+}
 
 export function validateGraph(nodes: Node[], edges: Edge[]): ValidationResult[] {
   const results: ValidationResult[] = [];
@@ -262,6 +272,39 @@ export function validateGraph(nodes: Node[], edges: Edge[]): ValidationResult[] 
             nodeId: id,
             level: 'error',
             message: `Duplicate ${fieldLabel} "${name}" — each ${nodeType} must have a unique name`,
+          });
+        });
+      }
+    });
+  });
+
+  // Duplicate rules labels targeting same node (error)
+  const rulesContextEdges = edges.filter(
+    (e) => (e.data as Record<string, unknown>)?.pinType === 'context'
+      && validatableNodes.find((n) => n.id === e.source)?.type === 'rules'
+  );
+  const rulesPerTarget = new Map<string, Map<string, string[]>>();
+  for (const edge of rulesContextEdges) {
+    const sourceNode = validatableNodes.find((n) => n.id === edge.source);
+    if (!sourceNode) continue;
+    const label = ((sourceNode.data as Record<string, unknown>).label as string) ?? '';
+    if (!label) continue;
+    if (!rulesPerTarget.has(edge.target)) rulesPerTarget.set(edge.target, new Map());
+    const targetMap = rulesPerTarget.get(edge.target)!;
+    const ids = targetMap.get(label) ?? [];
+    ids.push(edge.source);
+    targetMap.set(label, ids);
+  }
+  rulesPerTarget.forEach((labelMap, targetId) => {
+    const targetNode = validatableNodes.find((n) => n.id === targetId);
+    const targetName = targetNode ? getNodeLabel(targetNode) : targetId;
+    labelMap.forEach((ids, label) => {
+      if (ids.length > 1) {
+        ids.forEach((id) => {
+          results.push({
+            nodeId: id,
+            level: 'error',
+            message: `Duplicate rules name "${label}" targeting "${targetName}"`,
           });
         });
       }
