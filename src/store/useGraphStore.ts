@@ -111,7 +111,23 @@ export const useGraphStore = create<GraphStore>()(
       setEdges: (edges) => set({ edges }),
 
       onNodesChange: (changes) => {
-        set({ nodes: applyNodeChanges(changes, get().nodes) });
+        const newNodes = applyNodeChanges(changes, get().nodes);
+        set({ nodes: newNodes });
+
+        // After position changes complete (dragging === false), recalc affected plugins
+        const positionChanges = changes.filter(
+          (c) => c.type === 'position' && c.dragging === false
+        );
+        if (positionChanges.length > 0) {
+          const pluginIds = new Set<string>();
+          for (const change of positionChanges) {
+            const node = newNodes.find((n) => n.id === change.id);
+            if (node?.parentId) pluginIds.add(node.parentId);
+          }
+          for (const pluginId of pluginIds) {
+            get().recalcPluginSize(pluginId);
+          }
+        }
       },
 
       onEdgesChange: (changes) => {

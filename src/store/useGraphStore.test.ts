@@ -376,6 +376,36 @@ describe('useGraphStore', () => {
     expect(updated.parentId).toBeUndefined();
   });
 
+  it('does nothing when nodeId or pluginId does not exist', () => {
+    useGraphStore.getState().addNode('skill', { x: 100, y: 100 });
+    const skillId = useGraphStore.getState().nodes[0].id;
+
+    useGraphStore.getState().addToPlugin(skillId, 'nonexistent');
+    expect(useGraphStore.getState().nodes.find((n) => n.id === skillId)!.parentId).toBeUndefined();
+
+    useGraphStore.getState().addToPlugin('nonexistent', skillId);
+    expect(useGraphStore.getState().nodes).toHaveLength(1);
+  });
+
+  it('converts global position to relative when plugin is not at origin', () => {
+    useGraphStore.getState().addNode('plugin', { x: 50, y: 50 });
+    const pluginId = useGraphStore.getState().nodes[0].id;
+    useGraphStore.setState({
+      nodes: useGraphStore.getState().nodes.map((n) =>
+        n.id === pluginId ? { ...n, style: { width: 500, height: 400 } } : n
+      ),
+    });
+
+    useGraphStore.getState().addNode('skill', { x: 150, y: 200 });
+    const skillId = useGraphStore.getState().nodes[1].id;
+
+    useGraphStore.getState().addToPlugin(skillId, pluginId);
+
+    const updatedSkill = useGraphStore.getState().nodes.find((n) => n.id === skillId)!;
+    expect(updatedSkill.parentId).toBe(pluginId);
+    expect(updatedSkill.position).toEqual({ x: 100, y: 150 });
+  });
+
   // --- recalcPluginSize ---
 
   it('recalculates plugin size based on children', () => {
@@ -474,5 +504,150 @@ describe('useGraphStore', () => {
     expect(state.simulationActive).toBe(false);
     expect(state.simulationHighlightedNodeId).toBeNull();
     expect(state.simulationHighlightedEdgeIds).toEqual([]);
+  });
+
+  // --- recalcPluginSize edge cases ---
+
+  it('does nothing when called on a non-plugin node type', () => {
+    useGraphStore.getState().addNode('skill', { x: 0, y: 0 });
+    const skillId = useGraphStore.getState().nodes[0].id;
+    const nodesBefore = [...useGraphStore.getState().nodes];
+    useGraphStore.getState().recalcPluginSize(skillId);
+    // Nodes should be unchanged (reference may differ but content same)
+    expect(useGraphStore.getState().nodes.map(n => n.style)).toEqual(nodesBefore.map(n => n.style));
+  });
+
+  it('recalculates plugin size with exact expected values', () => {
+    useGraphStore.getState().addNode('plugin', { x: 0, y: 0 });
+    const pluginId = useGraphStore.getState().nodes[0].id;
+
+    useGraphStore.getState().addNode('skill', { x: 100, y: 100 });
+    useGraphStore.getState().addNode('skill', { x: 400, y: 300 });
+    const nodes = useGraphStore.getState().nodes;
+    const child1Id = nodes[1].id;
+    const child2Id = nodes[2].id;
+
+    useGraphStore.setState({
+      nodes: useGraphStore.getState().nodes.map((n) => {
+        if (n.id === child1Id) return { ...n, parentId: pluginId, position: { x: 60, y: 80 } };
+        if (n.id === child2Id) return { ...n, parentId: pluginId, position: { x: 300, y: 250 } };
+        return n;
+      }),
+    });
+
+    useGraphStore.getState().recalcPluginSize(pluginId);
+
+    const plugin = useGraphStore.getState().nodes.find((n) => n.id === pluginId)!;
+    const style = plugin.style as { width: number; height: number };
+    // Child 1: x=60, default w=300 -> maxX=360. Child 2: x=300, default w=300 -> maxX=600
+    // Child 1: y=80, default h=200 -> maxY=280. Child 2: y=250, default h=200 -> maxY=450
+    // width = max(400, 600 + 60) = 660
+    // height = max(200, 450 + 50 + 60) = 560
+    expect(style.width).toBe(660);
+    expect(style.height).toBe(560);
+  });
+
+  // --- removeFromPlugin triggers recalcPluginSize ---
+
+  it('recalculates plugin size after removing a child', () => {
+    // Create two skills and group them
+    useGraphStore.getState().addNode('skill', { x: 0, y: 0 });
+    useGraphStore.getState().addNode('skill', { x: 500, y: 500 });
+    const nodeIds = useGraphStore.getState().nodes.map((n) => n.id);
+    useGraphStore.getState().groupIntoPlugin(nodeIds);
+
+    const nodes = useGraphStore.getState().nodes;
+    const plugin = nodes.find((n) => n.type === 'plugin')!;
+    const styleBefore = plugin.style as { width: number; height: number };
+
+    // Remove the far-away child
+    const farChild = nodes.find((n) => n.parentId === plugin.id && n.position.x > 100);
+    expect(farChild).toBeDefined();
+    useGraphStore.getState().removeFromPlugin(farChild!.id);
+
+    const pluginAfter = useGraphStore.getState().nodes.find((n) => n.id === plugin.id)!;
+    const styleAfter = pluginAfter.style as { width: number; height: number };
+    // Plugin should be smaller now
+    expect(styleAfter.width).toBeLessThan(styleBefore.width);
+  });
+
+  // --- addToPlugin with nonexistent IDs ---
+
+  it('addToPlugin does nothing with nonexistent plugin target', () => {
+    useGraphStore.getState().addNode('skill', { x: 100, y: 100 });
+    const skillId = useGraphStore.getState().nodes[0].id;
+
+    useGraphStore.getState().addToPlugin(skillId, 'nonexistent-plugin');
+    expect(useGraphStore.getState().nodes.find((n) => n.id === skillId)!.parentId).toBeUndefined();
+  });
+
+  // --- onNodesChange auto-recalc ---
+
+  it('recalculates plugin size when child node position change completes', () => {
+    useGraphStore.getState().addNode('plugin', { x: 0, y: 0 });
+    const pluginId = useGraphStore.getState().nodes[0].id;
+    useGraphStore.setState({
+      nodes: useGraphStore.getState().nodes.map((n) =>
+        n.id === pluginId ? { ...n, style: { width: 400, height: 200 } } : n
+      ),
+    });
+
+    useGraphStore.getState().addNode('skill', { x: 100, y: 100 });
+    const childId = useGraphStore.getState().nodes[1].id;
+    useGraphStore.setState({
+      nodes: useGraphStore.getState().nodes.map((n) =>
+        n.id === childId ? { ...n, parentId: pluginId, position: { x: 60, y: 80 } } : n
+      ),
+    });
+
+    // Simulate a position change with dragging=false (drag ended)
+    useGraphStore.getState().onNodesChange([
+      {
+        id: childId,
+        type: 'position',
+        position: { x: 500, y: 400 },
+        dragging: false,
+      },
+    ]);
+
+    const plugin = useGraphStore.getState().nodes.find((n) => n.id === pluginId)!;
+    const style = plugin.style as { width: number; height: number };
+    // After moving child to x=500, y=400, plugin should have grown
+    expect(style.width).toBeGreaterThan(400);
+    expect(style.height).toBeGreaterThan(200);
+  });
+
+  it('does not recalculate plugin size during dragging', () => {
+    useGraphStore.getState().addNode('plugin', { x: 0, y: 0 });
+    const pluginId = useGraphStore.getState().nodes[0].id;
+    useGraphStore.setState({
+      nodes: useGraphStore.getState().nodes.map((n) =>
+        n.id === pluginId ? { ...n, style: { width: 400, height: 200 } } : n
+      ),
+    });
+
+    useGraphStore.getState().addNode('skill', { x: 100, y: 100 });
+    const childId = useGraphStore.getState().nodes[1].id;
+    useGraphStore.setState({
+      nodes: useGraphStore.getState().nodes.map((n) =>
+        n.id === childId ? { ...n, parentId: pluginId, position: { x: 60, y: 80 } } : n
+      ),
+    });
+
+    // Simulate a position change with dragging=true (still dragging)
+    useGraphStore.getState().onNodesChange([
+      {
+        id: childId,
+        type: 'position',
+        position: { x: 500, y: 400 },
+        dragging: true,
+      },
+    ]);
+
+    const plugin = useGraphStore.getState().nodes.find((n) => n.id === pluginId)!;
+    const style = plugin.style as { width: number; height: number };
+    // Plugin size should NOT have been recalculated during drag
+    expect(style.width).toBe(400);
+    expect(style.height).toBe(200);
   });
 });
