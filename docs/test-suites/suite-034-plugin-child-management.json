@@ -1,0 +1,111 @@
+{
+  "id": "SUITE-034",
+  "name": "Plugin Child Node Management",
+  "tests": [
+    {
+      "id": "TC-300",
+      "name": "Unlink button visible in PluginEditor for child nodes",
+      "priority": "critical",
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "dragAndDrop", "source": "[data-testid='palette-node-skill']", "target": ".react-flow__pane", "offsetX": 300, "offsetY": 300 },
+        { "action": "dragAndDrop", "source": "[data-testid='palette-node-hook']", "target": ".react-flow__pane", "offsetX": 300, "offsetY": 500 },
+        { "action": "keyDown", "key": "Shift" },
+        { "action": "click", "target": ".react-flow__node[data-type='skill']" },
+        { "action": "click", "target": ".react-flow__node[data-type='hook']" },
+        { "action": "keyUp", "key": "Shift" },
+        { "action": "rightClick", "target": ".react-flow__node[data-type='skill']" },
+        { "action": "click", "target": "[data-testid='ctx-group-into-plugin']" },
+        { "action": "wait_for_timeout", "timeout": 500 },
+        { "action": "click", "target": ".react-flow__node[data-type='plugin']" },
+        { "action": "wait_for_timeout", "timeout": 300 }
+      ],
+      "assertions": [
+        { "type": "visible", "target": "[data-testid^='unlink-child-']", "description": "Unlink button should be visible in PluginEditor children list" }
+      ]
+    },
+    {
+      "id": "TC-301",
+      "name": "Clicking unlink button detaches child from plugin",
+      "priority": "critical",
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "dragAndDrop", "source": "[data-testid='palette-node-skill']", "target": ".react-flow__pane", "offsetX": 300, "offsetY": 300 },
+        { "action": "dragAndDrop", "source": "[data-testid='palette-node-hook']", "target": ".react-flow__pane", "offsetX": 300, "offsetY": 500 },
+        { "action": "keyDown", "key": "Shift" },
+        { "action": "click", "target": ".react-flow__node[data-type='skill']" },
+        { "action": "click", "target": ".react-flow__node[data-type='hook']" },
+        { "action": "keyUp", "key": "Shift" },
+        { "action": "rightClick", "target": ".react-flow__node[data-type='skill']" },
+        { "action": "click", "target": "[data-testid='ctx-group-into-plugin']" },
+        { "action": "wait_for_timeout", "timeout": 500 },
+        { "action": "click", "target": ".react-flow__node[data-type='plugin']" },
+        { "action": "wait_for_timeout", "timeout": 300 },
+        { "action": "captureNodeCount" },
+        { "action": "click", "target": "[data-testid^='unlink-child-']" },
+        { "action": "wait_for_timeout", "timeout": 500 }
+      ],
+      "assertions": [
+        { "type": "count", "target": ".react-flow__node", "expectedMin": 3, "description": "All nodes still exist after unlinking (plugin + skill + hook)" },
+        { "type": "count", "target": ".react-flow__node[data-type='plugin']", "expected": 1, "description": "Plugin still exists" }
+      ]
+    },
+    {
+      "id": "TC-302",
+      "name": "Plugin link indicator visible on child node",
+      "priority": "high",
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "dragAndDrop", "source": "[data-testid='palette-node-skill']", "target": ".react-flow__pane", "offsetX": 300, "offsetY": 300 },
+        { "action": "dragAndDrop", "source": "[data-testid='palette-node-hook']", "target": ".react-flow__pane", "offsetX": 300, "offsetY": 500 },
+        { "action": "keyDown", "key": "Shift" },
+        { "action": "click", "target": ".react-flow__node[data-type='skill']" },
+        { "action": "click", "target": ".react-flow__node[data-type='hook']" },
+        { "action": "keyUp", "key": "Shift" },
+        { "action": "rightClick", "target": ".react-flow__node[data-type='skill']" },
+        { "action": "click", "target": "[data-testid='ctx-group-into-plugin']" },
+        { "action": "wait_for_timeout", "timeout": 500 }
+      ],
+      "assertions": [
+        { "type": "visible", "target": "[data-testid='plugin-link-indicator']", "description": "Plugin link indicator visible on child node in plugin" }
+      ]
+    },
+    {
+      "id": "TC-303",
+      "name": "Plugin link indicator not shown on standalone node",
+      "priority": "medium",
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "dragAndDrop", "source": "[data-testid='palette-node-skill']", "target": ".react-flow__pane", "offsetX": 300, "offsetY": 300 },
+        { "action": "wait_for_timeout", "timeout": 300 }
+      ],
+      "assertions": [
+        { "type": "notVisible", "target": "[data-testid='plugin-link-indicator']", "description": "Plugin link indicator should not appear on standalone nodes" }
+      ]
+    },
+    {
+      "id": "TC-304",
+      "name": "Remove from Plugin via context menu keeps node on canvas",
+      "priority": "high",
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "dragAndDrop", "source": "[data-testid='palette-node-skill']", "target": ".react-flow__pane", "offsetX": 300, "offsetY": 300 },
+        { "action": "rightClick", "target": ".react-flow__node[data-type='skill']" },
+        { "action": "click", "target": "[data-testid='ctx-group-into-plugin']" },
+        { "action": "wait_for_timeout", "timeout": 500 },
+        { "action": "rightClick", "target": ".react-flow__node[data-type='skill']" },
+        { "action": "click", "target": "[data-testid='ctx-remove-from-plugin']" },
+        { "action": "wait_for_timeout", "timeout": 500 }
+      ],
+      "assertions": [
+        { "type": "count", "target": ".react-flow__node", "expectedMin": 2, "description": "All nodes still present after removing from plugin (plugin + skill)" },
+        { "type": "notVisible", "target": "[data-testid='plugin-link-indicator']", "description": "Removed node no longer shows plugin link indicator" }
+      ]
+    }
+  ]
+}
