@@ -307,10 +307,22 @@ export function BlueprintCanvas() {
       connectStartRef.current = null;
       if (!startInfo) return;
 
-      // If dropped on a handle or node, the connection succeeded — do nothing
       const target = event.target as HTMLElement;
-      if (target.closest('.react-flow__handle') || target.closest('.react-flow__node')) {
+
+      // If dropped on a handle, let normal connection logic handle it
+      if (target.closest('.react-flow__handle')) {
         return;
+      }
+
+      // If dropped on a node, check if it's a plugin's empty area
+      const closestNode = target.closest('.react-flow__node');
+      if (closestNode) {
+        const nodeId = closestNode.getAttribute('data-id');
+        const nodeInStore = nodes.find((n) => n.id === nodeId);
+        // Only allow quick-add if dropped on a plugin node (empty area, not a child)
+        if (!nodeInStore || nodeInStore.type !== 'plugin') {
+          return;
+        }
       }
 
       // Find the dragged pin definition
