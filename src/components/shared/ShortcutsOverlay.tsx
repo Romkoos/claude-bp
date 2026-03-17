@@ -26,6 +26,7 @@ const leftColumn: ShortcutGroup[] = [
       { key: 'Ctrl+K', description: 'Search' },
       { key: '?', description: 'Shortcuts' },
       { key: 'Escape', description: 'Deselect' },
+      { key: 'Ctrl+,', description: 'Settings' },
     ],
   },
   {

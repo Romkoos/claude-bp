@@ -92,6 +92,7 @@ export function BlueprintCanvas() {
   const removeFromPlugin = useGraphStore((s) => s.removeFromPlugin);
   const autoLayout = useGraphStore((s) => s.autoLayout);
   const layouting = useGraphStore((s) => s.layouting);
+  const showMinimap = useGraphStore((s) => s.showMinimap);
 
   const contextMenuNode = contextMenu ? nodes.find((n) => n.id === contextMenu.nodeId) : null;
 
@@ -122,6 +123,7 @@ export function BlueprintCanvas() {
         useGraphStore.getState().setSearchOpen(false);
         useGraphStore.getState().setExportPreviewOpen(false);
         useGraphStore.getState().setShortcutsOpen(false);
+        useGraphStore.getState().setSettingsOpen(false);
       }
 
       const tag = (document.activeElement?.tagName ?? '').toLowerCase();
@@ -166,6 +168,8 @@ export function BlueprintCanvas() {
       if (key === '?' || (shift && key === '/')) { useGraphStore.getState().setShortcutsOpen(true); }
       // Search via /
       if (key === '/' && !shift && !meta) { e.preventDefault(); useGraphStore.getState().setSearchOpen(true); }
+      // Settings
+      if (meta && key === ',') { e.preventDefault(); useGraphStore.getState().setSettingsOpen(!useGraphStore.getState().settingsOpen); }
     };
     document.addEventListener('click', handleClick);
     document.addEventListener('keydown', handleKeyDown);
@@ -220,7 +224,12 @@ export function BlueprintCanvas() {
   );
 
   const onNodeClick = useCallback(
-    (_: React.MouseEvent, node: { id: string }) => {
+    (event: React.MouseEvent, node: { id: string }) => {
+      const target = event.target as HTMLElement;
+      const tag = target.tagName.toLowerCase();
+      if (tag === 'input' || tag === 'textarea' || tag === 'select' || target.isContentEditable) {
+        return;
+      }
       selectNode(node.id);
     },
     [selectNode]
@@ -366,20 +375,22 @@ export function BlueprintCanvas() {
         multiSelectionKeyCode="Shift"
       >
         <Background variant={BackgroundVariant.Dots} color="#2d333b" gap={20} />
-        <MiniMap
-          nodeColor={minimapNodeColor}
-          style={{ background: '#161b22', border: '1px solid #2d333b', borderRadius: 8 }}
-          maskColor="#0d111780"
-          onNodeClick={(_event, node) => {
-            const n = nodes.find((nd) => nd.id === node.id);
-            if (n) {
-              const x = n.position.x + (n.measured?.width ?? 300) / 2;
-              const y = n.position.y + (n.measured?.height ?? 200) / 2;
-              setCenter(x, y, { zoom: getZoom(), duration: 300 });
-              selectNode(n.id);
-            }
-          }}
-        />
+        {showMinimap && (
+          <MiniMap
+            nodeColor={minimapNodeColor}
+            style={{ background: '#161b22', border: '1px solid #2d333b', borderRadius: 8 }}
+            maskColor="#0d111780"
+            onNodeClick={(_event, node) => {
+              const n = nodes.find((nd) => nd.id === node.id);
+              if (n) {
+                const x = n.position.x + (n.measured?.width ?? 300) / 2;
+                const y = n.position.y + (n.measured?.height ?? 200) / 2;
+                setCenter(x, y, { zoom: getZoom(), duration: 300 });
+                selectNode(n.id);
+              }
+            }}
+          />
+        )}
         <Controls />
       </ReactFlow>
 

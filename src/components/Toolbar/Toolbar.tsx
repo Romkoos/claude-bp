@@ -1,13 +1,14 @@
 import { useRef } from 'react';
 import {
   ShieldCheck, LayoutGrid, Save, Upload, Trash2, Undo2, Redo2,
-  FolderInput, FileArchive, Search, Play, Square, HelpCircle,
+  FolderInput, FileArchive, Search, Play, Square, HelpCircle, Settings,
 } from 'lucide-react';
 import { useReactFlow } from '@xyflow/react';
 import { useStore } from 'zustand';
 import { useGraphStore } from '../../store/useGraphStore';
 import { downloadJSON } from '../../serialization/jsonExporter';
 import { importFromZip } from '../../serialization/fileSystemImporter';
+import { useModal } from '../shared/useModal';
 import type { GraphSchema } from '../../types/graph';
 
 export function Toolbar() {
@@ -27,6 +28,9 @@ export function Toolbar() {
   const runSimulation = useGraphStore((s) => s.runSimulation);
   const stopSimulation = useGraphStore((s) => s.stopSimulation);
   const setShortcutsOpen = useGraphStore((s) => s.setShortcutsOpen);
+  const settingsOpen = useGraphStore((s) => s.settingsOpen);
+  const setSettingsOpen = useGraphStore((s) => s.setSettingsOpen);
+  const modal = useModal();
 
   const canUndo = useStore(useGraphStore.temporal, (s) => s.pastStates.length > 0);
   const canRedo = useStore(useGraphStore.temporal, (s) => s.futureStates.length > 0);
@@ -68,11 +72,11 @@ export function Toolbar() {
 
       if (result.warnings.length > 0) {
         const msg = 'Import warnings:\n' + result.warnings.map((w) => `- ${w}`).join('\n');
-        if (!window.confirm(msg + '\n\nContinue with import?')) return;
+        if (!await modal.confirm({ title: 'Import Warnings', message: msg + '\n\nContinue with import?' })) return;
       }
 
       if (nodes.length > 0 || edges.length > 0) {
-        if (!window.confirm('This will replace the current graph. Continue?')) return;
+        if (!await modal.confirm({ title: 'Replace Graph', message: 'This will replace the current graph. Continue?', danger: true })) return;
       }
 
       useGraphStore.setState({ nodes: result.nodes, edges: result.edges });
@@ -81,15 +85,15 @@ export function Toolbar() {
         setTimeout(() => fitView({ padding: 0.2 }), 400);
       }, 50);
     } catch {
-      window.alert('Failed to import ZIP file.');
+      await modal.alert({ title: 'Import Error', message: 'Failed to import ZIP file.', danger: true });
     }
 
     e.target.value = '';
   };
 
-  const handleClear = () => {
+  const handleClear = async () => {
     if (nodes.length === 0 && edges.length === 0) return;
-    if (window.confirm('Clear the entire canvas? This cannot be undone.')) {
+    if (await modal.confirm({ title: 'Clear Canvas', message: 'Clear the entire canvas? This cannot be undone.', danger: true, confirmLabel: 'Clear' })) {
       clearGraph();
     }
   };
@@ -142,6 +146,13 @@ export function Toolbar() {
         <ToolbarButton icon={LayoutGrid} label="Layout" title="Auto-layout" onClick={() => autoLayout('LR')} testId="toolbar-layout" />
         <ToolbarButton icon={ShieldCheck} label="Validate" title="Validate" onClick={runValidation} testId="toolbar-validate" />
         <ToolbarButton icon={HelpCircle} label="Help" title="Keyboard Shortcuts (?)" onClick={() => setShortcutsOpen(true)} testId="toolbar-shortcuts" />
+        <ToolbarButton
+          icon={Settings}
+          label="Settings"
+          title="Settings (Ctrl+,)"
+          onClick={() => setSettingsOpen(!settingsOpen)}
+          testId="toolbar-settings"
+        />
       </div>
 
       <Separator />
