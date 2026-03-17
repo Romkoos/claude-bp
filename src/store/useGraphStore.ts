@@ -47,6 +47,10 @@ interface GraphStore {
   disconnectNode: (nodeId: string) => void;
   groupIntoPlugin: (nodeIds: string[]) => void;
   removeFromPlugin: (nodeId: string) => void;
+  addToPlugin: (nodeId: string, pluginId: string) => void;
+  recalcPluginSize: (pluginId: string) => void;
+  dragOverPluginId: string | null;
+  setDragOverPluginId: (id: string | null) => void;
   layouting: boolean;
   autoLayout: (direction?: 'TB' | 'LR' | 'BT' | 'RL') => void;
   onConnect: (connection: Connection) => void;
@@ -87,6 +91,7 @@ export const useGraphStore = create<GraphStore>()(
       configName: 'Untitled Blueprint',
       validationResults: [],
       layouting: false,
+      dragOverPluginId: null,
 
       // Simulation
       simulationActive: false,
@@ -192,8 +197,8 @@ export const useGraphStore = create<GraphStore>()(
           position: { x: pluginX, y: pluginY },
           data: createPluginData() as unknown as Record<string, unknown>,
           style: {
-            width: maxX - minX + padding * 2,
-            height: maxY - minY + padding * 2 + headerHeight,
+            width: 400,
+            height: 200,
           },
         };
 
@@ -212,6 +217,8 @@ export const useGraphStore = create<GraphStore>()(
         });
 
         set({ nodes: [pluginNode, ...updatedNodes] });
+
+        get().recalcPluginSize(pluginId);
       },
 
       removeFromPlugin: (nodeId) => {
@@ -221,6 +228,8 @@ export const useGraphStore = create<GraphStore>()(
 
         const parentNode = nodes.find((n) => n.id === node.parentId);
         if (!parentNode) return;
+
+        const savedParentId = node.parentId;
 
         set({
           nodes: nodes.map((n) =>
@@ -236,7 +245,75 @@ export const useGraphStore = create<GraphStore>()(
               : n
           ),
         });
+
+        get().recalcPluginSize(savedParentId);
       },
+
+      addToPlugin: (nodeId, pluginId) => {
+        const { nodes } = get();
+        const node = nodes.find((n) => n.id === nodeId);
+        const plugin = nodes.find((n) => n.id === pluginId);
+        if (!node || !plugin) return;
+        if (node.parentId || node.type === 'plugin') return;
+
+        set({
+          nodes: nodes.map((n) =>
+            n.id === nodeId
+              ? {
+                  ...n,
+                  parentId: pluginId,
+                  position: {
+                    x: n.position.x - plugin.position.x,
+                    y: n.position.y - plugin.position.y,
+                  },
+                }
+              : n
+          ),
+        });
+
+        get().recalcPluginSize(pluginId);
+      },
+
+      recalcPluginSize: (pluginId) => {
+        const { nodes } = get();
+        const plugin = nodes.find((n) => n.id === pluginId && n.type === 'plugin');
+        if (!plugin) return;
+
+        const children = nodes.filter((n) => n.parentId === pluginId);
+        const padding = 60;
+        const headerHeight = 50;
+        const minWidth = 400;
+        const minHeight = 200;
+
+        if (children.length === 0) {
+          set({
+            nodes: nodes.map((n) =>
+              n.id === pluginId ? { ...n, style: { ...n.style, width: minWidth, height: minHeight } } : n
+            ),
+          });
+          return;
+        }
+
+        let maxX = -Infinity;
+        let maxY = -Infinity;
+        for (const child of children) {
+          const w = (child.measured?.width ?? child.width ?? 300) as number;
+          const h = (child.measured?.height ?? child.height ?? 200) as number;
+          maxX = Math.max(maxX, child.position.x + w);
+          maxY = Math.max(maxY, child.position.y + h);
+        }
+
+        const width = Math.max(minWidth, maxX + padding);
+        const height = Math.max(minHeight, maxY + headerHeight + padding);
+
+        set({
+          nodes: nodes.map((n) =>
+            n.id === pluginId ? { ...n, style: { ...n.style, width, height } } : n
+          ),
+        });
+      },
+
+      setDragOverPluginId: (id) => set({ dragOverPluginId: id }),
 
       autoLayout: (direction = 'LR') => {
         const { nodes, edges } = get();

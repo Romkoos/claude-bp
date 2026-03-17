@@ -325,6 +325,118 @@ describe('useGraphStore', () => {
     expect(useGraphStore.getState().nodes[0].parentId).toBeUndefined();
   });
 
+  // --- addToPlugin ---
+
+  it('adds a node to an existing plugin', () => {
+    useGraphStore.getState().addNode('plugin', { x: 0, y: 0 });
+    const pluginId = useGraphStore.getState().nodes[0].id;
+    useGraphStore.setState({
+      nodes: useGraphStore.getState().nodes.map((n) =>
+        n.id === pluginId ? { ...n, style: { width: 500, height: 400 } } : n
+      ),
+    });
+
+    useGraphStore.getState().addNode('skill', { x: 100, y: 100 });
+    const skillId = useGraphStore.getState().nodes[1].id;
+
+    useGraphStore.getState().addToPlugin(skillId, pluginId);
+
+    const updatedSkill = useGraphStore.getState().nodes.find((n) => n.id === skillId)!;
+    expect(updatedSkill.parentId).toBe(pluginId);
+    expect(updatedSkill.position).toEqual({ x: 100, y: 100 });
+  });
+
+  it('does nothing when node is already in a plugin', () => {
+    useGraphStore.getState().addNode('plugin', { x: 0, y: 0 });
+    const pluginId = useGraphStore.getState().nodes[0].id;
+    useGraphStore.setState({
+      nodes: useGraphStore.getState().nodes.map((n) =>
+        n.id === pluginId ? { ...n, style: { width: 500, height: 400 } } : n
+      ),
+    });
+
+    useGraphStore.getState().addNode('skill', { x: 100, y: 100 });
+    const skillId = useGraphStore.getState().nodes[1].id;
+
+    useGraphStore.getState().addToPlugin(skillId, pluginId);
+    const positionBefore = useGraphStore.getState().nodes.find((n) => n.id === skillId)!.position;
+    useGraphStore.getState().addToPlugin(skillId, pluginId);
+    const positionAfter = useGraphStore.getState().nodes.find((n) => n.id === skillId)!.position;
+    expect(positionAfter).toEqual(positionBefore);
+  });
+
+  it('does not add a plugin node into another plugin', () => {
+    useGraphStore.getState().addNode('plugin', { x: 0, y: 0 });
+    useGraphStore.getState().addNode('plugin', { x: 200, y: 200 });
+    const plugin1 = useGraphStore.getState().nodes[0].id;
+    const plugin2 = useGraphStore.getState().nodes[1].id;
+
+    useGraphStore.getState().addToPlugin(plugin2, plugin1);
+    const updated = useGraphStore.getState().nodes.find((n) => n.id === plugin2)!;
+    expect(updated.parentId).toBeUndefined();
+  });
+
+  // --- recalcPluginSize ---
+
+  it('recalculates plugin size based on children', () => {
+    useGraphStore.getState().addNode('plugin', { x: 0, y: 0 });
+    const pluginId = useGraphStore.getState().nodes[0].id;
+    useGraphStore.setState({
+      nodes: useGraphStore.getState().nodes.map((n) =>
+        n.id === pluginId ? { ...n, style: { width: 500, height: 400 } } : n
+      ),
+    });
+
+    useGraphStore.getState().addNode('skill', { x: 100, y: 100 });
+    useGraphStore.getState().addNode('skill', { x: 400, y: 300 });
+    const nodes = useGraphStore.getState().nodes;
+    const child1Id = nodes[1].id;
+    const child2Id = nodes[2].id;
+
+    useGraphStore.setState({
+      nodes: useGraphStore.getState().nodes.map((n) => {
+        if (n.id === child1Id) return { ...n, parentId: pluginId, position: { x: 60, y: 80 } };
+        if (n.id === child2Id) return { ...n, parentId: pluginId, position: { x: 300, y: 250 } };
+        return n;
+      }),
+    });
+
+    useGraphStore.getState().recalcPluginSize(pluginId);
+
+    const plugin = useGraphStore.getState().nodes.find((n) => n.id === pluginId)!;
+    const style = plugin.style as { width: number; height: number };
+    expect(style.width).toBeGreaterThanOrEqual(400);
+    expect(style.height).toBeGreaterThanOrEqual(200);
+  });
+
+  it('enforces minimum size when plugin has no children', () => {
+    useGraphStore.getState().addNode('plugin', { x: 0, y: 0 });
+    const pluginId = useGraphStore.getState().nodes[0].id;
+
+    useGraphStore.getState().recalcPluginSize(pluginId);
+
+    const plugin = useGraphStore.getState().nodes.find((n) => n.id === pluginId)!;
+    const style = plugin.style as { width: number; height: number };
+    expect(style.width).toBe(400);
+    expect(style.height).toBe(200);
+  });
+
+  it('does nothing for non-existent plugin', () => {
+    const nodesBefore = useGraphStore.getState().nodes;
+    useGraphStore.getState().recalcPluginSize('nonexistent');
+    expect(useGraphStore.getState().nodes).toBe(nodesBefore);
+  });
+
+  // --- dragOverPluginId ---
+
+  it('sets and clears dragOverPluginId', () => {
+    expect(useGraphStore.getState().dragOverPluginId).toBeNull();
+    useGraphStore.getState().setDragOverPluginId('plugin-1');
+    expect(useGraphStore.getState().dragOverPluginId).toBe('plugin-1');
+    useGraphStore.getState().setDragOverPluginId(null);
+    expect(useGraphStore.getState().dragOverPluginId).toBeNull();
+  });
+
   // --- autoLayout ---
 
   it('runs auto layout', () => {
