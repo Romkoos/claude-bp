@@ -650,4 +650,114 @@ describe('useGraphStore', () => {
     expect(style.width).toBe(400);
     expect(style.height).toBe(200);
   });
+
+  // --- Label auto-sync from name fields ---
+
+  describe('label auto-sync', () => {
+    it('syncs subagent label from name field', () => {
+      useGraphStore.getState().addNode('subagent', { x: 0, y: 0 });
+      const nodeId = useGraphStore.getState().nodes[0].id;
+
+      // Initially default
+      expect(useGraphStore.getState().nodes[0].data.label).toBe('New Subagent');
+
+      // Set name → label follows
+      useGraphStore.getState().updateNodeData(nodeId, { name: 'my-agent' });
+      expect(useGraphStore.getState().nodes[0].data.label).toBe('my-agent');
+
+      // Clear name → label reverts to default
+      useGraphStore.getState().updateNodeData(nodeId, { name: '' });
+      expect(useGraphStore.getState().nodes[0].data.label).toBe('New Subagent');
+    });
+
+    it('syncs skill label from frontmatter.name', () => {
+      useGraphStore.getState().addNode('skill', { x: 0, y: 0 });
+      const nodeId = useGraphStore.getState().nodes[0].id;
+
+      expect(useGraphStore.getState().nodes[0].data.label).toBe('New Skill');
+
+      const fm = useGraphStore.getState().nodes[0].data.frontmatter as Record<string, unknown>;
+      useGraphStore.getState().updateNodeData(nodeId, { frontmatter: { ...fm, name: 'my-skill' } });
+      expect(useGraphStore.getState().nodes[0].data.label).toBe('my-skill');
+
+      const fm2 = useGraphStore.getState().nodes[0].data.frontmatter as Record<string, unknown>;
+      useGraphStore.getState().updateNodeData(nodeId, { frontmatter: { ...fm2, name: '' } });
+      expect(useGraphStore.getState().nodes[0].data.label).toBe('New Skill');
+    });
+
+    it('syncs tool label from toolName', () => {
+      useGraphStore.getState().addNode('tool', { x: 0, y: 0 });
+      const nodeId = useGraphStore.getState().nodes[0].id;
+
+      expect(useGraphStore.getState().nodes[0].data.label).toBe('New Tool');
+
+      useGraphStore.getState().updateNodeData(nodeId, { toolName: 'Bash' });
+      expect(useGraphStore.getState().nodes[0].data.label).toBe('Bash');
+
+      useGraphStore.getState().updateNodeData(nodeId, { toolName: '' });
+      expect(useGraphStore.getState().nodes[0].data.label).toBe('New Tool');
+    });
+
+    it('syncs MCP label from serverName', () => {
+      useGraphStore.getState().addNode('mcp', { x: 0, y: 0 });
+      const nodeId = useGraphStore.getState().nodes[0].id;
+
+      expect(useGraphStore.getState().nodes[0].data.label).toBe('New MCP Server');
+
+      useGraphStore.getState().updateNodeData(nodeId, { serverName: 'my-mcp' });
+      expect(useGraphStore.getState().nodes[0].data.label).toBe('my-mcp');
+
+      useGraphStore.getState().updateNodeData(nodeId, { serverName: '' });
+      expect(useGraphStore.getState().nodes[0].data.label).toBe('New MCP Server');
+    });
+
+    it('syncs plugin label from pluginName', () => {
+      useGraphStore.getState().addNode('plugin', { x: 0, y: 0 });
+      const nodeId = useGraphStore.getState().nodes[0].id;
+
+      expect(useGraphStore.getState().nodes[0].data.label).toBe('New Plugin');
+
+      useGraphStore.getState().updateNodeData(nodeId, { pluginName: 'my-plugin' });
+      expect(useGraphStore.getState().nodes[0].data.label).toBe('my-plugin');
+
+      useGraphStore.getState().updateNodeData(nodeId, { pluginName: '' });
+      expect(useGraphStore.getState().nodes[0].data.label).toBe('New Plugin');
+    });
+
+    it('does not affect label when updating non-name fields', () => {
+      useGraphStore.getState().addNode('subagent', { x: 0, y: 0 });
+      const nodeId = useGraphStore.getState().nodes[0].id;
+
+      // Set a name first
+      useGraphStore.getState().updateNodeData(nodeId, { name: 'my-agent' });
+      expect(useGraphStore.getState().nodes[0].data.label).toBe('my-agent');
+
+      // Update a different field — label should stay
+      useGraphStore.getState().updateNodeData(nodeId, { description: 'some desc' });
+      expect(useGraphStore.getState().nodes[0].data.label).toBe('my-agent');
+    });
+
+    it('does not sync labels for node types without name fields', () => {
+      useGraphStore.getState().addNode('hook', { x: 0, y: 0 });
+      const nodeId = useGraphStore.getState().nodes[0].id;
+
+      expect(useGraphStore.getState().nodes[0].data.label).toBe('New Hook');
+
+      // Updating event should not change label
+      useGraphStore.getState().updateNodeData(nodeId, { event: 'Stop' });
+      expect(useGraphStore.getState().nodes[0].data.label).toBe('New Hook');
+    });
+
+    it('trims whitespace from name when syncing to label', () => {
+      useGraphStore.getState().addNode('subagent', { x: 0, y: 0 });
+      const nodeId = useGraphStore.getState().nodes[0].id;
+
+      useGraphStore.getState().updateNodeData(nodeId, { name: '  my-agent  ' });
+      expect(useGraphStore.getState().nodes[0].data.label).toBe('my-agent');
+
+      // Whitespace-only name reverts to default
+      useGraphStore.getState().updateNodeData(nodeId, { name: '   ' });
+      expect(useGraphStore.getState().nodes[0].data.label).toBe('New Subagent');
+    });
+  });
 });

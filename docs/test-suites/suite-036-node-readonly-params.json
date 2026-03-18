@@ -1,0 +1,124 @@
+{
+  "id": "SUITE-036",
+  "name": "Node Read-Only Parameter Display",
+  "tests": [
+    {
+      "id": "TC-323",
+      "name": "Expanded Skill node shows read-only params without duplication",
+      "priority": "high",
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "dragAndDrop", "source": "[data-testid='palette-node-skill']", "target": ".react-flow__pane", "offsetX": 400, "offsetY": 300 },
+        { "action": "click", "target": ".react-flow__node[data-type='skill']" },
+        { "action": "clear", "target": "[data-testid='field-skill-name'] input" },
+        { "action": "type", "target": "[data-testid='field-skill-name'] input", "value": "test-skill" }
+      ],
+      "assertions": [
+        { "type": "visible", "target": "[data-testid='node-param-name']", "description": "Name param row is visible in expanded node" },
+        { "type": "visible", "target": "[data-testid='node-param-context']", "description": "Context param row is visible in expanded node" },
+        { "type": "textContains", "target": "[data-testid='node-param-name']", "expected": "test-skill", "description": "Name param shows correct value" }
+      ]
+    },
+    {
+      "id": "TC-324",
+      "name": "Collapsed Skill node shows compact badges, not param rows",
+      "priority": "high",
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "dragAndDrop", "source": "[data-testid='palette-node-skill']", "target": ".react-flow__pane", "offsetX": 400, "offsetY": 300 },
+        { "action": "click", "target": ".react-flow__node[data-type='skill'] [data-testid='collapse-toggle']" }
+      ],
+      "assertions": [
+        { "type": "notVisible", "target": ".react-flow__node[data-type='skill'] [data-testid='node-param-name']", "description": "Param rows are hidden when collapsed" }
+      ]
+    },
+    {
+      "id": "TC-330",
+      "name": "Expanded node has styled param block container",
+      "priority": "high",
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "dragAndDrop", "source": "[data-testid='palette-node-skill']", "target": ".react-flow__pane", "offsetX": 400, "offsetY": 300 }
+      ],
+      "assertions": [
+        { "type": "visible", "target": "[data-testid='node-param-block']", "description": "Param block container is visible in expanded node" }
+      ]
+    },
+    {
+      "id": "TC-325",
+      "name": "Expanded Tool node shows read-only params",
+      "priority": "high",
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "dragAndDrop", "source": "[data-testid='palette-node-tool']", "target": ".react-flow__pane", "offsetX": 400, "offsetY": 300 }
+      ],
+      "assertions": [
+        { "type": "visible", "target": "[data-testid='node-param-tool']", "description": "Tool param row visible" },
+        { "type": "notVisible", "target": ".react-flow__node[data-type='tool'] select", "description": "No editable select in expanded node" },
+        { "type": "notVisible", "target": ".react-flow__node[data-type='tool'] input:not([type='hidden'])", "description": "No editable input in expanded node" }
+      ]
+    },
+    {
+      "id": "TC-326",
+      "name": "Expanded Hook node shows all params",
+      "priority": "medium",
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "dragAndDrop", "source": "[data-testid='palette-node-hook']", "target": ".react-flow__pane", "offsetX": 400, "offsetY": 300 }
+      ],
+      "assertions": [
+        { "type": "visible", "target": "[data-testid='node-param-event']", "description": "Event param visible" },
+        { "type": "visible", "target": "[data-testid='node-param-type']", "description": "Type param visible" },
+        { "type": "visible", "target": "[data-testid='node-param-decision']", "description": "Decision param visible" }
+      ]
+    },
+    {
+      "id": "TC-327",
+      "name": "Expanded Subagent node shows params without system prompt",
+      "priority": "medium",
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "dragAndDrop", "source": "[data-testid='palette-node-subagent']", "target": ".react-flow__pane", "offsetX": 400, "offsetY": 300 }
+      ],
+      "assertions": [
+        { "type": "visible", "target": "[data-testid='node-param-model']", "description": "Model param visible" },
+        { "type": "notVisible", "target": ".react-flow__node[data-type='subagent'] textarea", "description": "No editable textarea for system prompt" }
+      ]
+    },
+    {
+      "id": "TC-328",
+      "name": "Expanded MCP node shows connection params",
+      "priority": "medium",
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "dragAndDrop", "source": "[data-testid='palette-node-mcp']", "target": ".react-flow__pane", "offsetX": 400, "offsetY": 300 }
+      ],
+      "assertions": [
+        { "type": "visible", "target": "[data-testid='node-param-type']", "description": "Type param visible" },
+        { "type": "notVisible", "target": ".react-flow__node[data-type='mcp'] input", "description": "No editable inputs in expanded MCP node" }
+      ]
+    },
+    {
+      "id": "TC-329",
+      "name": "Expanded Rules node shows scope and priority, not content textarea",
+      "priority": "medium",
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "dragAndDrop", "source": "[data-testid='palette-node-rules']", "target": ".react-flow__pane", "offsetX": 400, "offsetY": 300 }
+      ],
+      "assertions": [
+        { "type": "visible", "target": "[data-testid='node-param-scope']", "description": "Scope param visible" },
+        { "type": "visible", "target": "[data-testid='node-param-priority']", "description": "Priority param visible" },
+        { "type": "notVisible", "target": ".react-flow__node[data-type='rules'] textarea", "description": "No editable textarea for content" }
+      ]
+    }
+  ]
+}

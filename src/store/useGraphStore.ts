@@ -30,6 +30,46 @@ const DATA_FACTORIES: Record<BlueprintNodeType, () => any> = {
   comment: createCommentData,
 };
 
+const DEFAULT_LABELS: Partial<Record<BlueprintNodeType, string>> = {
+  subagent: 'New Subagent',
+  skill: 'New Skill',
+  tool: 'New Tool',
+  mcp: 'New MCP Server',
+  plugin: 'New Plugin',
+};
+
+/**
+ * Given an update payload and the node type, extract the "name" value if it was changed.
+ * Returns undefined if the name field was not part of this update.
+ */
+function extractNameFromUpdate(
+  nodeType: string,
+  update: Partial<Record<string, unknown>>,
+  mergedData: Record<string, unknown>,
+): string | undefined {
+  switch (nodeType) {
+    case 'subagent':
+      if ('name' in update) return (update.name as string) ?? '';
+      break;
+    case 'skill':
+      if ('frontmatter' in update) {
+        const fm = mergedData.frontmatter as Record<string, unknown> | undefined;
+        return (fm?.name as string) ?? '';
+      }
+      break;
+    case 'tool':
+      if ('toolName' in update) return (update.toolName as string) ?? '';
+      break;
+    case 'mcp':
+      if ('serverName' in update) return (update.serverName as string) ?? '';
+      break;
+    case 'plugin':
+      if ('pluginName' in update) return (update.pluginName as string) ?? '';
+      break;
+  }
+  return undefined;
+}
+
 interface GraphStore {
   nodes: Node[];
   edges: Edge[];
@@ -150,11 +190,22 @@ export const useGraphStore = create<GraphStore>()(
 
       updateNodeData: (nodeId, data) => {
         set({
-          nodes: get().nodes.map((node) =>
-            node.id === nodeId
-              ? { ...node, data: { ...node.data, ...data } }
-              : node
-          ),
+          nodes: get().nodes.map((node) => {
+            if (node.id !== nodeId) return node;
+
+            const mergedData = { ...node.data, ...data };
+            const nodeType = node.type as string;
+            const nameValue = extractNameFromUpdate(nodeType, data, mergedData);
+
+            if (nameValue !== undefined) {
+              const defaultLabel = DEFAULT_LABELS[nodeType as BlueprintNodeType];
+              if (defaultLabel) {
+                mergedData.label = nameValue.trim() || defaultLabel;
+              }
+            }
+
+            return { ...node, data: mergedData };
+          }),
         });
       },
 

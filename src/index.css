@@ -232,6 +232,44 @@ body {
   line-height: 1.3;
 }
 
+/* === Node param block (read-only params inside expanded nodes) === */
+.node-param-block {
+  background: #161b22;
+  border: 1px solid var(--node-border);
+  border-radius: 6px;
+  padding: 4px 0;
+  overflow: hidden;
+}
+
+.node-param-row {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  padding: 2px 8px;
+  min-width: 0;
+}
+
+.node-param-row + .node-param-row {
+  border-top: 1px solid #1e252e;
+}
+
+.node-param-label {
+  font-size: 10px;
+  color: var(--text-muted);
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.node-param-value {
+  font-size: 10px;
+  font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, monospace;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+
 /* === Simulation animations === */
 @keyframes sim-pulse {
   0%, 100% { box-shadow: 0 0 0 0 var(--glow-color); }

@@ -1,0 +1,90 @@
+{
+  "id": "SUITE-037",
+  "name": "Node Label Auto-Sync from Name Field",
+  "tests": [
+    {
+      "id": "TC-331",
+      "name": "Subagent label syncs when name is filled",
+      "priority": "critical",
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "dragAndDrop", "source": "[data-testid='palette-node-subagent']", "target": ".react-flow__pane", "offsetX": 300, "offsetY": 300 },
+        { "action": "wait_for_timeout", "timeout": 300 },
+        { "action": "click", "target": "[data-testid='node-header']" },
+        { "action": "wait_for_timeout", "timeout": 200 },
+        { "action": "fill", "target": "[data-testid='field-subagent-name'] input", "value": "code-reviewer" }
+      ],
+      "assertions": [
+        { "type": "textContains", "target": "[data-testid='node-label']", "expected": "code-reviewer", "description": "Node header label mirrors the name field value" }
+      ]
+    },
+    {
+      "id": "TC-332",
+      "name": "Subagent label reverts to default when name is cleared",
+      "priority": "critical",
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "dragAndDrop", "source": "[data-testid='palette-node-subagent']", "target": ".react-flow__pane", "offsetX": 300, "offsetY": 300 },
+        { "action": "wait_for_timeout", "timeout": 300 },
+        { "action": "click", "target": "[data-testid='node-header']" },
+        { "action": "wait_for_timeout", "timeout": 200 },
+        { "action": "fill", "target": "[data-testid='field-subagent-name'] input", "value": "temp-name" },
+        { "action": "wait_for_timeout", "timeout": 100 },
+        { "action": "fill", "target": "[data-testid='field-subagent-name'] input", "value": "" }
+      ],
+      "assertions": [
+        { "type": "textContains", "target": "[data-testid='node-label']", "expected": "New Subagent", "description": "Node header label reverts to default when name is cleared" }
+      ]
+    },
+    {
+      "id": "TC-333",
+      "name": "Skill label syncs when frontmatter name is filled",
+      "priority": "critical",
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "dragAndDrop", "source": "[data-testid='palette-node-skill']", "target": ".react-flow__pane", "offsetX": 300, "offsetY": 300 },
+        { "action": "wait_for_timeout", "timeout": 300 },
+        { "action": "click", "target": "[data-testid='node-header']" },
+        { "action": "wait_for_timeout", "timeout": 200 },
+        { "action": "fill", "target": "[data-testid='field-skill-name'] input", "value": "my-skill" }
+      ],
+      "assertions": [
+        { "type": "textContains", "target": "[data-testid='node-label']", "expected": "my-skill", "description": "Skill node header label mirrors the frontmatter name" }
+      ]
+    },
+    {
+      "id": "TC-334",
+      "name": "MCP label syncs when server name is filled",
+      "priority": "high",
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "dragAndDrop", "source": "[data-testid='palette-node-mcp']", "target": ".react-flow__pane", "offsetX": 300, "offsetY": 300 },
+        { "action": "wait_for_timeout", "timeout": 300 },
+        { "action": "click", "target": "[data-testid='node-header']" },
+        { "action": "wait_for_timeout", "timeout": 200 },
+        { "action": "fill", "target": "[data-testid='field-mcp-server-name'] input", "value": "my-mcp-server" }
+      ],
+      "assertions": [
+        { "type": "textContains", "target": "[data-testid='node-label']", "expected": "my-mcp-server", "description": "MCP node header label mirrors the server name" }
+      ]
+    },
+    {
+      "id": "TC-335",
+      "name": "New subagent node shows default label before name is set",
+      "priority": "high",
+      "url": "/",
+      "steps": [
+        { "action": "navigate", "target": "/" },
+        { "action": "dragAndDrop", "source": "[data-testid='palette-node-subagent']", "target": ".react-flow__pane", "offsetX": 300, "offsetY": 300 },
+        { "action": "wait_for_timeout", "timeout": 300 }
+      ],
+      "assertions": [
+        { "type": "textContains", "target": "[data-testid='node-label']", "expected": "New Subagent", "description": "Default label shown before name is filled" }
+      ]
+    }
+  ]
+}

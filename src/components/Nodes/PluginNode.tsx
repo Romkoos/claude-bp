@@ -7,6 +7,7 @@ import { NODE_PIN_DEFINITIONS } from '../../constants/nodeDefaults';
 import { TypedHandle } from '../Pins/TypedHandle';
 import { useGraphStore } from '../../store/useGraphStore';
 import { PLUGIN_MIN_WIDTH, PLUGIN_MIN_HEIGHT } from '../../utils/pluginHelpers';
+import { NodeParamBlock, NodeParamRow } from './NodeParamRow';
 
 function PluginNodeInner({ id, data, selected }: NodeProps) {
   const nodeData = data as unknown as PluginNodeData;
@@ -107,21 +108,14 @@ function PluginNodeInner({ id, data, selected }: NodeProps) {
         </div>
       </div>
 
-      {/* Expanded body */}
+      {/* Expanded body: read-only params */}
       {!nodeData.collapsed && (
-        <div className="px-2 py-1 space-y-1">
-          <input
-            value={nodeData.pluginName}
-            onChange={(e) => updateNodeData(id, { pluginName: e.target.value })}
-            placeholder="Plugin name..."
-            className="bp-input"
-          />
-          <input
-            value={nodeData.version}
-            onChange={(e) => updateNodeData(id, { version: e.target.value })}
-            placeholder="1.0.0"
-            className="bp-input"
-          />
+        <div className="px-2 py-1">
+          <NodeParamBlock>
+            <NodeParamRow label="Plugin" value={nodeData.pluginName} />
+            <NodeParamRow label="Version" value={nodeData.version} />
+            <NodeParamRow label="Install script" value={nodeData.installScript} />
+          </NodeParamBlock>
         </div>
       )}
 
